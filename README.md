@@ -76,6 +76,20 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
+### Verify live NASA DONKI access
+
+`DEMO_KEY` allows only ~10 calls/hour, so use your own free key from https://api.nasa.gov
+(one live refresh = 5 calls, cached for 1 h):
+
+```bash
+NASA_API_KEY=your_key python -m scripts.check_donki_live   # per-feed report + snapshot comparison
+NASA_API_KEY=your_key pytest -m live                        # opt-in live test
+```
+
+The regular test suite replays real saved DONKI responses (`tests/fixtures/donki`), including
+429 rate limits, 5xx retries and network errors. `/api/space-weather` reports `reason: rate_limited`
+when NASA throttles the key, and the app keeps serving cache/snapshot data.
+
 ### Refresh the DONKI snapshot
 
 Save `SEP.json`, `CME.json`, `GST.json`, `notifications.json` (and optionally `FLR.json`) from

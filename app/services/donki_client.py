@@ -11,29 +11,81 @@ from app.services import donki_parsers as parsers
 
 log = logging.getLogger(__name__)
 
+RETRIES = 2  # extra attempts for transient failures (timeouts, 5xx)
+RETRY_BACKOFF_SECONDS = 0.5
+DEFAULT_RATE_LIMIT_WAIT = 900  # seconds, when NASA does not say how long
+
 
 class DonkiError(Exception):
     """The live DONKI call could not be completed."""
 
+    def __init__(self, message: str, retry_after: float | None = None):
+        super().__init__(message)
+        self.retry_after = retry_after  # hint for how long to stay away
+
+
+class DonkiRateLimited(DonkiError):
+    """api.nasa.gov rejected the key (HTTP 429 / OVER_RATE_LIMIT)."""
+
 
 class DonkiClient:
-    def __init__(self, http: httpx.AsyncClient, base_url: str, api_key: str, timeout: float = 15.0):
+    def __init__(
+        self,
+        http: httpx.AsyncClient,
+        base_url: str,
+        api_key: str,
+        timeout: float = 15.0,
+        backoff: float = RETRY_BACKOFF_SECONDS,
+    ):
         self._http = http
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
         self._timeout = timeout
+        self._backoff = backoff
+        self.rate_limit_remaining: int | None = None  # from X-RateLimit-Remaining
 
     async def _get(self, endpoint: str, start: date, end: date) -> list[dict]:
         params = {"startDate": start.isoformat(), "endDate": end.isoformat(), "api_key": self._api_key}
+        url = f"{self._base_url}/{endpoint}"
+        last: Exception | None = None
+        for attempt in range(RETRIES + 1):
+            try:
+                resp = await self._http.get(url, params=params, timeout=self._timeout)
+            except httpx.HTTPError as exc:  # timeout, connection reset, DNS...
+                last = DonkiError(f"DONKI /{endpoint} unreachable: {exc!r}")
+            else:
+                remaining = resp.headers.get("x-ratelimit-remaining")
+                if remaining and remaining.isdigit():
+                    self.rate_limit_remaining = int(remaining)
+                if resp.status_code == 429 or (resp.status_code == 403 and "RATE_LIMIT" in resp.text):
+                    raise DonkiRateLimited(
+                        f"DONKI /{endpoint} rate limited (key {self._masked_key()})",
+                        retry_after=_retry_after(resp),
+                    )
+                if resp.status_code >= 500:
+                    last = DonkiError(f"DONKI /{endpoint} server error {resp.status_code}")
+                elif resp.status_code >= 400:
+                    # 4xx (e.g. 404 on /FLR) will not fix itself: don't retry.
+                    raise DonkiError(f"DONKI /{endpoint} returned HTTP {resp.status_code}")
+                else:
+                    return self._json_list(endpoint, resp)
+            if attempt < RETRIES:
+                await asyncio.sleep(self._backoff * (attempt + 1))
+        assert last is not None
+        raise last
+
+    @staticmethod
+    def _json_list(endpoint: str, resp: httpx.Response) -> list[dict]:
         try:
-            resp = await self._http.get(f"{self._base_url}/{endpoint}", params=params, timeout=self._timeout)
-            resp.raise_for_status()
             data = resp.json()
-        except (httpx.HTTPError, ValueError) as exc:
-            raise DonkiError(f"DONKI /{endpoint} failed: {exc}") from exc
-        if not isinstance(data, list):  # DONKI returns an error object when rate-limited
+        except ValueError as exc:
+            raise DonkiError(f"DONKI /{endpoint} returned invalid JSON") from exc
+        if not isinstance(data, list):  # DONKI can return an error object with HTTP 200
             raise DonkiError(f"DONKI /{endpoint} returned an unexpected payload")
         return data
+
+    def _masked_key(self) -> str:
+        return "DEMO_KEY" if self._api_key == "DEMO_KEY" else "custom"
 
     async def fetch_events(self, start: date, end: date) -> list[SpaceWeatherEvent]:
         """Fetch + normalize all event types for [start, end] (inclusive).
@@ -50,9 +102,14 @@ class DonkiClient:
             self._get("notifications", start, end),
             return_exceptions=True,
         )
-        for name, result in (("SEP", sep), ("CME", cme), ("GST", gst), ("notifications", notes)):
-            if isinstance(result, BaseException):
-                raise DonkiError(f"required DONKI feed {name} unavailable") from result
+        required = (("SEP", sep), ("CME", cme), ("GST", gst), ("notifications", notes))
+        failures = [(n, r) for n, r in required if isinstance(r, BaseException)]
+        if failures:
+            limited = next((r for _, r in failures if isinstance(r, DonkiRateLimited)), None)
+            if limited:
+                raise limited
+            name, err = failures[0]
+            raise DonkiError(f"required DONKI feed {name} unavailable: {err}") from err
 
         if isinstance(flr, BaseException):
             log.warning("DONKI /FLR unavailable (%s); deriving flares from notifications", flr)
@@ -69,3 +126,8 @@ class DonkiClient:
         ]
         in_window = [e for e in events if start <= e.time.date() <= end]
         return sorted(in_window, key=lambda e: e.time)
+
+
+def _retry_after(resp: httpx.Response) -> float:
+    value = resp.headers.get("retry-after", "")
+    return float(value) if value.replace(".", "", 1).isdigit() else DEFAULT_RATE_LIMIT_WAIT

@@ -9,7 +9,7 @@ from app.services.donki_client import DonkiClient
 
 
 def make_client(handler) -> DonkiClient:
-    return DonkiClient(httpx.AsyncClient(transport=httpx.MockTransport(handler)), "https://donki.test", "KEY")
+    return DonkiClient(httpx.AsyncClient(transport=httpx.MockTransport(handler)), "https://donki.test", "KEY", backoff=0)
 
 
 def failing(request: httpx.Request) -> httpx.Response:
