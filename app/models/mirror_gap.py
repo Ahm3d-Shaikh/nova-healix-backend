@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +21,9 @@ class LapseBand(StrEnum):
 
 class MirrorGapSubmission(BaseModel):
     self_rating: int = Field(ge=1, le=10, description="How sharp do I feel? 1-10")
-    reaction_times_ms: list[float] = Field(min_length=5, max_length=1000)
+    reaction_times_ms: list[Annotated[float, Field(gt=0, le=60_000)]] = Field(
+        min_length=5, max_length=1000, description="One value per response, in ms (> 0)"
+    )
     mode: TestMode = TestMode.PVT_B_3MIN
 
 

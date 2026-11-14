@@ -1,3 +1,4 @@
+from app.core.errors import InvalidDayError
 from app.models.settings import MissionSettings
 
 
@@ -12,7 +13,9 @@ class SettingsService:
         return self._settings
 
     def update(self, new: MissionSettings) -> MissionSettings:
-        self._settings = new.model_copy(update={"current_day": min(new.current_day, self.mission_days)})
+        if new.current_day > self.mission_days:
+            raise InvalidDayError(new.current_day, self.mission_days)
+        self._settings = new
         return self._settings
 
     def reset(self) -> MissionSettings:

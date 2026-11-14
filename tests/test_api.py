@@ -120,3 +120,16 @@ def test_blank_submissions_dir_means_in_memory_only():
 
     assert Settings(submissions_dir="").submissions_dir is None
     assert Settings(submissions_dir="var").submissions_dir is not None
+
+
+def test_settings_reject_out_of_range_day_instead_of_clamping(api):
+    resp = api.post("/api/settings", json={"mission": "mars", "deep_space_mode": False, "current_day": 99})
+    assert resp.status_code == 422
+    assert "outside 1-30" in resp.json()["detail"]
+    assert api.get("/api/settings").json()["current_day"] == 5  # unchanged
+
+
+def test_mirror_gap_rejects_impossible_reaction_times(api):
+    for bad in (-5, 0, 70_000):
+        resp = api.post("/api/mirror-gap/A", json={"self_rating": 5, "reaction_times_ms": [bad, 300, 300, 300, 300]})
+        assert resp.status_code == 422, bad
