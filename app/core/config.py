@@ -40,7 +40,9 @@ class Settings(BaseSettings):
 
     # --- Google Gemini (AI isolation check-in companion) -----------------------
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-3.8-flash"  # free tier on the Gemini API
+    gemini_model: str = "gemini-3.8-flash"  # scores check-ins (one call per check-in); free tier
+    gemini_chat_model: str = "gemini-3.5-flash-lite"  # ECHO's chat replies: fastest free-tier model (~1 s)
+    gemini_chat_timeout_seconds: float = 20.0  # then retry once on gemini_model, then 503
     gemini_timeout_seconds: float = 60.0
 
     # --- Mission timeline ---------------------------------------------------
