@@ -2,7 +2,7 @@
 
 from collections.abc import Callable
 
-from app.models.enums import COMMS_DELAY, EventKind, Hazard
+from app.models.enums import EventKind, Hazard
 from app.models.metrics import (
     CardMetrics,
     DistanceMetrics,
@@ -13,7 +13,7 @@ from app.models.metrics import (
     RadiationMetrics,
     Vital,
 )
-from app.rules import gravity, isolation, mirror_gap, radiation
+from app.rules import distance, gravity, isolation, mirror_gap, radiation
 from app.rules import thresholds as t
 from app.rules.context import RuleContext
 
@@ -43,24 +43,40 @@ def _radiation(ctx: RuleContext) -> RadiationMetrics:
 def _isolation(ctx: RuleContext) -> IsolationMetrics:
     totals = [r.loneliness_total for r in ctx.records]
     direction, delta = isolation.trend(totals)
+    latest = ctx.records[-1]
     return IsolationMetrics(
         loneliness_score=totals[-1],
         scale_min=t.LONELINESS_MIN,
         scale_max=t.LONELINESS_MAX,
+        amber_threshold=t.LONELINESS_AMBER_MIN,
+        red_threshold=t.LONELINESS_RED_MIN,
+        red_consecutive_days=t.LONELINESS_RED_DAYS,
         consecutive_days_at_or_above_7=isolation.high_streak(totals),
         trend=direction,
         trend_delta=delta,
+        latest_source=latest.loneliness_source,
+        safety_concern=latest.isolation_safety_flag,
+        ai_checkin_days=[r.day for r in ctx.records if r.loneliness_source == "ai_checkin"],
         history=totals,
     )
 
 
 def _distance(ctx: RuleContext) -> DistanceMetrics:
+    d = ctx.distance
     return DistanceMetrics(
         mission=ctx.mission.value,
-        comms_delay=COMMS_DELAY[ctx.mission],
+        comms_delay=distance.comms_delay_text(ctx),
         deep_space_mode=ctx.deep_space_mode,
         data_source=ctx.weather_source.value,
         data_as_of=ctx.weather_as_of.isoformat(),
+        target_name=ctx.distance_target,
+        distance_km=None if d is None else round(d.distance_km, 1),
+        distance_au=None if d is None else round(d.distance_km / distance.AU_KM, 6),
+        one_way_light_time_s=None if d is None else round(d.light_time_s, 3),
+        round_trip_light_time_s=None if d is None else round(2 * d.light_time_s, 3),
+        range_rate_km_s=None if d is None else round(d.range_rate_km_s, 4),
+        distance_source=None if ctx.distance_source is None else ctx.distance_source.value,
+        distance_as_of=None if ctx.distance_as_of is None else ctx.distance_as_of.isoformat(),
     )
 
 

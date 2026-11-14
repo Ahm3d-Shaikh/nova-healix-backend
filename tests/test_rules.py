@@ -101,12 +101,54 @@ def test_isolation_red_needs_three_days_at_7():
     assert top(isolation.evaluate(ctx([lonely(1, 7), lonely(2, 8), lonely(3, 7)]))) == Level.RED
 
 
+def test_isolation_safety_concern_is_red_immediately():
+    flagged = lonely(1, 4).model_copy(update={"isolation_safety_flag": True})
+    a = isolation.evaluate(ctx([flagged]))[0]
+    assert a.level == Level.RED and "wellbeing concern" in a.what
+
+
 # --- Distance -----------------------------------------------------------------
 def test_distance_amber_on_snapshot_or_deep_space():
     assert top(distance.evaluate(ctx([rec(1)]))) == Level.GREEN
     assert top(distance.evaluate(ctx([rec(1)], source=DataSource.SNAPSHOT))) == Level.AMBER
-    a = distance.evaluate(ctx([rec(1)], deep=True))[0]
-    assert a.level == Level.AMBER and "cached data from 2024-05-10" in a.what
+    a = next(x for x in distance.evaluate(ctx([rec(1)], deep=True)) if x.rule == "D.data_freshness")
+    assert a.level == Level.AMBER and "space weather from 2024-05-10" in a.what
+
+
+def with_distance(light_time_s, source=DataSource.LIVE, target="Mars") -> RuleContext:
+    from dataclasses import replace
+
+    from app.models.distance import DistanceSample
+
+    sample = DistanceSample(
+        time=T0, distance_km=light_time_s * 299_792.458, light_time_s=light_time_s, range_rate_km_s=1.0
+    )
+    return replace(ctx([rec(1)]), distance=sample, distance_target=target, distance_source=source, distance_as_of=T0)
+
+
+def test_distance_comms_delay_uses_horizons_light_time():
+    near = next(a for a in distance.evaluate(with_distance(1.3, target="Moon")) if a.rule == "D.comms_delay")
+    assert near.level == Level.GREEN and "1.3 s" in near.what and "Moon" in near.what
+    far = next(a for a in distance.evaluate(with_distance(1000)) if a.rule == "D.comms_delay")
+    assert far.level == Level.AMBER and "16 min 40 s" in far.what and "AU" in far.what
+    edge = next(a for a in distance.evaluate(with_distance(299.9)) if a.rule == "D.comms_delay")
+    assert edge.level == Level.GREEN
+
+
+def test_distance_freshness_flags_stale_ephemeris():
+    stale = distance.evaluate(with_distance(1000, source=DataSource.SNAPSHOT))
+    fresh = next(a for a in stale if a.rule == "D.data_freshness")
+    assert fresh.level == Level.AMBER and "ephemeris from 2024-05-10" in fresh.what
+
+
+def test_format_delay():
+    assert [distance.format_delay(x) for x in (0.0227, 1.34, 59.9, 61, 1320)] == [
+        "23 ms",
+        "1.3 s",
+        "59.9 s",
+        "1 min 01 s",
+        "22 min 00 s",
+    ]
 
 
 # --- Gravity ------------------------------------------------------------------

@@ -26,6 +26,16 @@ LONELINESS_AMBER_MIN: Final = 6  # [PAPER] 6-9 elevated
 LONELINESS_RED_MIN: Final = 7  # [OURS]
 LONELINESS_RED_DAYS: Final = 3  # [OURS]
 
+# --- Isolation: AI check-in companion ------------------------------------------
+CHECKIN_MIN_TURNS: Final = 3  # [OURS] astronaut replies needed before the chat can be scored
+CHECKIN_MAX_TURNS: Final = 10  # [OURS] astronaut replies after which the chat must be scored
+CHECKIN_MIN_CONFIDENCE: Final = 0.6  # [OURS] below this a rating is stored but never drives the card
+
+# --- Distance (JPL Horizons) -----------------------------------------------------
+SPEED_OF_LIGHT_KM_S: Final = 299_792.458  # physical constant
+REALTIME_COMMS_MAX_S: Final = 10.0  # [OURS] one-way delay that still allows a live conversation
+DISTANCE_AMBER_LIGHT_TIME_S: Final = 300.0  # [OURS] one-way delay >= 5 min: crew must self-manage events
+
 # --- Gravity (cardiovascular flag) ---------------------------------------------
 BASELINE_DAYS: Final = 7  # [OURS]
 SD_MULTIPLIER: Final = 2.0  # [OURS]

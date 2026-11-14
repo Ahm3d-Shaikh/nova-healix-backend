@@ -24,6 +24,9 @@ class DailyRecord(BaseModel):
     pvt_lapses: int
     pvt_false_starts: int
     dose_msv: float
+    # Overlay set when an AI check-in scored this day (q1-q3 then come from the rating)
+    loneliness_source: str = "simulated"  # "simulated" | "ai_checkin"
+    isolation_safety_flag: bool = False
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -75,21 +78,3 @@ class DashboardCrew(BaseModel):
     overall: Level
     cards: list[CardStatus]
     alerts: list[Alert]  # amber / red only
-
-
-class DayLevels(BaseModel):
-    day: int
-    overall: Level
-    cards: dict[Hazard, Level]
-
-
-class AstronautTimeline(BaseModel):
-    astronaut_id: str
-    days: list[DayLevels]
-
-
-class TimelineResponse(BaseModel):
-    mission_days: int
-    storm_days: list[int]  # mission days with a real DONKI SEP event
-    radiation_source: DataSource
-    crew: list[AstronautTimeline]
