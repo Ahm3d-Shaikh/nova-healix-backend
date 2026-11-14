@@ -1,23 +1,20 @@
 from app.core.errors import InvalidDayError
 from app.models.settings import MissionSettings
+from app.repositories.settings import SettingsRepository
 
 
 class SettingsService:
-    """In-memory demo settings (mission, deep space mode, current day)."""
+    """Demo settings (mission, deep space mode, current day), persisted in the database."""
 
-    def __init__(self, mission_days: int):
+    def __init__(self, mission_days: int, repo: SettingsRepository):
         self.mission_days = mission_days
-        self._settings = MissionSettings()
+        self._repo = repo
 
-    def get(self) -> MissionSettings:
-        return self._settings
+    async def get(self) -> MissionSettings:
+        return await self._repo.get() or MissionSettings()
 
-    def update(self, new: MissionSettings) -> MissionSettings:
-        if new.current_day > self.mission_days:
+    async def update(self, new: MissionSettings) -> MissionSettings:
+        if not 1 <= new.current_day <= self.mission_days:
             raise InvalidDayError(new.current_day, self.mission_days)
-        self._settings = new
-        return self._settings
-
-    def reset(self) -> MissionSettings:
-        self._settings = MissionSettings()
-        return self._settings
+        await self._repo.save(new)
+        return new

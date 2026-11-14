@@ -1,12 +1,16 @@
+import asyncio
+
+from tests.conftest import set_settings
+
+
 def test_health_and_root(api):
-    assert api.get("/health").json() == {"status": "healthy", "version": "2.0.0"}
+    assert api.get("/health").json() == {
+        "status": "healthy",
+        "version": "2.0.0",
+        "database": "memory",
+        "ai_checkin": True,
+    }
     assert "not a medical device" in api.get("/").json()["disclaimer"]
-
-
-def test_space_weather_snapshot_fallback(api):
-    body = api.get("/api/space-weather").json()
-    assert body["source"] == "snapshot" and body["reason"] == "live_unavailable"
-    assert any(e["kind"] == "sep" and e["mission_day"] == 20 for e in body["events"])
 
 
 def test_crew_list_and_detail(api):
@@ -22,7 +26,7 @@ def test_crew_list_and_detail(api):
 
 def test_unknown_astronaut_404(api):
     assert api.get("/api/crew/Z").status_code == 404
-    assert api.get("/api/mirror-gap/Z").status_code == 404
+    assert api.get("/api/isolation/Z").status_code == 404
 
 
 def test_alerts_sorted_worst_first(api):
@@ -32,30 +36,17 @@ def test_alerts_sorted_worst_first(api):
     assert {a["astronaut_id"] for a in alerts} == {"A", "B", "C"}  # A only has the Distance (snapshot) alert
 
 
-def test_settings_roundtrip(api):
-    body = api.post("/api/settings", json={"mission": "moon", "deep_space_mode": True, "current_day": 12}).json()
-    assert body["comms_delay"] == "≈1.3 s" and body["current_day"] == 12
-    assert api.get("/api/settings").json()["deep_space_mode"] is True
+def test_saved_settings_drive_default_day_and_mission(api):
+    set_settings(api, mission="moon", deep_space_mode=True, current_day=12)
+    body = api.get("/api/dashboard").json()
+    assert body["day"] == 12 and body["settings"]["comms_delay"] == "≈1.3 s"
+    assert body["settings"]["deep_space_mode"] is True
     assert api.get("/api/crew").json()[0]["day"] == 12
 
 
-def test_mirror_gap_submission(api):
-    api.post("/api/settings", json={"mission": "iss", "deep_space_mode": False, "current_day": 25})
-    slow = [330, 360, 400, 370, 345, 380, 150, 90]  # one false start (<100), several lapses (>=355)
-    body = api.post("/api/mirror-gap/B", json={"self_rating": 8, "reaction_times_ms": slow}).json()
-    assert body["false_starts"] == 1 and body["lapses"] == 4 and body["responses"] == 7
-    assert body["gap"] > 1.5 and body["level"] in ("amber", "red")
-    hist = api.get("/api/mirror-gap/B").json()
-    assert hist["items"][-1]["source"] == "submitted" and len(hist["items"]) == 31
-
-
-def test_mirror_gap_validation(api):
-    assert api.post("/api/mirror-gap/A", json={"self_rating": 11, "reaction_times_ms": [300] * 6}).status_code == 422
-    assert api.post("/api/mirror-gap/A", json={"self_rating": 5, "reaction_times_ms": [50] * 6}).status_code == 422
-    demo = api.post(
-        "/api/mirror-gap/A", json={"self_rating": 7, "reaction_times_ms": [280] * 8, "mode": "demo_60s"}
-    ).json()
-    assert demo["validated"] is False and demo["lapse_band"] is None
+def test_removed_endpoints_are_gone(api):
+    for path in ("/api/space-weather", "/api/settings", "/api/timeline", "/api/mirror-gap/A"):
+        assert api.get(path).status_code == 404, path
 
 
 def test_out_of_range_day_is_rejected(api):
@@ -64,7 +55,7 @@ def test_out_of_range_day_is_rejected(api):
         assert resp.status_code == 422, path
         assert "outside 1-30" in resp.json()["detail"]
     assert api.get("/api/crew", params={"day": 0}).status_code == 422
-    assert api.post("/api/isolation/A?day=99", json={"q1": 1, "q2": 1, "q3": 1}).status_code == 422
+    assert api.post("/api/isolation/A/sessions?day=99").status_code == 422
 
 
 def test_error_bodies_are_json_detail(api):
@@ -82,7 +73,7 @@ def test_responses_carry_request_id_and_security_headers(api):
 
 
 def test_large_responses_are_gzipped(api):
-    resp = api.get("/api/timeline", headers={"accept-encoding": "gzip"})
+    resp = api.get("/api/dashboard", headers={"accept-encoding": "gzip"})
     assert resp.headers["content-encoding"] == "gzip"
 
 
@@ -99,15 +90,6 @@ def test_openapi_schema_exposes_typed_card_metrics(api):
     assert schema["CardStatus"]["properties"]["metrics"]["discriminator"]["propertyName"] == "kind"
 
 
-def test_explicit_day_overrides_saved_day_for_submissions(api):
-    api.post("/api/settings", json={"mission": "mars", "deep_space_mode": False, "current_day": 3})
-    body = {"q1": 3, "q2": 3, "q3": 2}
-    early = api.post("/api/isolation/C", json=body).json()  # saved day 3: little history
-    late = api.post("/api/isolation/C?day=25", json=body).json()  # day 25: long high streak
-    assert early["level"] == "amber"
-    assert late["level"] == "red"
-
-
 def test_blank_nasa_key_falls_back_to_demo_key():
     from app.core.config import Settings
 
@@ -115,21 +97,13 @@ def test_blank_nasa_key_falls_back_to_demo_key():
     assert Settings(nasa_api_key=" abc ").nasa_api_key == "abc"
 
 
-def test_blank_submissions_dir_means_in_memory_only():
-    from app.core.config import Settings
-
-    assert Settings(submissions_dir="").submissions_dir is None
-    assert Settings(submissions_dir="var").submissions_dir is not None
-
-
 def test_settings_reject_out_of_range_day_instead_of_clamping(api):
-    resp = api.post("/api/settings", json={"mission": "mars", "deep_space_mode": False, "current_day": 99})
-    assert resp.status_code == 422
-    assert "outside 1-30" in resp.json()["detail"]
-    assert api.get("/api/settings").json()["current_day"] == 5  # unchanged
+    import pytest
 
+    from app.core.errors import InvalidDayError
+    from app.models.settings import MissionSettings
 
-def test_mirror_gap_rejects_impossible_reaction_times(api):
-    for bad in (-5, 0, 70_000):
-        resp = api.post("/api/mirror-gap/A", json={"self_rating": 5, "reaction_times_ms": [bad, 300, 300, 300, 300]})
-        assert resp.status_code == 422, bad
+    service = api.app.state.container.mission_settings
+    with pytest.raises(InvalidDayError, match="outside 1-30"):
+        asyncio.run(service.update(MissionSettings(mission="mars", deep_space_mode=False, current_day=99)))
+    assert api.get("/api/dashboard").json()["settings"]["current_day"] == 5  # unchanged

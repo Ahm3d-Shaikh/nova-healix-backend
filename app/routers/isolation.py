@@ -1,26 +1,51 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, status
 
 from app.api.deps import ContainerDep
-from app.models.isolation import IsolationHistory, IsolationResult, IsolationSubmission, Questionnaire
+from app.models.isolation import (
+    ChatMessageIn,
+    ChatSessionDetail,
+    ChatTurnResponse,
+    IsolationHistory,
+    LonelinessAssessment,
+    ScoringMethod,
+    StartSessionResponse,
+)
 from app.routers.crew import DayQuery
-from app.services.isolation_service import QUESTIONNAIRE
+from app.services.isolation_service import METHOD
 
 router = APIRouter(prefix="/api/isolation", tags=["isolation"])
 
 
-@router.get("/questionnaire")
-async def questionnaire() -> Questionnaire:
-    """Questions, answer options and bands for the Angular check-in form."""
-    return QUESTIONNAIRE
+@router.get("/method")
+async def method() -> ScoringMethod:
+    """How the AI check-in is scored: instrument, item scale, thresholds and turn limits."""
+    return METHOD
 
 
-@router.post("/{astronaut_id}")
-async def submit(
-    astronaut_id: str, body: IsolationSubmission, c: ContainerDep, day: DayQuery = None
-) -> IsolationResult:
-    return c.isolation.submit(astronaut_id, body, c.crew.resolve_day(day))
+@router.post("/{astronaut_id}/sessions", status_code=status.HTTP_201_CREATED)
+async def start_session(astronaut_id: str, c: ContainerDep, day: DayQuery = None) -> StartSessionResponse:
+    """Open today's check-in chat; returns the companion's opening message."""
+    return await c.isolation.start(astronaut_id, await c.crew.resolve_day(day))
+
+
+@router.post("/{astronaut_id}/sessions/{session_id}/messages")
+async def send_message(astronaut_id: str, session_id: str, body: ChatMessageIn, c: ContainerDep) -> ChatTurnResponse:
+    """Send what the astronaut said; returns the companion's reply."""
+    return await c.isolation.send(astronaut_id, session_id, body.content)
+
+
+@router.post("/{astronaut_id}/sessions/{session_id}/complete")
+async def complete_session(astronaut_id: str, session_id: str, c: ContainerDep) -> LonelinessAssessment:
+    """Score the chat: loneliness score (3-9), level, alert. Idempotent."""
+    return await c.isolation.complete(astronaut_id, session_id)
+
+
+@router.get("/{astronaut_id}/sessions/{session_id}")
+async def session_detail(astronaut_id: str, session_id: str, c: ContainerDep) -> ChatSessionDetail:
+    return await c.isolation.detail(astronaut_id, session_id)
 
 
 @router.get("/{astronaut_id}")
 async def history(astronaut_id: str, c: ContainerDep) -> IsolationHistory:
-    return c.isolation.history(astronaut_id)
+    """Loneliness score per day: simulated baseline plus every AI check-in."""
+    return await c.isolation.history(astronaut_id)

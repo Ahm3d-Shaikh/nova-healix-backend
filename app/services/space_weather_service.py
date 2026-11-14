@@ -1,4 +1,4 @@
-"""Space-weather data with a 3-tier fallback: live -> in-memory cache -> snapshot file."""
+"""Space-weather data with fallback: live -> cache (memory, then database) -> snapshot file."""
 
 import asyncio
 import json
@@ -11,6 +11,7 @@ from pathlib import Path
 
 from app.models.enums import DataSource
 from app.models.space_weather import SpaceWeatherData, SpaceWeatherEvent
+from app.repositories.cache import CacheRepository
 from app.services.donki_client import DonkiClient, DonkiError, DonkiRateLimited
 
 log = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ class SpaceWeatherService:
         window_end: date,
         snapshot_path: Path,
         *,
+        cache: CacheRepository | None = None,
         cache_ttl_seconds: int = 3600,
         retry_after_seconds: int = 60,
         fetch_timeout_seconds: float = 12.0,
@@ -45,6 +47,7 @@ class SpaceWeatherService:
         self._start = window_start
         self._end = window_end
         self._snapshot_path = snapshot_path
+        self._db_cache = cache
         self._ttl = cache_ttl_seconds
         self._retry_after = retry_after_seconds
         self._fetch_timeout = fetch_timeout_seconds
@@ -74,14 +77,14 @@ class SpaceWeatherService:
 
     async def get(self, deep_space_mode: bool = False) -> SpaceWeatherData:
         if deep_space_mode:
-            return self._fallback(REASON_DEEP_SPACE)
+            return await self._fallback(REASON_DEEP_SPACE)
 
         async with self._lock:
             entry = self._cache
             if entry and self._clock() - entry.stored_at < self._ttl:
                 return self._from_entry(entry, DataSource.LIVE, None)
             if self._clock() < self._backoff_until:
-                return self._fallback(self._backoff_reason)  # don't hammer a failing API
+                return await self._fallback(self._backoff_reason)  # don't hammer a failing API
             try:
                 async with asyncio.timeout(self._fetch_timeout):
                     events = await self._client.fetch_events(self._start, self._end)
@@ -89,21 +92,34 @@ class SpaceWeatherService:
                 log.warning("Live DONKI fetch exceeded %.0fs; serving fallback data", self._fetch_timeout)
                 self._backoff_until = self._clock() + self._retry_after
                 self._backoff_reason = REASON_UNAVAILABLE
-                return self._fallback(REASON_UNAVAILABLE)
+                return await self._fallback(REASON_UNAVAILABLE)
             except DonkiError as exc:
                 log.warning("Live DONKI fetch failed: %s", exc)
                 limited = isinstance(exc, DonkiRateLimited)
                 wait = max(self._retry_after, exc.retry_after or 0) if limited else self._retry_after
                 self._backoff_until = self._clock() + wait
                 self._backoff_reason = REASON_RATE_LIMITED if limited else REASON_UNAVAILABLE
-                return self._fallback(self._backoff_reason)
+                return await self._fallback(self._backoff_reason)
             self._backoff_until = 0.0
             self._cache = _CacheEntry(events, self._now(), self._clock())
+            if self._db_cache is not None:
+                await self._db_cache.put(
+                    self._cache_key, [e.model_dump(mode="json") for e in events], self._cache.fetched_at
+                )
             return self._from_entry(self._cache, DataSource.LIVE, None)
 
-    def _fallback(self, reason: str) -> SpaceWeatherData:
+    @property
+    def _cache_key(self) -> str:
+        return f"donki:{self._start.isoformat()}:{self._end.isoformat()}"
+
+    async def _fallback(self, reason: str) -> SpaceWeatherData:
         if self._cache:
             return self._from_entry(self._cache, DataSource.CACHED, reason)
+        stored = await self._db_cache.get(self._cache_key) if self._db_cache is not None else None
+        if stored is not None:
+            payload, fetched_at = stored
+            events = [SpaceWeatherEvent.model_validate(e) for e in payload]
+            return SpaceWeatherData(source=DataSource.CACHED, data_as_of=fetched_at, reason=reason, events=events)
         return self.load_snapshot().model_copy(update={"reason": reason})
 
     @staticmethod

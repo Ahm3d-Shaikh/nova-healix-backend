@@ -16,11 +16,19 @@ class SpaceWeatherStatus(BaseModel):
     events_last_24h: list[MissionEvent]  # SEP / flare / CME / storm events only
 
 
+class DistanceStatus(BaseModel):
+    source: DataSource  # JPL Horizons feed status
+    data_as_of: datetime
+    reason: str | None
+    target_name: str
+
+
 class DashboardResponse(BaseModel):
     disclaimer: str
     day: int
     mission_days: int
     settings: MissionSettingsResponse
     space_weather: SpaceWeatherStatus
+    distance: DistanceStatus
     crew: list[DashboardCrew]
     alerts: list[CrewAlert]  # worst first
