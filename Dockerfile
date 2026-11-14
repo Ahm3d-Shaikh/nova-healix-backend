@@ -14,6 +14,8 @@ RUN pip install -r requirements.lock
 # Run as an unprivileged user.
 RUN useradd --create-home --uid 10001 appuser
 COPY --chown=appuser:appuser app ./app
+# Writable folder for persisted check-in results (mount a volume here to keep them across deploys).
+RUN mkdir /app/var && chown appuser:appuser /app/var
 USER appuser
 
 # Railway provides $PORT; default 8000 for local runs.

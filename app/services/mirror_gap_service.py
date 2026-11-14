@@ -17,13 +17,13 @@ from app.models.mirror_gap import (
 from app.rules import mirror_gap as rule
 from app.rules import thresholds as t
 from app.services.crew_service import CrewService
-from app.services.store import InMemoryStore
+from app.services.store import InMemoryStore, SubmissionStore
 
 
 class MirrorGapService:
-    def __init__(self, crew: CrewService) -> None:
+    def __init__(self, crew: CrewService, store: SubmissionStore[MirrorGapResult] | None = None) -> None:
         self._crew = crew
-        self._submitted: InMemoryStore[MirrorGapResult] = InMemoryStore()
+        self._submitted: SubmissionStore[MirrorGapResult] = store or InMemoryStore()
 
     def submit(self, astronaut_id: str, body: MirrorGapSubmission, day: int) -> MirrorGapResult:
         """Score a test taken on mission `day`; the gap is judged against the days before it."""
@@ -65,6 +65,10 @@ class MirrorGapService:
         )
         self._submitted.add(astro.id, result)
         return result
+
+    def clear(self) -> None:
+        """Forget all submitted check-ins (demo reset)."""
+        self._submitted.clear()
 
     def history(self, astronaut_id: str) -> MirrorGapHistory:
         astro = self._crew.astronaut(astronaut_id)

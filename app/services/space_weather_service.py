@@ -37,6 +37,7 @@ class SpaceWeatherService:
         *,
         cache_ttl_seconds: int = 3600,
         retry_after_seconds: int = 60,
+        fetch_timeout_seconds: float = 12.0,
         clock: Callable[[], float] = time.monotonic,
         now: Callable[[], datetime] = lambda: datetime.now(UTC),
     ) -> None:
@@ -46,6 +47,7 @@ class SpaceWeatherService:
         self._snapshot_path = snapshot_path
         self._ttl = cache_ttl_seconds
         self._retry_after = retry_after_seconds
+        self._fetch_timeout = fetch_timeout_seconds
         self._clock = clock
         self._now = now
         self._cache: _CacheEntry | None = None
@@ -81,7 +83,13 @@ class SpaceWeatherService:
             if self._clock() < self._backoff_until:
                 return self._fallback(self._backoff_reason)  # don't hammer a failing API
             try:
-                events = await self._client.fetch_events(self._start, self._end)
+                async with asyncio.timeout(self._fetch_timeout):
+                    events = await self._client.fetch_events(self._start, self._end)
+            except TimeoutError:
+                log.warning("Live DONKI fetch exceeded %.0fs; serving fallback data", self._fetch_timeout)
+                self._backoff_until = self._clock() + self._retry_after
+                self._backoff_reason = REASON_UNAVAILABLE
+                return self._fallback(REASON_UNAVAILABLE)
             except DonkiError as exc:
                 log.warning("Live DONKI fetch failed: %s", exc)
                 limited = isinstance(exc, DonkiRateLimited)

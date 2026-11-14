@@ -26,6 +26,26 @@ def high_streak(totals: Sequence[int]) -> int:
     return trailing_streak([score >= t.LONELINESS_RED_MIN for score in totals])
 
 
+TREND_WINDOW = 3  # days compared on each side
+TREND_DELTA = 0.5  # points of average change that counts as a trend
+
+
+def trend(totals: Sequence[int]) -> tuple[str, float | None]:
+    """('rising' | 'falling' | 'stable' | 'insufficient_data', change in mean score).
+
+    Compares the mean of the last 3 days with the 3 days before them."""
+    if len(totals) < 2 * TREND_WINDOW:
+        return "insufficient_data", None
+    recent = sum(totals[-TREND_WINDOW:]) / TREND_WINDOW
+    earlier = sum(totals[-2 * TREND_WINDOW : -TREND_WINDOW]) / TREND_WINDOW
+    delta = round(recent - earlier, 2)
+    if delta >= TREND_DELTA:
+        return "rising", delta
+    if delta <= -TREND_DELTA:
+        return "falling", delta
+    return "stable", delta
+
+
 def assess(totals: Sequence[int]) -> Alert:
     """Alert for a series of daily loneliness totals (latest last)."""
     if not totals:

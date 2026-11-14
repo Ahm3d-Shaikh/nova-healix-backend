@@ -50,6 +50,8 @@ Card level = worst of its rules. Every threshold lives in `app/rules/thresholds.
 | `POST/GET /api/mirror-gap/{id}` | Score a reaction test (self-rating + times) → lapses, false starts, gap, level; plus history |
 | `GET /api/isolation/questionnaire`, `POST/GET /api/isolation/{id}` | Loneliness check-in form definition, scoring and history |
 | `GET/POST /api/settings` | Mission (ISS/Moon/Mars), Deep space mode, current mission day |
+| `GET /api/meta` | Disclaimer, real-vs-simulated data, every threshold's provenance, sources |
+| `POST /api/demo/reset` | Reset to day 5 / Mars / live and clear submissions (repeatable demo) |
 | `GET /health`, `GET /` | Liveness and disclaimer |
 
 Card `metrics` are typed and discriminated by `kind` (radiation, isolation, distance, gravity, environment, mirror), so the frontend never parses alert text. Interactive docs at `/docs`.
@@ -68,6 +70,7 @@ Card `metrics` are typed and discriminated by `kind` (radiation, isolation, dist
 |---|---|
 | `feature/ridge-backend` | RIDGE rules engine, DONKI client, crew generator, core endpoints, live-DONKI hardening |
 | `feature/dashboard-data` | `/api/dashboard`, `/api/timeline`, card metrics, isolation check-in |
+| `feature/requirements-coverage` | `/api/meta` (disclaimer + threshold provenance + sources), JSON persistence, demo reset, isolation trend, card headlines, offline fetch budget, requirements + coverage docs |
 | `feature/production-hardening` | Central thresholds, typed metrics, error handling, middleware, caching, tooling, CI, Docker |
 
 All merged into `development` and `main`.
@@ -75,7 +78,7 @@ All merged into `development` and `main`.
 ## 4. Known limitations (deliberate for the hackathon)
 
 - Settings (mission, day, deep-space mode) are one process-wide demo state, not per user.
-- Mirror Gap and isolation submissions are in memory and lost on restart; submitted check-ins do not change the simulated cards or alerts.
+- Submitted Mirror Gap and isolation check-ins are saved to JSON files (`SUBMISSIONS_DIR`) but do not change the simulated cards or alerts.
 - No authentication or rate limiting; CORS limited to configured origins; routes are `/api/...` without a version prefix.
 - Docker image build not yet verified (Docker daemon was off); the container start command and health check were verified directly.
 - Not built: Angular frontend, PDF export, real OSDR RadLab dose data, Mission Control view.

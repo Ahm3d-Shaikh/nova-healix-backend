@@ -14,3 +14,7 @@ class SettingsService:
     def update(self, new: MissionSettings) -> MissionSettings:
         self._settings = new.model_copy(update={"current_day": min(new.current_day, self.mission_days)})
         return self._settings
+
+    def reset(self) -> MissionSettings:
+        self._settings = MissionSettings()
+        return self._settings
