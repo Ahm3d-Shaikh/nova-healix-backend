@@ -1,7 +1,7 @@
 """Small statistics helpers shared by rules."""
 
+from collections.abc import Sequence
 from statistics import mean, stdev
-from typing import Sequence
 
 
 def mean_sd(values: Sequence[float], sd_floor: float) -> tuple[float, float]:

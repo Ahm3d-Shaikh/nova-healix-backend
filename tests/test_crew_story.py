@@ -12,6 +12,7 @@ def cards(container, aid, day):
 
 def test_generator_is_deterministic(settings, offline_container):
     from app.services.crew_generator import generate_crew
+
     a = generate_crew(settings.crew_seed, 30, {20})
     b = generate_crew(settings.crew_seed, 30, {20})
     assert a == b and all(len(v) == 30 for v in a.values())
@@ -21,8 +22,11 @@ def test_astronaut_a_stays_green_outside_radiation_and_distance(offline_containe
     for day in range(1, 31):
         c = cards(offline_container, "A", day)
         assert {h: lv for h, lv in c.items() if h not in (Hazard.RADIATION, Hazard.DISTANCE)} == {
-            Hazard.ISOLATION: Level.GREEN, Hazard.GRAVITY: Level.GREEN,
-            Hazard.ENVIRONMENT: Level.GREEN, Hazard.MIRROR: Level.GREEN}, day
+            Hazard.ISOLATION: Level.GREEN,
+            Hazard.GRAVITY: Level.GREEN,
+            Hazard.ENVIRONMENT: Level.GREEN,
+            Hazard.MIRROR: Level.GREEN,
+        }, day
 
 
 def test_b_mirror_gap_goes_amber_then_red(offline_container):

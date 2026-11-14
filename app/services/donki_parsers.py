@@ -9,8 +9,9 @@ Field names were checked against live api.nasa.gov responses (May 2024):
 """
 
 import re
-from datetime import datetime, timezone
-from typing import Any, Iterable
+from collections.abc import Iterable
+from datetime import UTC, datetime
+from typing import Any
 
 from app.models.enums import EventKind
 from app.models.space_weather import SpaceWeatherEvent
@@ -22,7 +23,7 @@ _HEADLINE = re.compile(r"Message Type:\s*(.+)")
 def parse_time(value: str) -> datetime:
     """DONKI times look like '2024-05-09T13:59Z' (UTC, no seconds)."""
     dt = datetime.fromisoformat(value.replace("Z", "+00:00"))
-    return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+    return dt if dt.tzinfo else dt.replace(tzinfo=UTC)
 
 
 def parse_sep(raw: Iterable[dict[str, Any]]) -> list[SpaceWeatherEvent]:
@@ -34,7 +35,8 @@ def parse_sep(raw: Iterable[dict[str, Any]]) -> list[SpaceWeatherEvent]:
                 id=item["sepID"],
                 kind=EventKind.SEP,
                 time=parse_time(item["eventTime"]),
-                summary=f"Solar energetic particle event ({instruments})" if instruments
+                summary=f"Solar energetic particle event ({instruments})"
+                if instruments
                 else "Solar energetic particle event",
                 link=item.get("link"),
             )

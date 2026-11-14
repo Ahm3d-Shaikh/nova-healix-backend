@@ -1,5 +1,5 @@
 def test_health_and_root(api):
-    assert api.get("/health").json() == {"status": "healthy"}
+    assert api.get("/health").json() == {"status": "healthy", "version": "2.0.0"}
     assert "not a medical device" in api.get("/").json()["disclaimer"]
 
 
@@ -52,5 +52,64 @@ def test_mirror_gap_submission(api):
 def test_mirror_gap_validation(api):
     assert api.post("/api/mirror-gap/A", json={"self_rating": 11, "reaction_times_ms": [300] * 6}).status_code == 422
     assert api.post("/api/mirror-gap/A", json={"self_rating": 5, "reaction_times_ms": [50] * 6}).status_code == 422
-    demo = api.post("/api/mirror-gap/A", json={"self_rating": 7, "reaction_times_ms": [280] * 8, "mode": "demo_60s"}).json()
+    demo = api.post(
+        "/api/mirror-gap/A", json={"self_rating": 7, "reaction_times_ms": [280] * 8, "mode": "demo_60s"}
+    ).json()
     assert demo["validated"] is False and demo["lapse_band"] is None
+
+
+def test_out_of_range_day_is_rejected(api):
+    for path in ("/api/crew", "/api/dashboard", "/api/alerts", "/api/crew/A"):
+        resp = api.get(path, params={"day": 31})
+        assert resp.status_code == 422, path
+        assert "outside 1-30" in resp.json()["detail"]
+    assert api.get("/api/crew", params={"day": 0}).status_code == 422
+    assert api.post("/api/isolation/A?day=99", json={"q1": 1, "q2": 1, "q3": 1}).status_code == 422
+
+
+def test_error_bodies_are_json_detail(api):
+    resp = api.get("/api/crew/Z")
+    assert resp.status_code == 404
+    assert resp.json() == {"detail": "Unknown astronaut 'Z'"}
+
+
+def test_responses_carry_request_id_and_security_headers(api):
+    resp = api.get("/health")
+    assert len(resp.headers["x-request-id"]) == 12
+    assert float(resp.headers["x-process-time-ms"]) >= 0
+    assert resp.headers["x-content-type-options"] == "nosniff"
+    assert api.get("/health").headers["x-request-id"] != resp.headers["x-request-id"]
+
+
+def test_large_responses_are_gzipped(api):
+    resp = api.get("/api/timeline", headers={"accept-encoding": "gzip"})
+    assert resp.headers["content-encoding"] == "gzip"
+
+
+def test_cors_allows_only_configured_origin(api):
+    ok = api.get("/health", headers={"origin": "http://localhost:4200"})
+    assert ok.headers["access-control-allow-origin"] == "http://localhost:4200"
+    other = api.get("/health", headers={"origin": "http://evil.example"})
+    assert "access-control-allow-origin" not in other.headers
+
+
+def test_openapi_schema_exposes_typed_card_metrics(api):
+    schema = api.get("/openapi.json").json()["components"]["schemas"]
+    assert {"RadiationMetrics", "GravityMetrics", "MirrorMetrics"} <= set(schema)
+    assert schema["CardStatus"]["properties"]["metrics"]["discriminator"]["propertyName"] == "kind"
+
+
+def test_explicit_day_overrides_saved_day_for_submissions(api):
+    api.post("/api/settings", json={"mission": "mars", "deep_space_mode": False, "current_day": 3})
+    body = {"q1": 3, "q2": 3, "q3": 2}
+    early = api.post("/api/isolation/C", json=body).json()  # saved day 3: little history
+    late = api.post("/api/isolation/C?day=25", json=body).json()  # day 25: long high streak
+    assert early["level"] == "amber"
+    assert late["level"] == "red"
+
+
+def test_blank_nasa_key_falls_back_to_demo_key():
+    from app.core.config import Settings
+
+    assert Settings(nasa_api_key="   ").nasa_api_key == "DEMO_KEY"
+    assert Settings(nasa_api_key=" abc ").nasa_api_key == "abc"

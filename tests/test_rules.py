@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from app.models.crew import DailyRecord
 from app.models.enums import DataSource, EventKind, Level, Mission
@@ -6,26 +6,52 @@ from app.models.space_weather import SpaceWeatherEvent
 from app.rules import distance, environment, gravity, isolation, mirror_gap, radiation
 from app.rules.context import RuleContext
 
-T0 = datetime(2024, 5, 10, 0, 0, tzinfo=timezone.utc)
+T0 = datetime(2024, 5, 10, 0, 0, tzinfo=UTC)
 
 
 def rec(day, **kw) -> DailyRecord:
-    base = dict(day=day, sleep_hours=7.5, resting_hr=62, sys_bp=118, dia_bp=76, exercise_min=45,
-                co2_mmhg_1h=2.1, co2_mmhg_7d=1.9, cabin_temp_c=22.5, loneliness_q1=1, loneliness_q2=1,
-                loneliness_q3=1, self_rating=7, pvt_mean_rt=285, pvt_mean_speed=3.5, pvt_lapses=3,
-                pvt_false_starts=0, dose_msv=0.5)
+    base = {
+        "day": day,
+        "sleep_hours": 7.5,
+        "resting_hr": 62,
+        "sys_bp": 118,
+        "dia_bp": 76,
+        "exercise_min": 45,
+        "co2_mmhg_1h": 2.1,
+        "co2_mmhg_7d": 1.9,
+        "cabin_temp_c": 22.5,
+        "loneliness_q1": 1,
+        "loneliness_q2": 1,
+        "loneliness_q3": 1,
+        "self_rating": 7,
+        "pvt_mean_rt": 285,
+        "pvt_mean_speed": 3.5,
+        "pvt_lapses": 3,
+        "pvt_false_starts": 0,
+        "dose_msv": 0.5,
+    }
     return DailyRecord(**{**base, **kw})
 
 
 def ctx(records, events=(), source=DataSource.LIVE, deep=False, mission=Mission.MARS) -> RuleContext:
-    return RuleContext(day=len(records), now=T0, records=records, events=events, weather_source=source,
-                       weather_as_of=T0, deep_space_mode=deep, mission=mission)
+    return RuleContext(
+        day=len(records),
+        now=T0,
+        records=records,
+        events=events,
+        weather_source=source,
+        weather_as_of=T0,
+        deep_space_mode=deep,
+        mission=mission,
+    )
 
 
 def event(kind, hours_ago, **kw):
     from datetime import timedelta
-    return SpaceWeatherEvent(id=f"{kind}{hours_ago}", kind=kind, time=T0 - timedelta(hours=hours_ago),
-                             summary="x", **kw)
+
+    return SpaceWeatherEvent(
+        id=f"{kind}{hours_ago}", kind=kind, time=T0 - timedelta(hours=hours_ago), summary="x", **kw
+    )
 
 
 def top(alerts):
@@ -99,12 +125,12 @@ def test_gravity_hr_drift_three_days_is_amber():
 
 
 def test_gravity_two_days_of_drift_is_not_enough():
-    recs = baseline_days() + [rec(8, resting_hr=75), rec(9, resting_hr=75)]
+    recs = [*baseline_days(), rec(8, resting_hr=75), rec(9, resting_hr=75)]
     assert top(gravity.evaluate(ctx(recs))) == Level.GREEN
 
 
 def test_gravity_missed_exercise_amber_and_both_red():
-    missed = baseline_days() + [rec(8, exercise_min=0), rec(9, exercise_min=0)]
+    missed = [*baseline_days(), rec(8, exercise_min=0), rec(9, exercise_min=0)]
     assert top(gravity.evaluate(ctx(missed))) == Level.AMBER
     both = baseline_days() + [rec(8 + i, resting_hr=75, exercise_min=0) for i in range(3)]
     assert top(gravity.evaluate(ctx(both))) == Level.RED
@@ -136,4 +162,9 @@ def test_gap_positive_when_feeling_sharp_but_slow():
 
 
 def test_lapse_bands():
-    assert [mirror_gap.lapse_band_label(n) for n in (10, 11, 19, 20)] == ["good", "reduced", "reduced", "poor"]
+    assert [mirror_gap.lapse_band_label(n) for n in (10, 11, 19, 20)] == [
+        "good",
+        "reduced",
+        "reduced",
+        "poor",
+    ]

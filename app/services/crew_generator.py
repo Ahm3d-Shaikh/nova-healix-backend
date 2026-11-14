@@ -1,19 +1,34 @@
 """Seeded generator for the simulated crew of three (all values are SIMULATED)."""
 
 import random
+from collections.abc import Callable
 from statistics import mean
-from typing import Callable
+from typing import Any
 
 from app.models.crew import Astronaut, DailyRecord
 
 ASTRONAUTS: list[Astronaut] = [
-    Astronaut(id="A", name="Astronaut A", role="Commander",
-              story="Healthy reference: normal noise around a stable baseline."),
-    Astronaut(id="B", name="Astronaut B", role="Flight Engineer",
-              story="Sleep-deprived from day 18: slow reaction times while self-rating stays 7-8."),
-    Astronaut(id="C", name="Astronaut C", role="Mission Specialist",
-              story="From day 10: resting HR drifts up, exercise skipped, loneliness score rises."),
+    Astronaut(
+        id="A",
+        name="Astronaut A",
+        role="Commander",
+        story="Healthy reference: normal noise around a stable baseline.",
+    ),
+    Astronaut(
+        id="B",
+        name="Astronaut B",
+        role="Flight Engineer",
+        story="Sleep-deprived from day 18: slow reaction times while self-rating stays 7-8.",
+    ),
+    Astronaut(
+        id="C",
+        name="Astronaut C",
+        role="Mission Specialist",
+        story="From day 10: resting HR drifts up, exercise skipped, loneliness score rises.",
+    ),
 ]
+
+Fields = dict[str, Any]
 
 BASELINE_DOSE_MSV = 0.5  # NASA radiation brief, ~0.5 mSv/day
 STORM_DOSE_MSV = 3.0  # extra dose on an SEP day (illustrative)
@@ -25,12 +40,14 @@ C_ONSET_DAY = 10
 
 def generate_crew(seed: int, days: int, sep_days: set[int]) -> dict[str, list[DailyRecord]]:
     """Generate `days` daily records per astronaut. Deterministic for a given seed."""
-    builders: dict[str, Callable[[int, random.Random], dict]] = {
-        "A": _healthy_day, "B": _sleep_deprived_day, "C": _drifting_day,
+    builders: dict[str, Callable[[int, random.Random], Fields]] = {
+        "A": _healthy_day,
+        "B": _sleep_deprived_day,
+        "C": _drifting_day,
     }
     crew: dict[str, list[DailyRecord]] = {}
     for idx, astro in enumerate(ASTRONAUTS):
-        rng = random.Random(seed * 10 + idx)
+        rng = random.Random(seed * 10 + idx)  # noqa: S311 - simulation data, not cryptography
         records: list[DailyRecord] = []
         co2_daily: list[float] = []
         for day in range(1, days + 1):
@@ -39,17 +56,22 @@ def generate_crew(seed: int, days: int, sep_days: set[int]) -> dict[str, list[Da
             co2_daily.append(co2_mean)
             rt = fields.pop("pvt_mean_rt")
             q1, q2, q3 = _split_loneliness(fields.pop("loneliness_total"), rng)
-            records.append(DailyRecord(
-                day=day,
-                co2_mmhg_1h=round(co2_mean + 0.3 + rng.uniform(0, 0.1), 2),
-                co2_mmhg_7d=round(mean(co2_daily[-7:]), 2),
-                cabin_temp_c=round(rng.gauss(22.5, 0.5), 1),
-                loneliness_q1=q1, loneliness_q2=q2, loneliness_q3=q3,
-                pvt_mean_rt=round(rt, 1), pvt_mean_speed=round(1000 / rt, 3),
-                pvt_false_starts=rng.randint(0, 2),
-                dose_msv=round(_dose(day, sep_days, rng), 2),
-                **fields,
-            ))
+            records.append(
+                DailyRecord(
+                    day=day,
+                    co2_mmhg_1h=round(co2_mean + 0.3 + rng.uniform(0, 0.1), 2),
+                    co2_mmhg_7d=round(mean(co2_daily[-7:]), 2),
+                    cabin_temp_c=round(rng.gauss(22.5, 0.5), 1),
+                    loneliness_q1=q1,
+                    loneliness_q2=q2,
+                    loneliness_q3=q3,
+                    pvt_mean_rt=round(rt, 1),
+                    pvt_mean_speed=round(1000 / rt, 3),
+                    pvt_false_starts=rng.randint(0, 2),
+                    dose_msv=round(_dose(day, sep_days, rng), 2),
+                    **fields,
+                )
+            )
         crew[astro.id] = records
     return crew
 
@@ -63,7 +85,7 @@ def _dose(day: int, sep_days: set[int], rng: random.Random) -> float:
     return max(dose, 0.0)
 
 
-def _normal_vitals(rng: random.Random) -> dict:
+def _normal_vitals(rng: random.Random) -> Fields:
     return {
         "sleep_hours": round(rng.gauss(7.5, 0.4), 1),
         "resting_hr": round(rng.gauss(62, 1.2), 1),
@@ -77,11 +99,11 @@ def _normal_vitals(rng: random.Random) -> dict:
     }
 
 
-def _healthy_day(day: int, rng: random.Random) -> dict:
+def _healthy_day(day: int, rng: random.Random) -> Fields:
     return _normal_vitals(rng)
 
 
-def _sleep_deprived_day(day: int, rng: random.Random) -> dict:
+def _sleep_deprived_day(day: int, rng: random.Random) -> Fields:
     f = _normal_vitals(rng)
     f["self_rating"] = rng.choice([7, 7, 7, 8])  # stays 7-8 the whole mission
     if day >= B_ONSET_DAY:
@@ -92,7 +114,7 @@ def _sleep_deprived_day(day: int, rng: random.Random) -> dict:
     return f
 
 
-def _drifting_day(day: int, rng: random.Random) -> dict:
+def _drifting_day(day: int, rng: random.Random) -> Fields:
     f = _normal_vitals(rng)
     f["self_rating"] = rng.choice([7, 7, 7, 7, 6])
     if day >= C_ONSET_DAY:

@@ -2,9 +2,7 @@ from pydantic import BaseModel, Field, computed_field
 
 from app.models.alert import Alert
 from app.models.enums import DataSource, Hazard, Level
-
-
-MetricValue = float | int | str | bool | list[int] | None
+from app.models.metrics import CardMetrics
 
 
 class DailyRecord(BaseModel):
@@ -45,7 +43,7 @@ class CardStatus(BaseModel):
     label: str
     level: Level
     alerts: list[Alert]  # every rule result for this hazard (green included)
-    metrics: dict[str, MetricValue] = {}  # numbers behind the card
+    metrics: CardMetrics  # typed numbers behind the card
 
 
 class GapPoint(BaseModel):

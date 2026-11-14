@@ -3,6 +3,7 @@
 import asyncio
 import logging
 from datetime import date
+from typing import Any
 
 import httpx
 
@@ -11,6 +12,9 @@ from app.services import donki_parsers as parsers
 
 log = logging.getLogger(__name__)
 
+RawFeed = list[dict[str, Any]]
+FEEDS = ("SEP", "FLR", "CME", "GST", "notifications")
+REQUIRED_FEEDS = ("SEP", "CME", "GST", "notifications")
 RETRIES = 2  # extra attempts for transient failures (timeouts, 5xx)
 RETRY_BACKOFF_SECONDS = 0.5
 DEFAULT_RATE_LIMIT_WAIT = 900  # seconds, when NASA does not say how long
@@ -44,10 +48,10 @@ class DonkiClient:
         self._backoff = backoff
         self.rate_limit_remaining: int | None = None  # from X-RateLimit-Remaining
 
-    async def _get(self, endpoint: str, start: date, end: date) -> list[dict]:
+    async def _get(self, endpoint: str, start: date, end: date) -> RawFeed:
         params = {"startDate": start.isoformat(), "endDate": end.isoformat(), "api_key": self._api_key}
         url = f"{self._base_url}/{endpoint}"
-        last: Exception | None = None
+        last = DonkiError(f"DONKI /{endpoint}: no attempt made")
         for attempt in range(RETRIES + 1):
             try:
                 resp = await self._http.get(url, params=params, timeout=self._timeout)
@@ -71,11 +75,10 @@ class DonkiClient:
                     return self._json_list(endpoint, resp)
             if attempt < RETRIES:
                 await asyncio.sleep(self._backoff * (attempt + 1))
-        assert last is not None
         raise last
 
     @staticmethod
-    def _json_list(endpoint: str, resp: httpx.Response) -> list[dict]:
+    def _json_list(endpoint: str, resp: httpx.Response) -> RawFeed:
         try:
             data = resp.json()
         except ValueError as exc:
@@ -92,30 +95,28 @@ class DonkiClient:
 
         SEP, CME, GST and notifications are required: if any fails we raise so
         the caller falls back, rather than pretending partial data is live.
-        Flares are best-effort — if /FLR fails we derive them from notifications.
+        Flares are best-effort - if /FLR fails we derive them from notifications.
         """
-        sep, flr, cme, gst, notes = await asyncio.gather(
-            self._get("SEP", start, end),
-            self._get("FLR", start, end),
-            self._get("CME", start, end),
-            self._get("GST", start, end),
-            self._get("notifications", start, end),
-            return_exceptions=True,
-        )
-        required = (("SEP", sep), ("CME", cme), ("GST", gst), ("notifications", notes))
-        failures = [(n, r) for n, r in required if isinstance(r, BaseException)]
+        results = await asyncio.gather(*(self._get(feed, start, end) for feed in FEEDS), return_exceptions=True)
+        by_feed = dict(zip(FEEDS, results, strict=True))
+
+        failures = [(name, by_feed[name]) for name in REQUIRED_FEEDS if isinstance(by_feed[name], BaseException)]
         if failures:
-            limited = next((r for _, r in failures if isinstance(r, DonkiRateLimited)), None)
+            limited = next((err for _, err in failures if isinstance(err, DonkiRateLimited)), None)
             if limited:
                 raise limited
             name, err = failures[0]
-            raise DonkiError(f"required DONKI feed {name} unavailable: {err}") from err
+            raise DonkiError(f"required DONKI feed {name} unavailable: {err}") from (
+                err if isinstance(err, BaseException) else None
+            )
 
+        sep, cme, gst, notes = (_rows(by_feed[name]) for name in ("SEP", "CME", "GST", "notifications"))
+        flr = by_feed["FLR"]
         if isinstance(flr, BaseException):
             log.warning("DONKI /FLR unavailable (%s); deriving flares from notifications", flr)
             flares = parsers.parse_flares_from_notifications(notes)
         else:
-            flares = parsers.parse_flares(flr)
+            flares = parsers.parse_flares(_rows(flr))
 
         events = [
             *parsers.parse_sep(sep),
@@ -124,8 +125,14 @@ class DonkiClient:
             *parsers.parse_gst(gst),
             *parsers.parse_notifications(notes),
         ]
-        in_window = [e for e in events if start <= e.time.date() <= end]
-        return sorted(in_window, key=lambda e: e.time)
+        return sorted((e for e in events if start <= e.time.date() <= end), key=lambda e: e.time)
+
+
+def _rows(result: RawFeed | BaseException) -> RawFeed:
+    """Narrow a gather() result that has already been checked for failure."""
+    if isinstance(result, BaseException):  # pragma: no cover - guarded by the caller
+        raise result
+    return result
 
 
 def _retry_after(resp: httpx.Response) -> float:
