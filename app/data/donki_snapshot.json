@@ -1,0 +1,1100 @@
+{
+ "fetched_at": "2026-11-14T08:51:00+00:00",
+ "source": "NASA DONKI (api.nasa.gov/DONKI)",
+ "window": [
+  "2024-05-08",
+  "2024-05-12"
+ ],
+ "events": [
+  {
+   "id": "20240508-AL-001",
+   "kind": "notification",
+   "time": "2024-05-08T01:43:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30549/1"
+  },
+  {
+   "id": "20240508-AL-002-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T01:55:00Z",
+   "summary": "X1.0 solar flare (from DONKI notification)",
+   "class_type": "X1.0",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30550/1"
+  },
+  {
+   "id": "20240508-AL-002",
+   "kind": "notification",
+   "time": "2024-05-08T01:55:00Z",
+   "summary": "Space Weather Notification - X1.0 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30550/1"
+  },
+  {
+   "id": "20240508-AL-003",
+   "kind": "notification",
+   "time": "2024-05-08T04:55:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30552/1"
+  },
+  {
+   "id": "2024-05-08T05:36:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-08T05:36:00Z",
+   "summary": "Coronal mass ejection (870 km/s)",
+   "class_type": null,
+   "speed_km_s": 870.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30589/-1"
+  },
+  {
+   "id": "20240508-AL-004",
+   "kind": "notification",
+   "time": "2024-05-08T06:55:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30554/1"
+  },
+  {
+   "id": "20240508-AL-005",
+   "kind": "notification",
+   "time": "2024-05-08T11:53:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30556/1"
+  },
+  {
+   "id": "2024-05-08T12:24:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-08T12:24:00Z",
+   "summary": "Coronal mass ejection (776 km/s)",
+   "class_type": null,
+   "speed_km_s": 776.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30564/-1"
+  },
+  {
+   "id": "20240508-AL-006-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T13:10:00Z",
+   "summary": "X1.0 solar flare (from DONKI notification)",
+   "class_type": "X1.0",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30558/1"
+  },
+  {
+   "id": "20240508-AL-006",
+   "kind": "notification",
+   "time": "2024-05-08T13:10:00Z",
+   "summary": "Space Weather Notification - X1.0 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30558/1"
+  },
+  {
+   "id": "20240508-AL-007-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T13:36:00Z",
+   "summary": "M8.5 solar flare (from DONKI notification)",
+   "class_type": "M8.5",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30560/1"
+  },
+  {
+   "id": "20240508-AL-007",
+   "kind": "notification",
+   "time": "2024-05-08T13:36:00Z",
+   "summary": "Space Weather Notification - M8.5 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30560/1"
+  },
+  {
+   "id": "20240508-AL-008-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T13:45:00Z",
+   "summary": "M7.0 solar flare (from DONKI notification)",
+   "class_type": "M7.0",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30563/1"
+  },
+  {
+   "id": "20240508-AL-008",
+   "kind": "notification",
+   "time": "2024-05-08T13:45:00Z",
+   "summary": "Space Weather Notification - M7.0 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30563/1"
+  },
+  {
+   "id": "20240508-AL-009",
+   "kind": "notification",
+   "time": "2024-05-08T16:50:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Parker Solar Probe, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30575/1"
+  },
+  {
+   "id": "20240508-AL-010",
+   "kind": "notification",
+   "time": "2024-05-08T17:54:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30587/1"
+  },
+  {
+   "id": "20240508-AL-011-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T18:06:00Z",
+   "summary": "M7.9 solar flare (from DONKI notification)",
+   "class_type": "M7.9",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30588/1"
+  },
+  {
+   "id": "20240508-AL-011",
+   "kind": "notification",
+   "time": "2024-05-08T18:06:00Z",
+   "summary": "Space Weather Notification - M7.9 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30588/1"
+  },
+  {
+   "id": "20240508-AL-012",
+   "kind": "notification",
+   "time": "2024-05-08T18:43:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Parker Solar Probe, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30592/1"
+  },
+  {
+   "id": "2024-05-08T19:12:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-08T19:12:00Z",
+   "summary": "Coronal mass ejection (828 km/s)",
+   "class_type": null,
+   "speed_km_s": 828.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30612/-1"
+  },
+  {
+   "id": "20240508-7D-001",
+   "kind": "notification",
+   "time": "2024-05-08T21:58:00Z",
+   "summary": "Weekly Space Weather Summary Report for May 01, 2024 - May 07, 2024",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30600/1"
+  },
+  {
+   "id": "2024-05-08T22:24:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-08T22:24:00Z",
+   "summary": "Coronal mass ejection (1257 km/s)",
+   "class_type": null,
+   "speed_km_s": 1257.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30640/-1"
+  },
+  {
+   "id": "20240508-AL-013-FLR",
+   "kind": "flare",
+   "time": "2024-05-08T22:35:00Z",
+   "summary": "X1.0 solar flare (from DONKI notification)",
+   "class_type": "X1.0",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30602/1"
+  },
+  {
+   "id": "20240508-AL-013",
+   "kind": "notification",
+   "time": "2024-05-08T22:35:00Z",
+   "summary": "Space Weather Notification - X1.0 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30602/1"
+  },
+  {
+   "id": "20240508-AL-014",
+   "kind": "notification",
+   "time": "2024-05-08T22:38:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30604/1"
+  },
+  {
+   "id": "20240509-AL-001",
+   "kind": "notification",
+   "time": "2024-05-09T09:00:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30606/1"
+  },
+  {
+   "id": "2024-05-09T09:24:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-09T09:24:00Z",
+   "summary": "Coronal mass ejection (1330 km/s)",
+   "class_type": null,
+   "speed_km_s": 1330.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30619/-1"
+  },
+  {
+   "id": "20240509-AL-002-FLR",
+   "kind": "flare",
+   "time": "2024-05-09T12:03:00Z",
+   "summary": "X2.2 solar flare (from DONKI notification)",
+   "class_type": "X2.2",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30607/1"
+  },
+  {
+   "id": "20240509-AL-002",
+   "kind": "notification",
+   "time": "2024-05-09T12:03:00Z",
+   "summary": "Space Weather Notification - X2.2 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30607/1"
+  },
+  {
+   "id": "20240509-AL-003-FLR",
+   "kind": "flare",
+   "time": "2024-05-09T12:36:00Z",
+   "summary": "M9.8 solar flare (from DONKI notification)",
+   "class_type": "M9.8",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30608/1"
+  },
+  {
+   "id": "20240509-AL-003",
+   "kind": "notification",
+   "time": "2024-05-09T12:36:00Z",
+   "summary": "Space Weather Notification - M9.8 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30608/1"
+  },
+  {
+   "id": "2024-05-09T13:59:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-09T13:59:00Z",
+   "summary": "Solar energetic particle event (MODEL: REleASE:ACE/EPAM 15.8-39.8 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30609/-1"
+  },
+  {
+   "id": "20240509-AL-004",
+   "kind": "notification",
+   "time": "2024-05-09T14:00:00Z",
+   "summary": "Space Weather Notification - SEP Prediction",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30611/1"
+  },
+  {
+   "id": "2024-05-09T14:25:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-09T14:25:00Z",
+   "summary": "Solar energetic particle event (MODEL: REleASE:SOHO/EPHIN 15.8-39.8 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30610/-1"
+  },
+  {
+   "id": "20240509-AL-005",
+   "kind": "notification",
+   "time": "2024-05-09T16:39:00Z",
+   "summary": "Space Weather Notification - CME (Psyche, STEREO A, Lucy, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30624/1"
+  },
+  {
+   "id": "20240509-AL-006",
+   "kind": "notification",
+   "time": "2024-05-09T17:04:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30628/1"
+  },
+  {
+   "id": "20240509-AL-007",
+   "kind": "notification",
+   "time": "2024-05-09T17:42:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30635/1"
+  },
+  {
+   "id": "20240509-AL-008-FLR",
+   "kind": "flare",
+   "time": "2024-05-09T17:54:00Z",
+   "summary": "X1.1 solar flare (from DONKI notification)",
+   "class_type": "X1.1",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30636/1"
+  },
+  {
+   "id": "20240509-AL-008",
+   "kind": "notification",
+   "time": "2024-05-09T17:54:00Z",
+   "summary": "Space Weather Notification - X1.1 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30636/1"
+  },
+  {
+   "id": "2024-05-09T18:23:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-09T18:23:00Z",
+   "summary": "Coronal mass ejection (895 km/s)",
+   "class_type": null,
+   "speed_km_s": 895.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30655/-1"
+  },
+  {
+   "id": "20240509-AL-009",
+   "kind": "notification",
+   "time": "2024-05-09T20:03:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30649/1"
+  },
+  {
+   "id": "20240509-AL-010",
+   "kind": "notification",
+   "time": "2024-05-09T21:24:00Z",
+   "summary": "Space Weather Notification - CMEs update (Psyche, Lucy, STEREO A, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+  },
+  {
+   "id": "20240509-AL-011",
+   "kind": "notification",
+   "time": "2024-05-09T23:35:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Parker Solar Probe, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30662/1"
+  },
+  {
+   "id": "2024-05-10T02:12:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T02:12:00Z",
+   "summary": "Coronal mass ejection (232 km/s)",
+   "class_type": null,
+   "speed_km_s": 232.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30788/-1"
+  },
+  {
+   "id": "20240510-AL-001",
+   "kind": "notification",
+   "time": "2024-05-10T06:51:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30667/1"
+  },
+  {
+   "id": "2024-05-10T07:12:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T07:12:00Z",
+   "summary": "Coronal mass ejection (1018 km/s)",
+   "class_type": null,
+   "speed_km_s": 1018.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30670/-1"
+  },
+  {
+   "id": "20240510-AL-002-FLR",
+   "kind": "flare",
+   "time": "2024-05-10T11:37:00Z",
+   "summary": "X3.9 solar flare (from DONKI notification)",
+   "class_type": "X3.9",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30668/1"
+  },
+  {
+   "id": "20240510-AL-002",
+   "kind": "notification",
+   "time": "2024-05-10T11:37:00Z",
+   "summary": "Space Weather Notification - X3.9 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30668/1"
+  },
+  {
+   "id": "2024-05-10T12:59:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-10T12:59:00Z",
+   "summary": "Solar energetic particle event (SOHO: COSTEP 15.8-39.8 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30675/-1"
+  },
+  {
+   "id": "2024-05-10T13:02:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-10T13:02:00Z",
+   "summary": "Solar energetic particle event (SOHO: COSTEP 28.2-50.1 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30676/-1"
+  },
+  {
+   "id": "2024-05-10T13:35:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-10T13:35:00Z",
+   "summary": "Solar energetic particle event (GOES-P: SEISS >10 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30677/-1"
+  },
+  {
+   "id": "20240510-AL-003",
+   "kind": "notification",
+   "time": "2024-05-10T13:38:00Z",
+   "summary": "Space Weather Notification - CME (Lucy, STEREO A, Parker Solar Probe, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30674/1"
+  },
+  {
+   "id": "20240510-AL-004",
+   "kind": "notification",
+   "time": "2024-05-10T13:46:00Z",
+   "summary": "Auto-generated Space Weather Notification - SEP",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30678/1"
+  },
+  {
+   "id": "20240510-AL-005",
+   "kind": "notification",
+   "time": "2024-05-10T14:12:00Z",
+   "summary": "Space Weather Notification - SEP (GOES, SOHO)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30679/1"
+  },
+  {
+   "id": "20240510-AL-006",
+   "kind": "notification",
+   "time": "2024-05-10T14:15:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30681/1"
+  },
+  {
+   "id": "20240510-AL-007-FLR",
+   "kind": "flare",
+   "time": "2024-05-10T14:28:00Z",
+   "summary": "M5.9 solar flare (from DONKI notification)",
+   "class_type": "M5.9",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30682/1"
+  },
+  {
+   "id": "20240510-AL-007",
+   "kind": "notification",
+   "time": "2024-05-10T14:28:00Z",
+   "summary": "Space Weather Notification - M5.9 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30682/1"
+  },
+  {
+   "id": "2024-05-10T14:50:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-10T14:50:00Z",
+   "summary": "Solar energetic particle event (STEREO A: IMPACT 13-100 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30684/-1"
+  },
+  {
+   "id": "2024-05-10T15:00:00-GST-001",
+   "kind": "geostorm",
+   "time": "2024-05-10T15:00:00Z",
+   "summary": "Geomagnetic storm (Kp 9)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": 9.0,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/GST/30693/-1"
+  },
+  {
+   "id": "20240510-AL-008",
+   "kind": "notification",
+   "time": "2024-05-10T15:03:00Z",
+   "summary": "Auto-generated Space Weather Notification - SEP",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30685/1"
+  },
+  {
+   "id": "20240510-AL-009",
+   "kind": "notification",
+   "time": "2024-05-10T15:17:00Z",
+   "summary": "Space Weather Notification - SEP (STEREO A)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30686/1"
+  },
+  {
+   "id": "2024-05-10T16:36:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T16:36:00Z",
+   "summary": "Coronal mass ejection (393 km/s)",
+   "class_type": null,
+   "speed_km_s": 393.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30786/-1"
+  },
+  {
+   "id": "20240510-AL-010",
+   "kind": "notification",
+   "time": "2024-05-10T17:01:00Z",
+   "summary": "Space Weather Notification - Interplanetary Shock",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30689/1"
+  },
+  {
+   "id": "20240510-AL-011",
+   "kind": "notification",
+   "time": "2024-05-10T17:33:00Z",
+   "summary": "Auto-generated Space Weather Notification - Magnetopause Crossing",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30691/1"
+  },
+  {
+   "id": "20240510-AL-012",
+   "kind": "notification",
+   "time": "2024-05-10T17:39:00Z",
+   "summary": "Space Weather Notification - Magnetopause Crossing",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30692/1"
+  },
+  {
+   "id": "20240510-AL-013",
+   "kind": "notification",
+   "time": "2024-05-10T18:44:00Z",
+   "summary": "Auto-generated Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30694/1"
+  },
+  {
+   "id": "20240510-AL-014",
+   "kind": "notification",
+   "time": "2024-05-10T19:19:00Z",
+   "summary": "Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30695/1"
+  },
+  {
+   "id": "2024-05-10T21:17:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T21:17:00Z",
+   "summary": "Coronal mass ejection (678 km/s)",
+   "class_type": null,
+   "speed_km_s": 678.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30751/-1"
+  },
+  {
+   "id": "2024-05-10T21:28:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T21:28:00Z",
+   "summary": "Coronal mass ejection (717 km/s)",
+   "class_type": null,
+   "speed_km_s": 717.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30753/-1"
+  },
+  {
+   "id": "20240510-AL-015",
+   "kind": "notification",
+   "time": "2024-05-10T21:35:00Z",
+   "summary": "Auto-generated Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30702/1"
+  },
+  {
+   "id": "20240510-AL-016",
+   "kind": "notification",
+   "time": "2024-05-10T22:01:00Z",
+   "summary": "Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30703/1"
+  },
+  {
+   "id": "20240510-AL-017",
+   "kind": "notification",
+   "time": "2024-05-10T22:24:00Z",
+   "summary": "Space Weather Notification - Interplanetary Shock",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30705/1"
+  },
+  {
+   "id": "2024-05-10T23:13:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-10T23:13:00Z",
+   "summary": "Coronal mass ejection (445 km/s)",
+   "class_type": null,
+   "speed_km_s": 445.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30784/-1"
+  },
+  {
+   "id": "20240511-AL-001",
+   "kind": "notification",
+   "time": "2024-05-11T00:12:00Z",
+   "summary": "Space Weather Notification - Magnetopause Crossing",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30706/1"
+  },
+  {
+   "id": "20240511-AL-002",
+   "kind": "notification",
+   "time": "2024-05-11T00:34:00Z",
+   "summary": "Auto-generated Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30707/1"
+  },
+  {
+   "id": "20240511-AL-003",
+   "kind": "notification",
+   "time": "2024-05-11T00:39:00Z",
+   "summary": "Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30708/1"
+  },
+  {
+   "id": "20240511-AL-004",
+   "kind": "notification",
+   "time": "2024-05-11T01:27:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30712/1"
+  },
+  {
+   "id": "2024-05-11T01:36:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-11T01:36:00Z",
+   "summary": "Coronal mass ejection (1263 km/s)",
+   "class_type": null,
+   "speed_km_s": 1263.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30719/-1"
+  },
+  {
+   "id": "20240511-AL-005-FLR",
+   "kind": "flare",
+   "time": "2024-05-11T01:49:00Z",
+   "summary": "X5.8 solar flare (from DONKI notification)",
+   "class_type": "X5.8",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30713/1"
+  },
+  {
+   "id": "20240511-AL-005",
+   "kind": "notification",
+   "time": "2024-05-11T01:49:00Z",
+   "summary": "Space Weather Notification - X5.8 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30713/1"
+  },
+  {
+   "id": "2024-05-11T02:10:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-11T02:10:00Z",
+   "summary": "Solar energetic particle event (GOES-P: SEISS >100 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30714/-1"
+  },
+  {
+   "id": "20240511-AL-006",
+   "kind": "notification",
+   "time": "2024-05-11T02:30:00Z",
+   "summary": "Auto-generated Space Weather Notification - SEP",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30715/1"
+  },
+  {
+   "id": "2024-05-11T02:36:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-11T02:36:00Z",
+   "summary": "Coronal mass ejection (485 km/s)",
+   "class_type": null,
+   "speed_km_s": 485.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30744/-1"
+  },
+  {
+   "id": "20240511-AL-007",
+   "kind": "notification",
+   "time": "2024-05-11T02:46:00Z",
+   "summary": "Space Weather Notification - SEP",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30716/1"
+  },
+  {
+   "id": "2024-05-11T03:12:00-CME-002",
+   "kind": "cme",
+   "time": "2024-05-11T03:12:00Z",
+   "summary": "Coronal mass ejection (1032 km/s)",
+   "class_type": null,
+   "speed_km_s": 1032.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30793/-1"
+  },
+  {
+   "id": "2024-05-11T04:07:00-SEP-001",
+   "kind": "sep",
+   "time": "2024-05-11T04:07:00Z",
+   "summary": "Solar energetic particle event (STEREO A: IMPACT 13-100 MeV)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/SEP/30717/-1"
+  },
+  {
+   "id": "20240511-AL-008",
+   "kind": "notification",
+   "time": "2024-05-11T04:13:00Z",
+   "summary": "Auto-generated Space Weather Notification - SEP",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30718/1"
+  },
+  {
+   "id": "20240511-AL-009",
+   "kind": "notification",
+   "time": "2024-05-11T04:50:00Z",
+   "summary": "Space Weather Notification - CME",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30721/1"
+  },
+  {
+   "id": "20240511-AL-010",
+   "kind": "notification",
+   "time": "2024-05-11T11:37:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30723/1"
+  },
+  {
+   "id": "20240511-AL-011-FLR",
+   "kind": "flare",
+   "time": "2024-05-11T12:33:00Z",
+   "summary": "X1.5 solar flare (from DONKI notification)",
+   "class_type": "X1.5",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30724/1"
+  },
+  {
+   "id": "20240511-AL-011",
+   "kind": "notification",
+   "time": "2024-05-11T12:33:00Z",
+   "summary": "Space Weather Notification - X1.5 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30724/1"
+  },
+  {
+   "id": "20240511-AL-012",
+   "kind": "notification",
+   "time": "2024-05-11T14:23:00Z",
+   "summary": "Space Weather Notification - CME update (Lucy, Mars, Parker Solar Probe, STEREO A, OSIRIS-APEX, Missions Near Earth)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30727/1"
+  },
+  {
+   "id": "20240511-AL-013",
+   "kind": "notification",
+   "time": "2024-05-11T15:03:00Z",
+   "summary": "Space Weather Notification - SEP (STEREO A)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30728/1"
+  },
+  {
+   "id": "20240511-AL-014",
+   "kind": "notification",
+   "time": "2024-05-11T15:13:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30730/1"
+  },
+  {
+   "id": "20240511-AL-015",
+   "kind": "notification",
+   "time": "2024-05-11T15:14:00Z",
+   "summary": "Space Weather Notification - Geomagnetic Storm",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30731/1"
+  },
+  {
+   "id": "20240511-AL-016-FLR",
+   "kind": "flare",
+   "time": "2024-05-11T15:41:00Z",
+   "summary": "M8.8 solar flare (from DONKI notification)",
+   "class_type": "M8.8",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30732/1"
+  },
+  {
+   "id": "20240511-AL-016",
+   "kind": "notification",
+   "time": "2024-05-11T15:41:00Z",
+   "summary": "Space Weather Notification - M8.8 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30732/1"
+  },
+  {
+   "id": "2024-05-11T16:24:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-11T16:24:00Z",
+   "summary": "Coronal mass ejection (946 km/s)",
+   "class_type": null,
+   "speed_km_s": 946.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30742/-1"
+  },
+  {
+   "id": "2024-05-11T18:00:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-11T18:00:00Z",
+   "summary": "Coronal mass ejection (268 km/s)",
+   "class_type": null,
+   "speed_km_s": 268.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30765/-1"
+  },
+  {
+   "id": "20240511-AL-017",
+   "kind": "notification",
+   "time": "2024-05-11T20:49:00Z",
+   "summary": "Space Weather Notification - CME (Parker Solar Probe, STEREO A)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30748/1"
+  },
+  {
+   "id": "2024-05-12T02:00:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-12T02:00:00Z",
+   "summary": "Coronal mass ejection (624 km/s)",
+   "class_type": null,
+   "speed_km_s": 624.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30779/-1"
+  },
+  {
+   "id": "2024-05-12T03:48:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-12T03:48:00Z",
+   "summary": "Coronal mass ejection (602 km/s)",
+   "class_type": null,
+   "speed_km_s": 602.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30755/-1"
+  },
+  {
+   "id": "2024-05-12T13:00:00-CME-001",
+   "kind": "cme",
+   "time": "2024-05-12T13:00:00Z",
+   "summary": "Coronal mass ejection (281 km/s)",
+   "class_type": null,
+   "speed_km_s": 281.0,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/CME/30830/-1"
+  },
+  {
+   "id": "20240512-AL-001",
+   "kind": "notification",
+   "time": "2024-05-12T13:30:00Z",
+   "summary": "Space Weather Notification - CME (Mars, OSIRIS-APEX, Parker Solar Probe, Solar Orbiter)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30758/1"
+  },
+  {
+   "id": "20240512-AL-002",
+   "kind": "notification",
+   "time": "2024-05-12T16:25:00Z",
+   "summary": "Auto-generated Space Weather Notification - Flare intensity has crossed the threshold of M5.0",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30761/1"
+  },
+  {
+   "id": "20240512-AL-003-FLR",
+   "kind": "flare",
+   "time": "2024-05-12T16:37:00Z",
+   "summary": "X1.0 solar flare (from DONKI notification)",
+   "class_type": "X1.0",
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30762/1"
+  },
+  {
+   "id": "20240512-AL-003",
+   "kind": "notification",
+   "time": "2024-05-12T16:37:00Z",
+   "summary": "Space Weather Notification - X1.0 Flare",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30762/1"
+  },
+  {
+   "id": "20240512-AL-004",
+   "kind": "notification",
+   "time": "2024-05-12T17:17:00Z",
+   "summary": "Space Weather Notification - CME Update (Parker Solar Probe, STEREO A)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": null,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/Alert/30764/1"
+  },
+  {
+   "id": "2024-05-12T21:00:00-GST-001",
+   "kind": "geostorm",
+   "time": "2024-05-12T21:00:00Z",
+   "summary": "Geomagnetic storm (Kp 6.33)",
+   "class_type": null,
+   "speed_km_s": null,
+   "kp_index": 6.33,
+   "link": "https://ccmc.gsfc.nasa.gov/DONKI/view/GST/30798/-1"
+  }
+ ]
+}
