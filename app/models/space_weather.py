@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -18,15 +18,6 @@ class SpaceWeatherEvent(BaseModel):
 
 class MissionEvent(SpaceWeatherEvent):
     mission_day: int
-
-
-class SpaceWeatherResponse(BaseModel):
-    source: DataSource
-    data_as_of: datetime
-    reason: str | None = None  # why we are not serving live data
-    window_start: date
-    window_end: date
-    events: list[MissionEvent]
 
 
 class SpaceWeatherData(BaseModel):

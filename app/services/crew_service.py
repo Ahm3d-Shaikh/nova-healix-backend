@@ -1,5 +1,6 @@
 """Assembles crew records, space weather and rules into assessments."""
 
+from dataclasses import dataclass, field
 from datetime import timedelta
 
 from app.core.errors import UnknownAstronautError
@@ -8,27 +9,41 @@ from app.models.alert import CrewAlert
 from app.models.crew import (
     Astronaut,
     AstronautSummary,
-    AstronautTimeline,
     CardStatus,
     CrewDetail,
     DailyRecord,
     DashboardCrew,
-    DayLevels,
     GapPoint,
-    TimelineResponse,
 )
-from app.models.dashboard import DashboardResponse, SpaceWeatherStatus
-from app.models.enums import EventKind, worst
+from app.models.dashboard import DashboardResponse, DistanceStatus, SpaceWeatherStatus
+from app.models.distance import DistanceData, DistancePoint, DistanceResponse
+from app.models.enums import EventKind
+from app.models.isolation import LonelinessAssessment
 from app.models.settings import MissionSettings, MissionSettingsResponse
 from app.models.space_weather import MissionEvent, SpaceWeatherData, SpaceWeatherEvent
+from app.repositories.isolation import IsolationRepository
 from app.rules import engine, mirror_gap
 from app.rules import thresholds as t
 from app.rules.context import RuleContext
+from app.services.distance_service import DistanceService
 from app.services.settings_service import SettingsService
 from app.services.space_weather_service import SpaceWeatherService
 
-TIMELINE_CACHE_SIZE = 16
 HAZARD_EVENT_KINDS = (EventKind.SEP, EventKind.FLARE, EventKind.CME, EventKind.GEOSTORM)
+
+# astronaut id -> mission day -> latest reliable AI check-in for that day
+Overlays = dict[str, dict[int, LonelinessAssessment]]
+
+
+@dataclass(frozen=True)
+class _Inputs:
+    """Everything loaded once per request; assessments below are pure."""
+
+    day: int
+    weather: SpaceWeatherData
+    distance: DistanceData
+    settings: MissionSettings
+    overlays: Overlays = field(default_factory=dict)
 
 
 class CrewService:
@@ -37,15 +52,19 @@ class CrewService:
         roster: list[Astronaut],
         records: dict[str, list[DailyRecord]],
         timeline: MissionTimeline,
+        *,
         weather: SpaceWeatherService,
         settings: SettingsService,
+        distance: DistanceService,
+        isolation: IsolationRepository,
     ) -> None:
         self._roster = {a.id: a for a in roster}
         self._records = records
         self.timeline = timeline
         self._weather = weather
         self._settings = settings
-        self._timeline_cache: dict[tuple[object, ...], TimelineResponse] = {}
+        self._distance = distance
+        self._isolation = isolation
 
     # -- lookups ---------------------------------------------------------------
     def astronaut(self, astronaut_id: str) -> Astronaut:
@@ -57,60 +76,105 @@ class CrewService:
     def records(self, astronaut_id: str) -> list[DailyRecord]:
         return self._records[self.astronaut(astronaut_id).id]
 
-    def resolve_day(self, day: int | None) -> int:
+    async def resolve_day(self, day: int | None) -> int:
         """Explicit day, else the saved 'current day'. Raises InvalidDayError when out of range."""
-        return self.timeline.validate(self._settings.get().current_day if day is None else day)
+        return self._resolve(day, await self._settings.get())
 
-    # -- core assessment (pure, no I/O) -----------------------------------------
-    def _ctx(self, astro: Astronaut, day: int, weather: SpaceWeatherData, settings: MissionSettings) -> RuleContext:
-        return RuleContext(
-            day=day,
-            now=self.timeline.day_end(day),
-            records=self._records[astro.id][:day],
-            events=weather.events,
-            weather_source=weather.source,
-            weather_as_of=weather.data_as_of,
-            deep_space_mode=settings.deep_space_mode,
-            mission=settings.mission,
+    def _resolve(self, day: int | None, settings: MissionSettings) -> int:
+        return self.timeline.validate(settings.current_day if day is None else day)
+
+    # -- inputs (all I/O happens here) ---------------------------------------------------
+    async def _inputs(self, day: int | None) -> _Inputs:
+        settings = await self._settings.get()
+        resolved = self._resolve(day, settings)
+        return _Inputs(
+            day=resolved,
+            weather=await self._weather.get(settings.deep_space_mode),
+            distance=await self._distance.get(settings.mission, settings.deep_space_mode),
+            settings=settings,
+            overlays=await self._overlays(),
         )
 
-    def _cards(
-        self, astro: Astronaut, day: int, weather: SpaceWeatherData, settings: MissionSettings
-    ) -> list[CardStatus]:
-        return engine.evaluate_cards(self._ctx(astro, day, weather, settings))
+    async def _overlays(self) -> Overlays:
+        out: Overlays = {}
+        for a in await self._isolation.assessments():  # oldest first, so later check-ins win
+            if a.reliable:
+                out.setdefault(a.astronaut_id, {})[a.mission_day] = a
+        return out
 
-    async def _context(self, day: int | None) -> tuple[int, SpaceWeatherData, MissionSettings]:
-        resolved = self.resolve_day(day)
-        settings = self._settings.get()
-        return resolved, await self._weather.get(settings.deep_space_mode), settings
+    def _records_upto(self, astro_id: str, day: int, overlays: Overlays) -> list[DailyRecord]:
+        """Records for days 1..day with AI check-in scores applied over the simulated questionnaire."""
+        by_day = overlays.get(astro_id, {})
+        out = []
+        for rec in self._records[astro_id][:day]:
+            a = by_day.get(rec.day)
+            r = rec
+            if a is not None:
+                r = rec.model_copy(
+                    update={
+                        "loneliness_q1": a.q1,
+                        "loneliness_q2": a.q2,
+                        "loneliness_q3": a.q3,
+                        "loneliness_source": "ai_checkin",
+                        "isolation_safety_flag": a.safety_concern,
+                    }
+                )
+            out.append(r)
+        return out
+
+    async def loneliness_series(self, astronaut_id: str, upto_day: int) -> list[int]:
+        """Daily loneliness totals for days 1..upto_day, AI check-ins included."""
+        astro = self.astronaut(astronaut_id)
+        return [r.loneliness_total for r in self._records_upto(astro.id, max(0, upto_day), await self._overlays())]
+
+    # -- core assessment (pure, no I/O) -----------------------------------------
+    def _ctx(self, astro: Astronaut, day: int, inp: _Inputs) -> RuleContext:
+        now = self.timeline.day_end(day)
+        return RuleContext(
+            day=day,
+            now=now,
+            records=self._records_upto(astro.id, day, inp.overlays),
+            events=inp.weather.events,
+            weather_source=inp.weather.source,
+            weather_as_of=inp.weather.data_as_of,
+            deep_space_mode=inp.settings.deep_space_mode,
+            mission=inp.settings.mission,
+            distance=inp.distance.at(now),
+            distance_target=inp.distance.target_name,
+            distance_source=inp.distance.source,
+            distance_as_of=inp.distance.data_as_of,
+        )
+
+    def _cards(self, astro: Astronaut, day: int, inp: _Inputs) -> list[CardStatus]:
+        return engine.evaluate_cards(self._ctx(astro, day, inp))
 
     # -- API-facing assessments -------------------------------------------------
     async def detail(self, astronaut_id: str, day: int | None = None) -> CrewDetail:
         astro = self.astronaut(astronaut_id)
-        day, weather, settings = await self._context(day)
-        cards = self._cards(astro, day, weather, settings)
-        records = self._records[astro.id][:day]
+        inp = await self._inputs(day)
+        cards = self._cards(astro, inp.day, inp)
+        records = self._records_upto(astro.id, inp.day, inp.overlays)
         series = mirror_gap.gap_series(records)
         return CrewDetail(
             astronaut=astro,
-            day=day,
+            day=inp.day,
             overall=engine.overall_level(cards),
             cards=cards,
             alerts=engine.flagged_alerts(cards),
             records=records,
             mirror_gap_series=[GapPoint(day=r.day, gap=g) for r, g in zip(records, series, strict=True)],
-            radiation_source=weather.source,
+            radiation_source=inp.weather.source,
         )
 
     async def summaries(self, day: int | None = None) -> list[AstronautSummary]:
-        day, weather, settings = await self._context(day)
+        inp = await self._inputs(day)
         out = []
         for astro in self._roster.values():
-            cards = self._cards(astro, day, weather, settings)
+            cards = self._cards(astro, inp.day, inp)
             out.append(
                 AstronautSummary(
                     astronaut=astro,
-                    day=day,
+                    day=inp.day,
                     overall=engine.overall_level(cards),
                     cards={c.hazard: c.level for c in cards},
                 )
@@ -118,56 +182,48 @@ class CrewService:
         return out
 
     async def alerts(self, day: int | None = None) -> list[CrewAlert]:
-        day, weather, settings = await self._context(day)
-        return self._crew_alerts(day, weather, settings)
+        return self._crew_alerts(await self._inputs(day))
 
-    def _crew_alerts(self, day: int, weather: SpaceWeatherData, settings: MissionSettings) -> list[CrewAlert]:
+    def _crew_alerts(self, inp: _Inputs) -> list[CrewAlert]:
         out: list[CrewAlert] = []
         for astro in self._roster.values():
-            flagged = engine.flagged_alerts(self._cards(astro, day, weather, settings))
+            flagged = engine.flagged_alerts(self._cards(astro, inp.day, inp))
             out += [
-                CrewAlert(**a.model_dump(), astronaut_id=astro.id, astronaut_name=astro.name, day=day) for a in flagged
+                CrewAlert(**a.model_dump(), astronaut_id=astro.id, astronaut_name=astro.name, day=inp.day)
+                for a in flagged
             ]
         return sorted(out, key=lambda a: (-a.level.rank, a.astronaut_id))
 
-    async def timeline_all(self, astronaut_id: str | None = None) -> TimelineResponse:
-        """Card levels for every mission day, so the day slider needs one request.
-
-        Only levels are computed (no metrics) and results are cached per data snapshot,
-        because the answer depends only on weather data, mission and deep-space mode.
-        """
-        _, weather, settings = await self._context(None)
-        astro_id = self.astronaut(astronaut_id).id if astronaut_id else None
-        key = (weather.source, weather.data_as_of, settings.mission, settings.deep_space_mode, astro_id)
-        cached = self._timeline_cache.get(key)
-        if cached is None:
-            roster = [self._roster[astro_id]] if astro_id else list(self._roster.values())
-            cached = TimelineResponse(
-                mission_days=self.timeline.days,
-                storm_days=sep_mission_days(weather.events, self.timeline),
-                radiation_source=weather.source,
-                crew=[self._astronaut_timeline(a, weather, settings) for a in roster],
-            )
-            if len(self._timeline_cache) >= TIMELINE_CACHE_SIZE:
-                self._timeline_cache.pop(next(iter(self._timeline_cache)))
-            self._timeline_cache[key] = cached
-        return cached
-
-    def _astronaut_timeline(
-        self, astro: Astronaut, weather: SpaceWeatherData, settings: MissionSettings
-    ) -> AstronautTimeline:
-        days = []
+    async def distance_series(self) -> DistanceResponse:
+        """Earth distance and signal delay at the end of every mission day (for the D panel chart)."""
+        settings = await self._settings.get()
+        data = await self._distance.get(settings.mission, settings.deep_space_mode)
+        points = []
         for day in range(1, self.timeline.days + 1):
-            levels = engine.evaluate_levels(self._ctx(astro, day, weather, settings))
-            days.append(DayLevels(day=day, overall=worst(list(levels.values())), cards=levels))
-        return AstronautTimeline(astronaut_id=astro.id, days=days)
+            sample = data.at(self.timeline.day_end(day))
+            if sample is not None:
+                points.append(
+                    DistancePoint(
+                        day=day,
+                        distance_km=round(sample.distance_km, 1),
+                        light_time_s=round(sample.light_time_s, 3),
+                    )
+                )
+        return DistanceResponse(
+            mission=settings.mission,
+            target_name=data.target_name,
+            source=data.source,
+            data_as_of=data.data_as_of,
+            reason=data.reason,
+            days=points,
+        )
 
     async def dashboard(self, day: int | None = None) -> DashboardResponse:
         """Everything the main dashboard needs, in one request."""
-        day, weather, settings = await self._context(day)
+        inp = await self._inputs(day)
         crew = []
         for astro in self._roster.values():
-            cards = self._cards(astro, day, weather, settings)
+            cards = self._cards(astro, inp.day, inp)
             crew.append(
                 DashboardCrew(
                     astronaut=astro,
@@ -176,25 +232,31 @@ class CrewService:
                     alerts=engine.flagged_alerts(cards),
                 )
             )
-        now = self.timeline.day_end(day)
+        now = self.timeline.day_end(inp.day)
         since = now - timedelta(hours=t.EVENT_LOOKBACK_HOURS)
         recent = [
             MissionEvent(**e.model_dump(), mission_day=self.timeline.day_of(e.time))
-            for e in weather.events
+            for e in inp.weather.events
             if e.kind in HAZARD_EVENT_KINDS and since < e.time <= now
         ]
         return DashboardResponse(
-            day=day,
+            day=inp.day,
             mission_days=self.timeline.days,
-            settings=MissionSettingsResponse.build(settings, self.timeline.days),
+            settings=MissionSettingsResponse.build(inp.settings, self.timeline.days),
             space_weather=SpaceWeatherStatus(
-                source=weather.source,
-                data_as_of=weather.data_as_of,
-                reason=weather.reason,
+                source=inp.weather.source,
+                data_as_of=inp.weather.data_as_of,
+                reason=inp.weather.reason,
                 events_last_24h=recent,
             ),
+            distance=DistanceStatus(
+                source=inp.distance.source,
+                data_as_of=inp.distance.data_as_of,
+                reason=inp.distance.reason,
+                target_name=inp.distance.target_name,
+            ),
             crew=crew,
-            alerts=self._crew_alerts(day, weather, settings),
+            alerts=self._crew_alerts(inp),
         )
 
 

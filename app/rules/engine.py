@@ -37,11 +37,6 @@ def evaluate_cards(ctx: RuleContext) -> list[CardStatus]:
     return cards
 
 
-def evaluate_levels(ctx: RuleContext) -> dict[Hazard, Level]:
-    """Levels only (no metrics): cheap path used for the 30-day timeline."""
-    return {hazard: worst([a.level for a in rule(ctx)]) for hazard, rule in RULES.items()}
-
-
 def overall_level(cards: list[CardStatus]) -> Level:
     return worst([c.level for c in cards])
 

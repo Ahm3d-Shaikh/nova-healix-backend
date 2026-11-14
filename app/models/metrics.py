@@ -26,7 +26,13 @@ class IsolationMetrics(BaseModel):
     loneliness_score: int
     scale_min: int
     scale_max: int
+    amber_threshold: int
+    red_threshold: int
+    red_consecutive_days: int
     consecutive_days_at_or_above_7: int
+    latest_source: str  # "simulated" | "ai_checkin"
+    safety_concern: bool
+    ai_checkin_days: list[int]
     history: list[int]
 
 
@@ -35,8 +41,17 @@ class DistanceMetrics(BaseModel):
     mission: str
     comms_delay: str
     deep_space_mode: bool
-    data_source: str
+    data_source: str  # DONKI feed status
     data_as_of: str
+    # JPL Horizons (None when no ephemeris is available)
+    target_name: str | None = None
+    distance_km: float | None = None
+    distance_au: float | None = None
+    one_way_light_time_s: float | None = None
+    round_trip_light_time_s: float | None = None
+    range_rate_km_s: float | None = None
+    distance_source: str | None = None
+    distance_as_of: str | None = None
 
 
 class Vital(BaseModel):
