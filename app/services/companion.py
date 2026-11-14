@@ -8,6 +8,8 @@ Two separate calls keep conversation and measurement apart:
                app.rules.isolation, so thresholds never depend on the model.
 """
 
+import asyncio
+import logging
 from collections.abc import Sequence
 from typing import Protocol
 
@@ -20,7 +22,11 @@ from app.core.errors import CompanionUnavailableError
 from app.models.crew import Astronaut
 from app.models.isolation import ChatMessage, ChatRole, LonelinessRating
 
+log = logging.getLogger(__name__)
+
 RATING_SCHEMA = LonelinessRating.model_json_schema()
+# Gemini errors worth retrying once on the other model: rate limit / quota, overload, server errors.
+_RETRYABLE_STATUS = {429, 500, 502, 503, 504}
 SESSION_OPENED = "[The astronaut opened today's wellbeing check-in.]"
 # A wellbeing chat must be able to discuss distress, so only block clearly harmful content.
 SAFETY_SETTINGS = [
@@ -91,9 +97,17 @@ def opening_message(astronaut: Astronaut, day: int) -> str:
 
 
 class GeminiCompanion:
-    def __init__(self, client: genai.Client, model: str) -> None:
+    """`model` scores check-ins (quality matters, one call per check-in).
+    `chat_model` writes ECHO's replies (latency matters, one call per message); if it is rate-limited,
+    failing or slower than `chat_timeout` seconds, the reply is retried once on `model`."""
+
+    def __init__(
+        self, client: genai.Client, model: str, chat_model: str | None = None, chat_timeout: float = 20.0
+    ) -> None:
         self._client = client
         self.model = model
+        self.chat_model = chat_model or model
+        self._chat_timeout = chat_timeout
 
     async def reply(self, astronaut: Astronaut, day: int, transcript: Sequence[ChatMessage], replies_left: int) -> str:
         system = (
@@ -105,7 +119,7 @@ class GeminiCompanion:
             types.Content(role="user" if m.role == ChatRole.ASTRONAUT else "model", parts=[types.Part(text=m.content)])
             for m in transcript
         ]
-        response = await self._generate(
+        response = await self._chat(
             contents, types.GenerateContentConfig(system_instruction=system, safety_settings=SAFETY_SETTINGS)
         )
         if _blocked(response):
@@ -119,6 +133,7 @@ class GeminiCompanion:
         lines = "\n".join(f"{'ASTRONAUT' if m.role == ChatRole.ASTRONAUT else 'ECHO'}: {m.content}" for m in transcript)
         prompt = f"Mission day {day} check-in with {astronaut.name}.\n\n<transcript>\n{lines}\n</transcript>"
         response = await self._generate(
+            self.model,
             [types.Content(role="user", parts=[types.Part(text=prompt)])],
             types.GenerateContentConfig(
                 system_instruction=RATER_SYSTEM,
@@ -134,11 +149,33 @@ class GeminiCompanion:
         except ValidationError as exc:
             raise CompanionUnavailableError("the rater returned an invalid rating") from exc
 
-    async def _generate(
+    async def _chat(
         self, contents: list[types.Content], config: types.GenerateContentConfig
     ) -> types.GenerateContentResponse:
+        """Reply with the fast chat model; on rate limit / server error / timeout, retry once on the other model."""
+        models = list(dict.fromkeys([self.chat_model, self.model]))  # de-duplicated, order kept
+        for i, model in enumerate(models):
+            last = i == len(models) - 1
+            try:
+                async with asyncio.timeout(self._chat_timeout):
+                    return await self._client.aio.models.generate_content(model=model, contents=contents, config=config)
+            except TimeoutError as exc:
+                if last:
+                    raise CompanionUnavailableError("ECHO took too long to reply, please try again") from exc
+                log.warning("Gemini %s took over %.0fs; retrying on %s", model, self._chat_timeout, models[i + 1])
+            except errors.APIError as exc:
+                if last or exc.code not in _RETRYABLE_STATUS:
+                    raise CompanionUnavailableError(_describe(exc)) from exc
+                log.warning("Gemini %s failed (%s); retrying on %s", model, exc.code, models[i + 1])
+            except httpx2.HTTPError as exc:
+                raise CompanionUnavailableError("cannot reach the Gemini API") from exc
+        raise CompanionUnavailableError("no Gemini model available")  # pragma: no cover - loop always returns/raises
+
+    async def _generate(
+        self, model: str, contents: list[types.Content], config: types.GenerateContentConfig
+    ) -> types.GenerateContentResponse:
         try:
-            return await self._client.aio.models.generate_content(model=self.model, contents=contents, config=config)
+            return await self._client.aio.models.generate_content(model=model, contents=contents, config=config)
         except errors.APIError as exc:
             raise CompanionUnavailableError(_describe(exc)) from exc
         except httpx2.HTTPError as exc:
