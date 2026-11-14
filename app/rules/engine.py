@@ -31,6 +31,7 @@ def evaluate_cards(ctx: RuleContext) -> list[CardStatus]:
                 label=HAZARD_LABELS[hazard],
                 level=worst([a.level for a in alerts]),
                 alerts=alerts,
+                headline=max(alerts, key=lambda a: a.level.rank).what,
                 metrics=card_metrics(hazard, ctx),
             )
         )

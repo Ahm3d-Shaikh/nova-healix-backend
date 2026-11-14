@@ -113,3 +113,10 @@ def test_blank_nasa_key_falls_back_to_demo_key():
 
     assert Settings(nasa_api_key="   ").nasa_api_key == "DEMO_KEY"
     assert Settings(nasa_api_key=" abc ").nasa_api_key == "abc"
+
+
+def test_blank_submissions_dir_means_in_memory_only():
+    from app.core.config import Settings
+
+    assert Settings(submissions_dir="").submissions_dir is None
+    assert Settings(submissions_dir="var").submissions_dir is not None

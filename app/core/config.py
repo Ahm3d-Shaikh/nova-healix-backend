@@ -21,9 +21,13 @@ class Settings(BaseSettings):
     # --- NASA DONKI ---------------------------------------------------------
     nasa_api_key: str = "DEMO_KEY"  # DEMO_KEY is heavily rate-limited
     donki_base_url: str = "https://api.nasa.gov/DONKI"
-    donki_timeout_seconds: float = 15.0
+    donki_timeout_seconds: float = 6.0  # per request
+    donki_total_timeout_seconds: float = 12.0  # whole refresh, so offline never blocks the UI
     donki_cache_ttl_seconds: int = 3600
     donki_snapshot_path: Path = APP_DIR / "data" / "donki_snapshot.json"
+
+    # --- Persistence (set to empty/None to keep submissions in memory only) --
+    submissions_dir: Path | None = Path("var")
 
     # --- Mission timeline ---------------------------------------------------
     mission_days: int = 30
@@ -36,6 +40,11 @@ class Settings(BaseSettings):
 
     # --- Simulation ---------------------------------------------------------
     crew_seed: int = 2026
+
+    @field_validator("submissions_dir", mode="before")
+    @classmethod
+    def _blank_dir_means_memory_only(cls, value: object) -> object:
+        return None if isinstance(value, str) and not value.strip() else value
 
     @field_validator("nasa_api_key")
     @classmethod

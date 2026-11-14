@@ -20,7 +20,7 @@ def failing(request: httpx.Request) -> httpx.Response:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings()
+    return Settings(submissions_dir=None)  # keep tests off the disk
 
 
 @pytest.fixture

@@ -43,6 +43,7 @@ class CardStatus(BaseModel):
     label: str
     level: Level
     alerts: list[Alert]  # every rule result for this hazard (green included)
+    headline: str  # plain-text summary of the worst rule result (never colour alone)
     metrics: CardMetrics  # typed numbers behind the card
 
 

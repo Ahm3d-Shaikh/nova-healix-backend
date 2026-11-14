@@ -14,7 +14,7 @@ from app.models.isolation import (
 from app.rules import isolation as rule
 from app.rules import thresholds as t
 from app.services.crew_service import CrewService
-from app.services.store import InMemoryStore
+from app.services.store import InMemoryStore, SubmissionStore
 
 QUESTIONNAIRE = Questionnaire(
     name="Three-Item Loneliness Scale",
@@ -31,9 +31,9 @@ QUESTIONNAIRE = Questionnaire(
 
 
 class IsolationService:
-    def __init__(self, crew: CrewService) -> None:
+    def __init__(self, crew: CrewService, store: SubmissionStore[IsolationResult] | None = None) -> None:
         self._crew = crew
-        self._submitted: InMemoryStore[IsolationResult] = InMemoryStore()
+        self._submitted: SubmissionStore[IsolationResult] = store or InMemoryStore()
 
     def submit(self, astronaut_id: str, body: IsolationSubmission, day: int) -> IsolationResult:
         """Score a check-in for mission `day`; the streak rule uses the days before it."""
@@ -53,6 +53,10 @@ class IsolationService:
         )
         self._submitted.add(astro.id, result)
         return result
+
+    def clear(self) -> None:
+        """Forget all submitted check-ins (demo reset)."""
+        self._submitted.clear()
 
     def history(self, astronaut_id: str) -> IsolationHistory:
         astro = self._crew.astronaut(astronaut_id)

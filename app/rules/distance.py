@@ -4,7 +4,9 @@ from app.models.alert import Alert
 from app.models.enums import COMMS_DELAY, DataSource, Hazard, Level
 from app.rules.context import RuleContext
 
-SRC = "Mission comms delay figures as used by AURORA; DONKI feed status from this app"
+SRC = (
+    "Mission comms delay figures as used by AURORA; DONKI feed status from this app; amber rule is ours (illustrative)"
+)
 
 
 def evaluate(ctx: RuleContext) -> list[Alert]:

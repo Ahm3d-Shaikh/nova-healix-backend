@@ -4,6 +4,8 @@ from dataclasses import dataclass
 
 from app.core.config import Settings
 from app.core.timeline import MissionTimeline
+from app.models.isolation import IsolationResult
+from app.models.mirror_gap import MirrorGapResult
 from app.services.crew_generator import ASTRONAUTS, generate_crew
 from app.services.crew_service import CrewService, sep_mission_days
 from app.services.donki_client import DonkiClient
@@ -11,6 +13,7 @@ from app.services.isolation_service import IsolationService
 from app.services.mirror_gap_service import MirrorGapService
 from app.services.settings_service import SettingsService
 from app.services.space_weather_service import SpaceWeatherService
+from app.services.store import JsonFileStore, SubmissionStore
 
 
 @dataclass
@@ -32,14 +35,27 @@ def build_container(settings: Settings, donki: DonkiClient) -> Container:
         settings.storm_window_end,
         settings.donki_snapshot_path,
         cache_ttl_seconds=settings.donki_cache_ttl_seconds,
+        fetch_timeout_seconds=settings.donki_total_timeout_seconds,
     )
     # Simulated dose spikes follow the bundled (real) snapshot so crew data stays
     # deterministic even when live DONKI data changes.
     sep_days = set(sep_mission_days(weather.load_snapshot().events, timeline))
     records = generate_crew(settings.crew_seed, settings.mission_days, sep_days)
 
+    mirror_store: SubmissionStore[MirrorGapResult] | None = None
+    isolation_store: SubmissionStore[IsolationResult] | None = None
+    if settings.submissions_dir:
+        mirror_store = JsonFileStore(settings.submissions_dir / "mirror_gap.json", MirrorGapResult)
+        isolation_store = JsonFileStore(settings.submissions_dir / "isolation.json", IsolationResult)
+
     mission_settings = SettingsService(settings.mission_days)
     crew = CrewService(ASTRONAUTS, records, timeline, weather, mission_settings)
     return Container(
-        settings, timeline, weather, mission_settings, crew, MirrorGapService(crew), IsolationService(crew)
+        settings,
+        timeline,
+        weather,
+        mission_settings,
+        crew,
+        MirrorGapService(crew, mirror_store),
+        IsolationService(crew, isolation_store),
     )
