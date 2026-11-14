@@ -22,7 +22,7 @@ app/
 │                        #   environment, mirror_gap, engine (worst-of per card)
 ├── services/            # DONKI client + parsers, space-weather fallback, crew generator,
 │                        #   crew / mirror-gap / settings services
-├── routers/             # HTTP endpoints
+├── routers/             # HTTP endpoints (crew, dashboard, isolation, mirror_gap, settings, space_weather)
 ├── api/deps.py          # FastAPI dependencies
 └── data/donki_snapshot.json   # real DONKI response used as offline fallback
 scripts/build_snapshot.py      # regenerate the snapshot from raw DONKI JSON
@@ -43,6 +43,11 @@ unit-testable; routers are thin; the DONKI client is injected, so tests run offl
 | POST | `/api/mirror-gap/{id}` | Body `{self_rating, reaction_times_ms[], mode}` → lapses, false starts, gap, level |
 | GET | `/api/mirror-gap/{id}` | Mirror Gap history (simulated + submitted) |
 | GET / POST | `/api/settings` | Mission (iss/moon/mars), deep space mode, current mission day |
+| GET | `/api/dashboard?day=N` | **One call for the dashboard**: settings, data-source status, 6 cards per astronaut (level + numeric `metrics` + rule results), alert panel |
+| GET | `/api/timeline?astronaut=` | Card levels for all 30 days (day slider, history charts) + real storm days |
+| GET | `/api/isolation/questionnaire` | Three-Item Loneliness Scale questions/options/bands |
+| POST | `/api/isolation/{id}` | Body `{q1,q2,q3}` (1-3) → score, level, consecutive-days-≥7 |
+| GET | `/api/isolation/{id}` | Loneliness score history (simulated + submitted) |
 | GET | `/health` | Liveness check |
 
 Every rule result is `{rule, hazard, level, what, why, action, source}`.

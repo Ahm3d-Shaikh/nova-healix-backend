@@ -4,6 +4,9 @@ from app.models.alert import Alert
 from app.models.enums import DataSource, Hazard, Level
 
 
+MetricValue = float | int | str | bool | list[int] | None
+
+
 class DailyRecord(BaseModel):
     day: int
     sleep_hours: float
@@ -42,6 +45,7 @@ class CardStatus(BaseModel):
     label: str
     level: Level
     alerts: list[Alert]  # every rule result for this hazard (green included)
+    metrics: dict[str, MetricValue] = {}  # numbers behind the card
 
 
 class GapPoint(BaseModel):
@@ -65,3 +69,28 @@ class CrewDetail(BaseModel):
     records: list[DailyRecord]
     mirror_gap_series: list[GapPoint]
     radiation_source: DataSource
+
+
+class DashboardCrew(BaseModel):
+    astronaut: Astronaut
+    overall: Level
+    cards: list[CardStatus]
+    alerts: list[Alert]  # amber / red only
+
+
+class DayLevels(BaseModel):
+    day: int
+    overall: Level
+    cards: dict[Hazard, Level]
+
+
+class AstronautTimeline(BaseModel):
+    astronaut_id: str
+    days: list[DayLevels]
+
+
+class TimelineResponse(BaseModel):
+    mission_days: int
+    storm_days: list[int]  # mission days with a real DONKI SEP event
+    radiation_source: DataSource
+    crew: list[AstronautTimeline]
