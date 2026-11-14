@@ -14,23 +14,27 @@ SRC = "Three-Item Loneliness Scale (Hughes et al., 2004); red rule is ours (illu
 
 
 def evaluate(ctx: RuleContext) -> list[Alert]:
-    totals = [r.loneliness_total for r in ctx.records]
+    return [assess([r.loneliness_total for r in ctx.records])]
+
+
+def assess(totals: list[int]) -> Alert:
+    """Alert for a series of daily 3-9 loneliness totals (latest last)."""
     if not totals:
-        return [_alert(Level.GREEN, "No questionnaire answers yet.", "No action needed.")]
+        return _alert(Level.GREEN, "No questionnaire answers yet.", "No action needed.")
     latest = totals[-1]
     streak = trailing_streak([t >= 7 for t in totals])
 
     if streak >= 3:
-        return [_alert(
+        return _alert(
             Level.RED, f"Loneliness score {latest}/9; ≥7 for {streak} consecutive days.",
             "Schedule a private call with a flight surgeon or psychologist and increase crew contact.",
-        )]
+        )
     if latest >= 6:
-        return [_alert(
+        return _alert(
             Level.AMBER, f"Loneliness score {latest}/9 (6–9 = elevated).",
             "Plan social time with crew and a call home; re-check tomorrow.",
-        )]
-    return [_alert(Level.GREEN, f"Loneliness score {latest}/9 (3–5 = low).", "No action needed.")]
+        )
+    return _alert(Level.GREEN, f"Loneliness score {latest}/9 (3–5 = low).", "No action needed.")
 
 
 def _alert(level: Level, what: str, action: str) -> Alert:

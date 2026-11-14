@@ -7,6 +7,7 @@ from app.models.crew import CardStatus
 from app.models.enums import HAZARD_LABELS, Hazard, Level, worst
 from app.rules import distance, environment, gravity, isolation, mirror_gap, radiation
 from app.rules.context import RuleContext
+from app.rules.metrics import card_metrics
 
 RuleModule = Callable[[RuleContext], list[Alert]]
 
@@ -27,6 +28,7 @@ def evaluate_cards(ctx: RuleContext) -> list[CardStatus]:
         cards.append(CardStatus(
             hazard=hazard, label=HAZARD_LABELS[hazard],
             level=worst([a.level for a in alerts]), alerts=alerts,
+            metrics=card_metrics(hazard, ctx),
         ))
     return cards
 

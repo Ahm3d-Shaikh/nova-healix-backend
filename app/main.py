@@ -6,7 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.container import Container, build_container
 from app.core.config import Settings, get_settings
-from app.routers import crew, mirror_gap, settings as settings_router, space_weather
+from app.routers import (
+    crew, dashboard, isolation, mirror_gap, settings as settings_router, space_weather,
+)
 from app.services.donki_client import DonkiClient
 
 DISCLAIMER = (
@@ -40,7 +42,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         CORSMiddleware, allow_origins=settings.cors_origins,
         allow_methods=["*"], allow_headers=["*"],
     )
-    for r in (space_weather.router, crew.router, mirror_gap.router, settings_router.router):
+    for r in (space_weather.router, crew.router, dashboard.router, isolation.router,
+              mirror_gap.router, settings_router.router):
         app.include_router(r)
 
     @app.get("/", tags=["meta"])
