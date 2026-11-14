@@ -4,6 +4,8 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field
 
+from app.models.mobility import MobilityMetrics
+
 
 class RadiationMetrics(BaseModel):
     kind: Literal["radiation"] = "radiation"
@@ -72,6 +74,7 @@ class GravityMetrics(BaseModel):
     exercise_min: float
     exercise_missed_days: int
     drifting: list[str]
+    mobility: MobilityMetrics | None = None  # None until a Mobility & Balance Check has been done
 
 
 class EnvironmentMetrics(BaseModel):

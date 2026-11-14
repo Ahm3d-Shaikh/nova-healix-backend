@@ -29,7 +29,7 @@ from app.core.reference import DISCLAIMER
 from app.db.base import Database, DatabaseError
 from app.db.memory import InMemoryDatabase
 from app.db.supabase import SupabaseDatabase
-from app.routers import crew, dashboard, distance, isolation
+from app.routers import crew, dashboard, distance, isolation, mobility
 from app.services.companion import GeminiCompanion
 from app.services.donki_client import DonkiClient
 from app.services.horizons_client import HorizonsClient
@@ -123,7 +123,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         log.error("Database error: %s", exc)
         return JSONResponse(status_code=503, content={"detail": "Database temporarily unavailable; please retry"})
 
-    for router in (crew.router, dashboard.router, distance.router, isolation.router):
+    for router in (crew.router, dashboard.router, distance.router, isolation.router, mobility.router):
         app.include_router(router)
 
     @app.get("/", tags=["meta"])

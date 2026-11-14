@@ -20,9 +20,11 @@ from app.models.dashboard import DashboardResponse, DistanceStatus, SpaceWeather
 from app.models.distance import DistanceData, DistancePoint, DistanceResponse
 from app.models.enums import EventKind
 from app.models.isolation import LonelinessAssessment
+from app.models.mobility import MobilityCheck
 from app.models.settings import MissionSettings, MissionSettingsResponse
 from app.models.space_weather import MissionEvent, SpaceWeatherData, SpaceWeatherEvent
 from app.repositories.isolation import IsolationRepository
+from app.repositories.mobility import MobilityRepository
 from app.rules import engine, mirror_gap
 from app.rules import thresholds as t
 from app.rules.context import RuleContext
@@ -45,6 +47,7 @@ class _Inputs:
     distance: DistanceData
     settings: MissionSettings
     overlays: Overlays = field(default_factory=dict)
+    mobility: dict[str, list[MobilityCheck]] = field(default_factory=dict)  # astronaut id -> reliable checks
 
 
 class CrewService:
@@ -58,6 +61,7 @@ class CrewService:
         settings: SettingsService,
         distance: DistanceService,
         isolation: IsolationRepository,
+        mobility: MobilityRepository,
     ) -> None:
         self._roster = {a.id: a for a in roster}
         self._records = records
@@ -66,6 +70,7 @@ class CrewService:
         self._settings = settings
         self._distance = distance
         self._isolation = isolation
+        self._mobility = mobility
 
     # -- lookups ---------------------------------------------------------------
     def astronaut(self, astronaut_id: str) -> Astronaut:
@@ -94,6 +99,7 @@ class CrewService:
             distance=await self._distance.get(settings.mission, settings.deep_space_mode),
             settings=settings,
             overlays=await self._overlays(),
+            mobility=await self._mobility_checks(),
         )
 
     async def _overlays(self) -> Overlays:
@@ -101,6 +107,13 @@ class CrewService:
         for a in await self._isolation.assessments():  # oldest first, so later check-ins win
             if a.reliable:
                 out.setdefault(a.astronaut_id, {})[a.mission_day] = a
+        return out
+
+    async def _mobility_checks(self) -> dict[str, list[MobilityCheck]]:
+        out: dict[str, list[MobilityCheck]] = {}
+        for c in await self._mobility.checks():  # oldest first
+            if c.reliable:
+                out.setdefault(c.astronaut_id, []).append(c)
         return out
 
     def _records_upto(self, astro_id: str, day: int, overlays: Overlays) -> list[DailyRecord]:
@@ -144,6 +157,7 @@ class CrewService:
             distance_target=inp.distance.target_name,
             distance_source=inp.distance.source,
             distance_as_of=inp.distance.data_as_of,
+            mobility=[c for c in inp.mobility.get(astro.id, []) if c.mission_day <= day],
         )
 
     def _cards(self, astro: Astronaut, day: int, inp: _Inputs) -> list[CardStatus]:

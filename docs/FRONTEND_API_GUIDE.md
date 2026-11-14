@@ -18,6 +18,7 @@ types, and a step-by-step guide to building the Gemini check-in chatbot (ECHO).
 8. [Chatbot (ECHO check-in)](#8-chatbot-echo-check-in)
 9. [Building the Gemini chatbot in the frontend](#9-building-the-gemini-chatbot-in-the-frontend)
 10. [Errors](#10-errors)
+11. [Mobility & Balance Check](#11-mobility--balance-check)
 
 ---
 
@@ -72,6 +73,9 @@ current values in `settings`.
 | Chatbot | POST | `/api/isolation/{astronautId}/sessions/{sessionId}/complete` | Finish the chat and get the loneliness score |
 | Chatbot | GET | `/api/isolation/{astronautId}/sessions/{sessionId}` | Transcript + score of one chat |
 | Chatbot | GET | `/api/isolation/{astronautId}` | Loneliness score history |
+| Mobility | GET | `/api/mobility/method` | The 3 tests, what to send, thresholds, limits |
+| Mobility | POST | `/api/mobility/{astronautId}?day=` | Save a check measured in the browser (feeds the Gravity card) |
+| Mobility | GET | `/api/mobility/{astronautId}` | Check history + latest result |
 | Ops | GET | `/health` | Liveness + whether the chatbot is enabled |
 
 Astronaut ids are `"A"`, `"B"`, `"C"` (case-insensitive).
@@ -1211,3 +1215,40 @@ Request validation errors (wrong type, empty message, missing body) return `422`
 | 503 | Gemini quota hit | `AI check-in companion unavailable: Gemini rate limit reached (free tier quota), retry shortly` | "ECHO is busy, try again in a minute" |
 | 503 | Gemini down / blocked | `AI check-in companion unavailable: …` | "ECHO is unavailable right now" |
 | 503 | Database down | `Database temporarily unavailable; please retry` | Retry button |
+
+---
+
+## 11. Mobility & Balance Check
+
+Three short tests (about 2 minutes) on the **Gravity** card. The Angular page uses **MediaPipe Pose** in the browser to
+draw the skeleton and compute the numbers; **no video is sent**, only the final numbers below. It measures movement
+(balance, leg strength, knee range of motion). It does **not** assess bone health or bone loss.
+
+| Test | What the astronaut does | Numbers to send |
+|---|---|---|
+| `balance` | Stand on one leg, hands on hips, up to 30 s | `balance_hold_s`, `sway_pct_height` (RMS hip-centre sway as % of body height) |
+| `sit_to_stand` | 5 sit-to-stands, arms crossed, as fast as is safe | `sit_to_stand_5x_s` |
+| `squat_rom` | 3 slow bodyweight squats, side-on to the camera | `knee_flexion_deg` (deepest knee bend) |
+
+Also send `pose_confidence` (mean keypoint visibility, 0 to 1). Below the `min_pose_confidence` from `/api/mobility/method`
+(0.6) the check is saved but not used (`counted: false`); ask the astronaut to retake in good light.
+
+### POST `/api/mobility/{astronautId}?day=`
+
+```json
+{ "balance_hold_s": 22, "sway_pct_height": 1.4, "sit_to_stand_5x_s": 10.8, "knee_flexion_deg": 112, "pose_confidence": 0.91 }
+```
+
+Returns `201` with `{ check, counted, result, message }`. `result` has `level` (`green|amber|red`), one entry per test
+(`values`, `baseline` = the astronaut's first reliable check, `change_pct` = % worse than that, `note`) and the `alert`
+(what / why / action / source). A check applies to its mission day and every later day.
+
+### GET `/api/mobility/{astronautId}`
+
+`{ astronaut_id, checks[], latest }`, for a history chart.
+
+### On the Gravity card
+
+`GET /api/crew/{id}` and `/api/dashboard`: the Gravity card `metrics.mobility` is `null` until a reliable check exists, then
+`{ level, checks_used, last_check_day, tests[] }`. The card level is the worst of the cardio rule and `G.mobility`.
+Thresholds are illustrative; see `GET /api/mobility/method`.

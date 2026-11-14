@@ -10,6 +10,7 @@ from app.models.crew import Astronaut, DailyRecord
 from app.repositories.cache import CacheRepository
 from app.repositories.crew import CrewRepository
 from app.repositories.isolation import IsolationRepository
+from app.repositories.mobility import MobilityRepository
 from app.repositories.settings import SettingsRepository
 from app.services.companion import Companion
 from app.services.crew_generator import ASTRONAUTS, generate_crew
@@ -18,6 +19,7 @@ from app.services.distance_service import DistanceService
 from app.services.donki_client import DonkiClient
 from app.services.horizons_client import HorizonsClient
 from app.services.isolation_service import IsolationService
+from app.services.mobility_service import MobilityService
 from app.services.settings_service import SettingsService
 from app.services.space_weather_service import SpaceWeatherService
 
@@ -33,6 +35,7 @@ class Container:
     mission_settings: SettingsService
     crew: CrewService
     isolation: IsolationService
+    mobility: MobilityService
     database: str  # "supabase" | "memory"
     ai_checkin_enabled: bool
 
@@ -72,6 +75,7 @@ async def build_container(
 
     mission_settings = SettingsService(settings.mission_days, SettingsRepository(db))
     isolation_repo = IsolationRepository(db)
+    mobility_repo = MobilityRepository(db)
     crew = CrewService(
         roster,
         records,
@@ -80,6 +84,7 @@ async def build_container(
         settings=mission_settings,
         distance=distance,
         isolation=isolation_repo,
+        mobility=mobility_repo,
     )
     return Container(
         settings=settings,
@@ -89,6 +94,7 @@ async def build_container(
         mission_settings=mission_settings,
         crew=crew,
         isolation=IsolationService(crew, isolation_repo, companion),
+        mobility=MobilityService(crew, mobility_repo),
         database=db.name,
         ai_checkin_enabled=companion is not None,
     )

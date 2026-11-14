@@ -103,6 +103,24 @@ create index if not exists loneliness_assessments_astronaut_day_idx
     on public.loneliness_assessments (astronaut_id, mission_day, created_at);
 
 -- ---------------------------------------------------------------------------
+-- Gravity: Mobility & Balance Check (numbers measured in the browser; no video is stored)
+-- ---------------------------------------------------------------------------
+create table if not exists public.mobility_checks (
+    id                 uuid primary key default gen_random_uuid(),
+    astronaut_id       text not null references public.astronauts (id) on delete cascade,
+    mission_day        integer not null check (mission_day >= 1),
+    balance_hold_s     double precision not null check (balance_hold_s between 0 and 30),
+    sway_pct_height    double precision not null check (sway_pct_height between 0 and 50),
+    sit_to_stand_5x_s  double precision not null check (sit_to_stand_5x_s > 1),
+    knee_flexion_deg   double precision not null check (knee_flexion_deg between 0 and 180),
+    pose_confidence    double precision not null check (pose_confidence between 0 and 1),
+    reliable           boolean not null,
+    created_at         timestamptz not null default now()
+);
+create index if not exists mobility_checks_astronaut_idx
+    on public.mobility_checks (astronaut_id, created_at);
+
+-- ---------------------------------------------------------------------------
 -- Last-good copies of external feeds (NASA DONKI, JPL Horizons), survive restarts
 -- ---------------------------------------------------------------------------
 create table if not exists public.external_data_cache (
@@ -121,4 +139,5 @@ alter table public.mission_settings         disable row level security;
 alter table public.isolation_chat_sessions  disable row level security;
 alter table public.isolation_chat_messages  disable row level security;
 alter table public.loneliness_assessments   disable row level security;
+alter table public.mobility_checks          disable row level security;
 alter table public.external_data_cache      disable row level security;
