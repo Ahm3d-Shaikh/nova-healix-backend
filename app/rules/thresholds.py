@@ -46,6 +46,18 @@ HR_SD_FLOOR: Final = 1.5  # [OURS] bpm - stops a quiet baseline causing false al
 SYS_BP_SD_FLOOR: Final = 3.0  # [OURS] mmHg
 DIA_BP_SD_FLOOR: Final = 2.0  # [OURS] mmHg
 
+# --- Gravity: Mobility & Balance Check (movement only; NOT bone health) -----------------
+MOBILITY_MIN_CONFIDENCE: Final = 0.6  # [OURS] mean pose-keypoint confidence below which a check is not used
+BALANCE_HOLD_MAX_S: Final = 30.0  # [OURS] single-leg stance is stopped at 30 s
+BALANCE_HOLD_AMBER_S: Final = 10.0  # [OURS] hold shorter than this -> amber (illustrative)
+BALANCE_HOLD_RED_S: Final = 5.0  # [OURS] hold shorter than this -> red (illustrative)
+SIT_STAND_AMBER_S: Final = 12.0  # [OURS] 5 sit-to-stands slower than this -> amber (illustrative)
+SIT_STAND_RED_S: Final = 15.0  # [OURS] slower than this -> red (illustrative)
+KNEE_FLEXION_AMBER_DEG: Final = 100.0  # [OURS] squat depth shallower than this -> amber (illustrative)
+KNEE_FLEXION_RED_DEG: Final = 80.0  # [OURS] shallower than this -> red (illustrative)
+MOBILITY_CHANGE_AMBER: Final = 0.25  # [OURS] 25 % worse than the astronaut's first check -> amber
+MOBILITY_CHANGE_RED: Final = 0.50  # [OURS] 50 % worse than the first check -> red
+
 # --- Environment ---------------------------------------------------------------
 CO2_7D_LIMIT_MMHG: Final = 2.5  # [NASA] keeps headache risk < 1 %
 CO2_1H_LIMIT_MMHG: Final = 3.0  # [NASA] NASA-STD-3001 V2 6004

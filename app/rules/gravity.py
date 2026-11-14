@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from app.models.alert import Alert
 from app.models.crew import DailyRecord
 from app.models.enums import Hazard, Level
+from app.rules import mobility
 from app.rules import thresholds as t
 from app.rules.context import RuleContext
 from app.rules.stats import mean_sd, trailing_streak
@@ -61,6 +62,13 @@ def missed_exercise_days(records: Sequence[DailyRecord]) -> int:
 
 
 def evaluate(ctx: RuleContext) -> list[Alert]:
+    """Cardiovascular drift / exercise rule, plus the Mobility & Balance Check once one has been done."""
+    alerts = _cardio(ctx)
+    result = mobility.assess(ctx.mobility)
+    return [*alerts, result.alert] if result else alerts
+
+
+def _cardio(ctx: RuleContext) -> list[Alert]:
     if not baseline_ready(ctx.records):
         return [
             Alert(
