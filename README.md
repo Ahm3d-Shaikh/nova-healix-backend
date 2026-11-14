@@ -129,8 +129,10 @@ python -m scripts.build_snapshot path/to/raw
 
 ## Isolation: AI check-in companion
 
-Instead of a form, astronauts chat with **ECHO**, a Google Gemini-powered companion (`GEMINI_MODEL`, default
-`gemini-3.8-flash`, available on the free tier). ECHO naturally covers the three Three-Item Loneliness Scale themes (companionship,
+Instead of a form, astronauts chat with **ECHO**, a Google Gemini-powered companion. Chat replies use the fast
+`GEMINI_CHAT_MODEL` (default `gemini-3.5-flash-lite`, ~1-3 s per message; if it is rate-limited, failing or takes over
+`GEMINI_CHAT_TIMEOUT_SECONDS` the reply is retried once on `GEMINI_MODEL`). Scoring uses `GEMINI_MODEL` (default
+`gemini-3.8-flash`). All are on the free tier, and quotas are per model. ECHO naturally covers the three Three-Item Loneliness Scale themes (companionship,
 feeling left out, feeling isolated). After 3-10 replies the client calls `/complete`, and a **separate rater
 call** reads the transcript and returns, as structured output, a 1-3 rating per item with quoted evidence,
 a confidence (0-1) and a safety flag (Gemini structured output, validated server-side). The backend then scores deterministically:

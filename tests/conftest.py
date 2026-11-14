@@ -49,9 +49,13 @@ class FakeCompanion:
     def __init__(self) -> None:
         self.next_rating = rating()
         self.reply_calls: list[tuple[int, int]] = []  # (transcript length, replies left)
+        self.fail_next: Exception | None = None  # raise this from the next reply()
 
     async def reply(self, astronaut: Astronaut, day: int, transcript: Sequence[ChatMessage], replies_left: int) -> str:
         self.reply_calls.append((len(transcript), replies_left))
+        if self.fail_next is not None:
+            exc, self.fail_next = self.fail_next, None
+            raise exc
         return f"ECHO heard: {transcript[-1].content}"
 
     async def rate(self, astronaut: Astronaut, day: int, transcript: Sequence[ChatMessage]) -> LonelinessRating:

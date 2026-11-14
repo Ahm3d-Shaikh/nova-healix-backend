@@ -75,7 +75,13 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 if settings.gemini_api_key
                 else None
             )
-            companion = GeminiCompanion(gemini, settings.gemini_model) if gemini else None
+            companion = (
+                GeminiCompanion(
+                    gemini, settings.gemini_model, settings.gemini_chat_model, settings.gemini_chat_timeout_seconds
+                )
+                if gemini
+                else None
+            )
             if companion is None:
                 log.warning("GEMINI_API_KEY not set: AI isolation check-ins are disabled.")
             app.state.container = await build_container(settings, donki, horizons, db, companion)
