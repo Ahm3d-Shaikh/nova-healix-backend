@@ -9,7 +9,6 @@ Scoring algorithm (deterministic once the rater has answered):
      and is capped at amber (a safety concern still escalates to red).
 """
 
-import asyncio
 import uuid
 from datetime import UTC, datetime
 
@@ -72,27 +71,15 @@ class IsolationService:
         return self._companion
 
     async def _session(self, astronaut_id: str, session_id: str) -> ChatSession:
-        session, _ = await self._session_and_messages(astronaut_id, session_id, with_messages=False)
-        return session
-
-    async def _session_and_messages(
-        self, astronaut_id: str, session_id: str, *, with_messages: bool = True
-    ) -> tuple[ChatSession, list[ChatMessage]]:
-        """Load the session (and its transcript) in parallel; 404 if it isn't this astronaut's."""
         astro = self._crew.astronaut(astronaut_id)
         try:
             uuid.UUID(session_id)
         except ValueError:
             raise SessionNotFoundError(session_id) from None
-        if with_messages:
-            session, messages = await asyncio.gather(
-                self._repo.get_session(session_id), self._repo.messages(session_id)
-            )
-        else:
-            session, messages = await self._repo.get_session(session_id), []
+        session = await self._repo.get_session(session_id)
         if session is None or session.astronaut_id != astro.id:
             raise SessionNotFoundError(session_id)
-        return session, messages
+        return session
 
     # -- chat -------------------------------------------------------------------------
     async def start(self, astronaut_id: str, day: int) -> StartSessionResponse:
@@ -106,26 +93,18 @@ class IsolationService:
 
     async def send(self, astronaut_id: str, session_id: str, content: str) -> ChatTurnResponse:
         companion = self._require_companion()
-        session, transcript = await self._session_and_messages(astronaut_id, session_id)
+        session = await self._session(astronaut_id, session_id)
         if session.status != SessionStatus.ACTIVE:
             raise SessionClosedError
+        transcript = await self._repo.messages(session.id)
         turns = _astronaut_turns(transcript)
         if turns >= t.CHECKIN_MAX_TURNS:
             raise SessionTurnLimitError(t.CHECKIN_MAX_TURNS)
 
-        # Ask ECHO first and save both messages only if it answered, so a failed call
-        # leaves no orphaned message behind and the client can simply resend.
-        said = ChatMessage(
-            id="pending",
-            session_id=session.id,
-            role=ChatRole.ASTRONAUT,
-            content=content.strip(),
-            created_at=datetime.now(UTC),
-        )
+        said = await self._repo.add_message(session.id, ChatRole.ASTRONAUT, content.strip())
         turns += 1
         astro = self._crew.astronaut(session.astronaut_id)
         text = await companion.reply(astro, session.mission_day, [*transcript, said], t.CHECKIN_MAX_TURNS - turns)
-        await self._repo.add_message(session.id, ChatRole.ASTRONAUT, said.content)
         reply = await self._repo.add_message(session.id, ChatRole.ASSISTANT, text)
         return ChatTurnResponse(
             session_id=session.id,

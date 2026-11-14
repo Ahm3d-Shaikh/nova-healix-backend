@@ -147,7 +147,7 @@ def transcript() -> list[ChatMessage]:
     ]
 
 
-def gemini(handler, chat_model: str | None = None, chat_timeout: float = 20.0) -> GeminiCompanion:
+def gemini(handler) -> GeminiCompanion:
     http = httpx.AsyncClient(transport=httpx.MockTransport(handler))
     client = genai.Client(
         api_key="test",
@@ -155,7 +155,7 @@ def gemini(handler, chat_model: str | None = None, chat_timeout: float = 20.0) -
             httpx_async_client=http, retry_options=genai_types.HttpRetryOptions(attempts=1)
         ),
     )
-    return GeminiCompanion(client, MODEL, chat_model, chat_timeout)
+    return GeminiCompanion(client, MODEL)
 
 
 def answer(text: str, finish: str = "STOP") -> httpx.Response:
@@ -232,83 +232,3 @@ def test_gemini_failures_become_503(response, needle):
 
     with pytest.raises(CompanionUnavailableError, match=needle):
         asyncio.run(gemini(lambda _: response).rate(ASTRO, 1, transcript()))
-
-
-# --- Latency: fast chat model, fallback, timeout, no orphaned messages ------------------------
-LITE = "gemini-3.5-flash-lite"
-
-
-def by_model(responses: dict[str, httpx.Response], seen: list[str]):
-    def handler(request: httpx.Request) -> httpx.Response:
-        model = next(m for m in responses if f"models/{m}:" in str(request.url))
-        seen.append(model)
-        return responses[model]
-
-    return handler
-
-
-def test_chat_uses_the_fast_model_and_rating_uses_the_main_model():
-    seen: list[str] = []
-    companion = gemini(by_model({LITE: answer("quick reply"), MODEL: answer(rating().model_dump_json())}, seen), LITE)
-    assert asyncio.run(companion.reply(ASTRO, 1, transcript(), 3)) == "quick reply"
-    asyncio.run(companion.rate(ASTRO, 1, transcript()))
-    assert seen == [LITE, MODEL]
-
-
-@pytest.mark.parametrize("failure", [error(429, "RESOURCE_EXHAUSTED"), error(503, "UNAVAILABLE")])
-def test_chat_falls_back_to_main_model_when_fast_model_is_limited(failure):
-    seen: list[str] = []
-    companion = gemini(by_model({LITE: failure, MODEL: answer("fallback reply")}, seen), LITE)
-    assert asyncio.run(companion.reply(ASTRO, 1, transcript(), 3)) == "fallback reply"
-    assert seen == [LITE, MODEL]
-
-
-def test_chat_does_not_retry_errors_that_will_not_fix_themselves():
-    from app.core.errors import CompanionUnavailableError
-
-    seen: list[str] = []
-    bad_key = error(400, "INVALID_ARGUMENT", "API key not valid.")
-    companion = gemini(by_model({LITE: bad_key, MODEL: answer("unused")}, seen), LITE)
-    with pytest.raises(CompanionUnavailableError, match="GEMINI_API_KEY"):
-        asyncio.run(companion.reply(ASTRO, 1, transcript(), 3))
-    assert seen == [LITE]
-
-
-def test_chat_times_out_then_falls_back_then_gives_up():
-    from app.core.errors import CompanionUnavailableError
-
-    seen: list[str] = []
-
-    async def slow_then_fast(request: httpx.Request) -> httpx.Response:
-        model = LITE if f"models/{LITE}:" in str(request.url) else MODEL
-        seen.append(model)
-        if model == LITE:
-            await asyncio.sleep(1)
-        return answer("after timeout")
-
-    assert asyncio.run(gemini(slow_then_fast, LITE, chat_timeout=0.05).reply(ASTRO, 1, transcript(), 3)) == (
-        "after timeout"
-    )
-    assert seen == [LITE, MODEL]
-
-    async def always_slow(request: httpx.Request) -> httpx.Response:
-        await asyncio.sleep(1)
-        return answer("never")
-
-    with pytest.raises(CompanionUnavailableError, match="took too long"):
-        asyncio.run(gemini(always_slow, LITE, chat_timeout=0.05).reply(ASTRO, 1, transcript(), 3))
-
-
-def test_failed_reply_saves_nothing_so_the_client_can_resend(api, companion):
-    from app.core.errors import CompanionUnavailableError
-
-    sid, *_ = chat(api, "A", day=3, replies=1)
-    companion.fail_next = CompanionUnavailableError("Gemini rate limit reached (free tier quota), retry shortly")
-    resp = api.post(f"/api/isolation/A/sessions/{sid}/messages", json={"content": "second"})
-    assert resp.status_code == 503
-    assert len(api.get(f"/api/isolation/A/sessions/{sid}").json()["messages"]) == 3  # unchanged: opener + 1 pair
-
-    retry = api.post(f"/api/isolation/A/sessions/{sid}/messages", json={"content": "second"}).json()
-    assert retry["astronaut_turns"] == 2 and retry["reply"]["content"] == "ECHO heard: second"
-    roles = [m["role"] for m in api.get(f"/api/isolation/A/sessions/{sid}").json()["messages"]]
-    assert roles == ["assistant", "astronaut", "assistant", "astronaut", "assistant"]
