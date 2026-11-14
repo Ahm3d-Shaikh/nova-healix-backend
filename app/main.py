@@ -29,7 +29,7 @@ from app.core.reference import DISCLAIMER
 from app.db.base import Database, DatabaseError
 from app.db.memory import InMemoryDatabase
 from app.db.supabase import SupabaseDatabase
-from app.routers import crew, dashboard, distance, isolation
+from app.routers import crew, dashboard, distance, isolation, mobility
 from app.services.companion import GeminiCompanion
 from app.services.donki_client import DonkiClient
 from app.services.horizons_client import HorizonsClient
@@ -75,7 +75,13 @@ def create_app(settings: Settings | None = None, container: Container | None = N
                 if settings.gemini_api_key
                 else None
             )
-            companion = GeminiCompanion(gemini, settings.gemini_model) if gemini else None
+            companion = (
+                GeminiCompanion(
+                    gemini, settings.gemini_model, settings.gemini_chat_model, settings.gemini_chat_timeout_seconds
+                )
+                if gemini
+                else None
+            )
             if companion is None:
                 log.warning("GEMINI_API_KEY not set: AI isolation check-ins are disabled.")
             app.state.container = await build_container(settings, donki, horizons, db, companion)
@@ -123,7 +129,7 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         log.error("Database error: %s", exc)
         return JSONResponse(status_code=503, content={"detail": "Database temporarily unavailable; please retry"})
 
-    for router in (crew.router, dashboard.router, distance.router, isolation.router):
+    for router in (crew.router, dashboard.router, distance.router, isolation.router, mobility.router):
         app.include_router(router)
 
     @app.get("/", tags=["meta"])

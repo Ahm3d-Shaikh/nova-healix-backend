@@ -13,7 +13,8 @@ from app.models.metrics import (
     RadiationMetrics,
     Vital,
 )
-from app.rules import distance, gravity, isolation, mirror_gap, radiation
+from app.models.mobility import MobilityMetrics
+from app.rules import distance, gravity, isolation, mirror_gap, mobility, radiation
 from app.rules import thresholds as t
 from app.rules.context import RuleContext
 
@@ -105,6 +106,16 @@ def _gravity(ctx: RuleContext) -> GravityMetrics:
         exercise_min=latest.exercise_min,
         exercise_missed_days=gravity.missed_exercise_days(ctx.records),
         drifting=drifting,
+        mobility=_mobility(ctx),
+    )
+
+
+def _mobility(ctx: RuleContext) -> MobilityMetrics | None:
+    result = mobility.assess(ctx.mobility)
+    if result is None:
+        return None
+    return MobilityMetrics(
+        level=result.level, checks_used=result.checks_used, last_check_day=result.last_check_day, tests=result.tests
     )
 
 
