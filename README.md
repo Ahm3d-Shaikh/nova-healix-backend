@@ -9,6 +9,7 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 
 - **Live API docs (Swagger):** https://nova-healix-backend-production.up.railway.app/docs
 - Full product/context brief: [docs/RIDGE_CONTEXT.md](docs/RIDGE_CONTEXT.md)
+- What has been built so far: [docs/FEATURES.md](docs/FEATURES.md)
 
 ## Project structure
 
