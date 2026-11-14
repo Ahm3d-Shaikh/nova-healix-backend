@@ -9,6 +9,8 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 
 - **Live API docs (Swagger):** https://nova-healix-backend-production.up.railway.app/docs
 - Full product/context brief: [docs/RIDGE_CONTEXT.md](docs/RIDGE_CONTEXT.md)
+- What has been built so far: [docs/FEATURES.md](docs/FEATURES.md)
+- Requirements and backend coverage: [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md), [docs/COVERAGE.md](docs/COVERAGE.md)
 
 ## Project structure
 
@@ -49,6 +51,8 @@ client and clocks are injected, so tests need no network and no sleeping.
 | GET | `/api/isolation/questionnaire` | Three-Item Loneliness Scale questions/options/bands |
 | POST | `/api/isolation/{id}` | Body `{q1,q2,q3}` (1-3) → score, level, consecutive-days-≥7 |
 | GET | `/api/isolation/{id}` | Loneliness score history (simulated + submitted) |
+| GET | `/api/meta` | Disclaimer, real-vs-simulated data table, every threshold with provenance, all sources |
+| POST | `/api/demo/reset` | Back to day 5 / Mars / live; clears submitted check-ins (repeatable demo) |
 | GET | `/health` | Liveness check |
 
 Every rule result is `{rule, hazard, level, what, why, action, source}`. Card `metrics` are typed and
@@ -115,11 +119,26 @@ python -m scripts.build_snapshot path/to/raw
 `requirements.txt` lists direct dependencies; regenerate the lock after changing them
 (`pip install -r requirements.txt && pip freeze > requirements.lock` in a clean venv).
 
+## Sources
+
+NASA [Human Body in Space (RIDGE)](https://www.nasa.gov/humans-in-space/the-human-body-in-space/) ·
+[DONKI API](https://ccmc.gsfc.nasa.gov/DONKI/api/) ·
+[Radiation protection brief](https://www.nasa.gov/wp-content/uploads/2023/03/radiation-protection-technical-brief-ochmo.pdf) ·
+CO₂ briefs ([1](https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-004-carbon-dioxide.pdf), [2](https://nasa.gov/wp-content/uploads/2023/03/co2-technical-brief-ochmo.pdf)) ·
+[ECLSS brief](https://www.nasa.gov/wp-content/uploads/2023/12/ochmo-tb-002-eclss.pdf) ·
+[CSA Radi-N2](https://www.asc-csa.gc.ca/eng/sciences/radi-n2.asp) ·
+[CSA Bio-Monitor](https://hdiac.dtic.mil/articles/peak-performance-in-microgravity) ·
+[Three-Item Loneliness Scale](https://www.phenxtoolkit.org/toolkit_content/supplemental_info/psychosocial/measures/Social_Isolation.doc) ·
+[PVT-B validation](https://pmc.ncbi.nlm.nih.gov/articles/PMC3197786) ·
+[3-min PVT lapse bands](https://pmc.ncbi.nlm.nih.gov/articles/PMC3190077) ·
+[Subjective vs objective gap](https://www.24-7pressrelease.com/press-release/414258/clearing-the-space-fog) ·
+[AURORA](https://github.com/fabriciojunio/aurora-astronaut-health). The same list is served at `GET /api/meta`.
+
 ## Known limitations (deliberate for the hackathon)
 
 - Settings (mission, day, deep-space mode) are one process-wide demo state, not per user.
-- Mirror Gap / isolation submissions are kept in memory (`InMemoryStore`) and are lost on restart;
-  swap the store for a database to persist them. Run a single worker.
+- Mirror Gap / isolation submissions are saved to JSON files in `SUBMISSIONS_DIR` (default `var/`); on
+  Railway mount a volume there or they reset on redeploy. Run a single worker.
 - No authentication or rate limiting on the API; CORS is restricted to configured origins.
 - Routes live under `/api` (no version prefix) to match the agreed frontend contract.
 

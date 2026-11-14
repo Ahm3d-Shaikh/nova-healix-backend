@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 from app.core.errors import UnknownAstronautError
+from app.core.reference import DISCLAIMER
 from app.core.timeline import MissionTimeline
 from app.models.alert import CrewAlert
 from app.models.crew import (
@@ -184,6 +185,7 @@ class CrewService:
             if e.kind in HAZARD_EVENT_KINDS and since < e.time <= now
         ]
         return DashboardResponse(
+            disclaimer=DISCLAIMER,
             day=day,
             mission_days=self.timeline.days,
             settings=MissionSettingsResponse.build(settings, self.timeline.days),

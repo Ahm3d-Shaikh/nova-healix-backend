@@ -27,6 +27,8 @@ class IsolationMetrics(BaseModel):
     scale_min: int
     scale_max: int
     consecutive_days_at_or_above_7: int
+    trend: str  # rising | falling | stable | insufficient_data
+    trend_delta: float | None
     history: list[int]
 
 

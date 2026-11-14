@@ -42,11 +42,14 @@ def _radiation(ctx: RuleContext) -> RadiationMetrics:
 
 def _isolation(ctx: RuleContext) -> IsolationMetrics:
     totals = [r.loneliness_total for r in ctx.records]
+    direction, delta = isolation.trend(totals)
     return IsolationMetrics(
         loneliness_score=totals[-1],
         scale_min=t.LONELINESS_MIN,
         scale_max=t.LONELINESS_MAX,
         consecutive_days_at_or_above_7=isolation.high_streak(totals),
+        trend=direction,
+        trend_delta=delta,
         history=totals,
     )
 

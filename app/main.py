@@ -14,13 +14,11 @@ from app.core.config import Settings, get_settings
 from app.core.errors import DomainError, InvalidDayError, NoValidResponsesError, UnknownAstronautError
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
-from app.routers import crew, dashboard, isolation, mirror_gap, space_weather
+from app.core.reference import DISCLAIMER
+from app.routers import crew, dashboard, demo, isolation, meta, mirror_gap, space_weather
 from app.routers import settings as settings_router
 from app.services.donki_client import DonkiClient
 
-DISCLAIMER = (
-    "Decision support prototype, not a medical device. Crew data is simulated; space-weather data is real NASA data."
-)
 STATUS_BY_ERROR: dict[type[DomainError], int] = {
     UnknownAstronautError: 404,
     InvalidDayError: 422,
@@ -72,6 +70,8 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         return JSONResponse(status_code=status, content={"detail": str(exc)})
 
     for router in (
+        meta.router,
+        demo.router,
         space_weather.router,
         crew.router,
         dashboard.router,

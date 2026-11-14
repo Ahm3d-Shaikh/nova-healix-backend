@@ -17,6 +17,7 @@ class SpaceWeatherStatus(BaseModel):
 
 
 class DashboardResponse(BaseModel):
+    disclaimer: str
     day: int
     mission_days: int
     settings: MissionSettingsResponse
