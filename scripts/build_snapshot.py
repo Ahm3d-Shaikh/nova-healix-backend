@@ -10,14 +10,15 @@ the configured storm window.
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from app.core.config import get_settings
 from app.services import donki_parsers as p
 
 
-def load(raw_dir: Path, name: str) -> list | None:
+def load(raw_dir: Path, name: str) -> list[Any] | None:
     path = raw_dir / f"{name}.json"
     return json.loads(path.read_text()) if path.exists() else None
 
@@ -25,7 +26,7 @@ def load(raw_dir: Path, name: str) -> list | None:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("raw_dir", type=Path)
-    ap.add_argument("--fetched-at", default=datetime.now(timezone.utc).isoformat())
+    ap.add_argument("--fetched-at", default=datetime.now(UTC).isoformat())
     args = ap.parse_args()
     s = get_settings()
 

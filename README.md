@@ -14,23 +14,24 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 
 ```text
 app/
-├── main.py              # create_app() factory, CORS, router wiring
-├── container.py         # builds and wires all services
-├── core/                # config (env settings), mission timeline
-├── models/              # Pydantic schemas (enums, alert, crew, space weather, mirror gap, settings)
-├── rules/               # pure rules engine: radiation, isolation, distance, gravity,
-│                        #   environment, mirror_gap, engine (worst-of per card)
+├── main.py              # create_app() factory, CORS/gzip/request-context middleware, error mapping
+├── container.py         # builds and wires all services (dependency injection root)
+├── core/                # config (env), mission timeline, domain errors, logging, middleware
+├── models/              # Pydantic schemas (enums, alert, crew, typed card metrics, ...)
+├── rules/               # pure rules engine; thresholds.py = single source of truth for every limit
 ├── services/            # DONKI client + parsers, space-weather fallback, crew generator,
-│                        #   crew / mirror-gap / settings services
-├── routers/             # HTTP endpoints (crew, dashboard, isolation, mirror_gap, settings, space_weather)
+│                        #   crew / mirror-gap / isolation / settings services, in-memory store
+├── routers/             # thin HTTP endpoints, typed return models
 ├── api/deps.py          # FastAPI dependencies
 └── data/donki_snapshot.json   # real DONKI response used as offline fallback
-scripts/build_snapshot.py      # regenerate the snapshot from raw DONKI JSON
-tests/                         # pytest suite (no network needed)
+scripts/                 # build_snapshot.py, check_donki_live.py
+tests/                   # pytest suite (offline; real DONKI payload replays)
 ```
 
-Design rules: rules are pure functions of a `RuleContext`, so logic lives in one place and is
-unit-testable; routers are thin; the DONKI client is injected, so tests run offline.
+Design rules: rules are pure functions of a `RuleContext` (no I/O); every threshold lives in
+`app/rules/thresholds.py` tagged `[NASA]` / `[CSA]` / `[PAPER]` / `[OURS]`; routers contain no
+business logic and no error handling (domain errors are mapped to HTTP in one place); the DONKI
+client and clocks are injected, so tests need no network and no sleeping.
 
 ## Endpoints
 
@@ -50,7 +51,10 @@ unit-testable; routers are thin; the DONKI client is injected, so tests run offl
 | GET | `/api/isolation/{id}` | Loneliness score history (simulated + submitted) |
 | GET | `/health` | Liveness check |
 
-Every rule result is `{rule, hazard, level, what, why, action, source}`.
+Every rule result is `{rule, hazard, level, what, why, action, source}`. Card `metrics` are typed and
+discriminated by `kind` (see `/openapi.json`). `day` must be 1-30 (otherwise HTTP 422); POST check-ins accept
+an optional `?day=` and default to the saved current day. Errors are `{"detail": "..."}`.
+Every response carries `X-Request-ID` and `X-Process-Time-Ms`.
 
 ## Data: real vs simulated
 
@@ -65,21 +69,21 @@ Every rule result is `{rule, hazard, level, what, why, action, source}`.
 ## Getting started
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
+make install                       # venv + dev dependencies
 cp .env.example .env               # set NASA_API_KEY (free at https://api.nasa.gov)
-uvicorn app.main:app --reload
+make run                           # uvicorn with reload
 ```
 
 - API: http://127.0.0.1:8000 · Swagger: http://127.0.0.1:8000/docs · ReDoc: http://127.0.0.1:8000/redoc
 
-### Tests
+### Quality gate
 
 ```bash
-pip install -r requirements-dev.txt
-pytest
+make check      # ruff lint + format check, mypy --strict, pytest with coverage >= 90 % (what CI runs)
+make format     # auto-fix lint + formatting
 ```
+
+CI (`.github/workflows/ci.yml`) runs the same gate and a Docker build. Optional: `pre-commit install`.
 
 ### Verify live NASA DONKI access
 
@@ -106,7 +110,18 @@ python -m scripts.build_snapshot path/to/raw
 
 ## Deployment
 
-A `Dockerfile` is included (Railway-compatible, honours `$PORT`).
+`Dockerfile`: slim Python 3.12, non-root user, installs the fully pinned `requirements.lock`, health check on
+`/health`, honours `$PORT` (Railway). Set `NASA_API_KEY` in the service variables.
+`requirements.txt` lists direct dependencies; regenerate the lock after changing them
+(`pip install -r requirements.txt && pip freeze > requirements.lock` in a clean venv).
+
+## Known limitations (deliberate for the hackathon)
+
+- Settings (mission, day, deep-space mode) are one process-wide demo state, not per user.
+- Mirror Gap / isolation submissions are kept in memory (`InMemoryStore`) and are lost on restart;
+  swap the store for a database to persist them. Run a single worker.
+- No authentication or rate limiting on the API; CORS is restricted to configured origins.
+- Routes live under `/api` (no version prefix) to match the agreed frontend contract.
 
 ## Use of AI
 

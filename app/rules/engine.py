@@ -1,6 +1,6 @@
 """Runs every rule for one astronaut-day. Card level = worst of its rules."""
 
-from typing import Callable
+from collections.abc import Callable
 
 from app.models.alert import Alert
 from app.models.crew import CardStatus
@@ -25,12 +25,21 @@ def evaluate_cards(ctx: RuleContext) -> list[CardStatus]:
     cards = []
     for hazard, rule in RULES.items():
         alerts = rule(ctx)
-        cards.append(CardStatus(
-            hazard=hazard, label=HAZARD_LABELS[hazard],
-            level=worst([a.level for a in alerts]), alerts=alerts,
-            metrics=card_metrics(hazard, ctx),
-        ))
+        cards.append(
+            CardStatus(
+                hazard=hazard,
+                label=HAZARD_LABELS[hazard],
+                level=worst([a.level for a in alerts]),
+                alerts=alerts,
+                metrics=card_metrics(hazard, ctx),
+            )
+        )
     return cards
+
+
+def evaluate_levels(ctx: RuleContext) -> dict[Hazard, Level]:
+    """Levels only (no metrics): cheap path used for the 30-day timeline."""
+    return {hazard: worst([a.level for a in rule(ctx)]) for hazard, rule in RULES.items()}
 
 
 def overall_level(cards: list[CardStatus]) -> Level:

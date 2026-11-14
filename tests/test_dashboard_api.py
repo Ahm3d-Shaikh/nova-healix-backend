@@ -17,7 +17,9 @@ def test_every_card_has_metrics(api):
         assert len(crew["cards"]) == 6 and all(c["metrics"] for c in crew["cards"])
     c = next(x for x in api.get("/api/dashboard", params={"day": 25}).json()["crew"] if x["astronaut"]["id"] == "C")
     grav = next(k for k in c["cards"] if k["hazard"] == "G")["metrics"]
-    assert grav["resting_hr"] > grav["resting_hr_threshold"] and grav["exercise_missed_days"] >= 2
+    assert grav["kind"] == "gravity" and grav["resting_hr"]["above_threshold"] is True
+    assert grav["exercise_missed_days"] >= 2
+    assert grav["drifting"] == ["resting HR"]
 
 
 def test_timeline_matches_per_day_requests(api):
@@ -47,3 +49,12 @@ def test_isolation_questionnaire_and_submission(api):
 def test_isolation_validation(api):
     assert api.post("/api/isolation/A", json={"q1": 4, "q2": 1, "q3": 1}).status_code == 422
     assert api.post("/api/isolation/Z", json={"q1": 1, "q2": 1, "q3": 1}).status_code == 404
+
+
+def test_timeline_cache_respects_deep_space_mode(api):
+    normal = api.get("/api/timeline", params={"astronaut": "A"}).json()
+    api.post("/api/settings", json={"mission": "mars", "deep_space_mode": True, "current_day": 5})
+    deep = api.get("/api/timeline", params={"astronaut": "A"}).json()
+    # Offline fixture serves the snapshot either way, but deep-space mode must never reuse a stale entry.
+    assert deep["crew"][0]["days"][4]["cards"]["D"] == "amber"
+    assert normal["crew"][0]["astronaut_id"] == deep["crew"][0]["astronaut_id"] == "A"

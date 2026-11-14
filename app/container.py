@@ -27,14 +27,19 @@ class Container:
 def build_container(settings: Settings, donki: DonkiClient) -> Container:
     timeline = MissionTimeline(start=settings.mission_start, days=settings.mission_days)
     weather = SpaceWeatherService(
-        donki, settings.storm_window_start, settings.storm_window_end,
-        settings.donki_snapshot_path, settings.donki_cache_ttl_seconds,
+        donki,
+        settings.storm_window_start,
+        settings.storm_window_end,
+        settings.donki_snapshot_path,
+        cache_ttl_seconds=settings.donki_cache_ttl_seconds,
     )
     # Simulated dose spikes follow the bundled (real) snapshot so crew data stays
     # deterministic even when live DONKI data changes.
-    sep_days = sep_mission_days(weather.load_snapshot().events, timeline)
+    sep_days = set(sep_mission_days(weather.load_snapshot().events, timeline))
     records = generate_crew(settings.crew_seed, settings.mission_days, sep_days)
 
     mission_settings = SettingsService(settings.mission_days)
     crew = CrewService(ASTRONAUTS, records, timeline, weather, mission_settings)
-    return Container(settings, timeline, weather, mission_settings, crew, MirrorGapService(crew), IsolationService(crew))
+    return Container(
+        settings, timeline, weather, mission_settings, crew, MirrorGapService(crew), IsolationService(crew)
+    )

@@ -1,98 +1,127 @@
-"""Structured numbers behind each card, so the dashboard never parses alert text."""
+"""Typed numbers behind each card, so the dashboard never parses alert text."""
 
-from datetime import timedelta
+from collections.abc import Callable
 
-from app.models.crew import MetricValue
 from app.models.enums import COMMS_DELAY, EventKind, Hazard
-from app.rules import gravity, mirror_gap, radiation
+from app.models.metrics import (
+    CardMetrics,
+    DistanceMetrics,
+    EnvironmentMetrics,
+    GravityMetrics,
+    IsolationMetrics,
+    MirrorMetrics,
+    RadiationMetrics,
+    Vital,
+)
+from app.rules import gravity, isolation, mirror_gap, radiation
+from app.rules import thresholds as t
 from app.rules.context import RuleContext
-from app.rules.stats import mean_sd, trailing_streak
-
-Metrics = dict[str, MetricValue]
 
 
-def card_metrics(hazard: Hazard, ctx: RuleContext) -> Metrics:
+def card_metrics(hazard: Hazard, ctx: RuleContext) -> CardMetrics:
     return _BUILDERS[hazard](ctx)
 
 
-def _radiation(ctx: RuleContext) -> Metrics:
+def _radiation(ctx: RuleContext) -> RadiationMetrics:
     total = sum(r.dose_msv for r in ctx.records)
-    since = ctx.now - timedelta(hours=24)
-    recent = [e for e in ctx.events if since < e.time <= ctx.now]
-    return {
-        "cumulative_dose_msv": round(total, 2),
-        "career_limit_msv": radiation.CAREER_LIMIT_MSV,
-        "percent_of_limit": round(100 * total / radiation.CAREER_LIMIT_MSV, 2),
-        "latest_daily_dose_msv": ctx.records[-1].dose_msv,
-        "neutron_share_estimate": radiation.NEUTRON_SHARE,
-        "neutron_dose_estimate_msv": round(total * radiation.NEUTRON_SHARE, 2),
-        "iss_neutron_usv_per_day": radiation.ISS_NEUTRON_USV_PER_DAY,
-        "sep_events_24h": sum(e.kind == EventKind.SEP for e in recent),
-        "x_flares_24h": sum(e.kind == EventKind.FLARE and (e.class_type or "").startswith("X") for e in recent),
-        "cmes_24h": sum(e.kind == EventKind.CME for e in recent),
-        "data_source": ctx.weather_source.value,
-        "data_as_of": ctx.weather_as_of.isoformat(),
-    }
+    return RadiationMetrics(
+        cumulative_dose_msv=round(total, 2),
+        career_limit_msv=t.CAREER_DOSE_LIMIT_MSV,
+        percent_of_limit=round(100 * total / t.CAREER_DOSE_LIMIT_MSV, 2),
+        latest_daily_dose_msv=ctx.records[-1].dose_msv,
+        neutron_share_estimate=t.NEUTRON_SHARE,
+        neutron_dose_estimate_msv=round(total * t.NEUTRON_SHARE, 2),
+        iss_neutron_usv_per_day=t.ISS_NEUTRON_USV_PER_DAY,
+        sep_events_24h=len(radiation.recent_events(ctx, EventKind.SEP)),
+        x_flares_24h=sum(radiation.is_alert_flare(e) for e in radiation.recent_events(ctx, EventKind.FLARE)),
+        cmes_24h=len(radiation.recent_events(ctx, EventKind.CME)),
+        data_source=ctx.weather_source.value,
+        data_as_of=ctx.weather_as_of.isoformat(),
+    )
 
 
-def _isolation(ctx: RuleContext) -> Metrics:
+def _isolation(ctx: RuleContext) -> IsolationMetrics:
     totals = [r.loneliness_total for r in ctx.records]
-    return {
-        "loneliness_score": totals[-1], "scale_min": 3, "scale_max": 9,
-        "consecutive_days_at_or_above_7": trailing_streak([t >= 7 for t in totals]),
-        "history": totals,
-    }
+    return IsolationMetrics(
+        loneliness_score=totals[-1],
+        scale_min=t.LONELINESS_MIN,
+        scale_max=t.LONELINESS_MAX,
+        consecutive_days_at_or_above_7=isolation.high_streak(totals),
+        history=totals,
+    )
 
 
-def _distance(ctx: RuleContext) -> Metrics:
-    return {
-        "mission": ctx.mission.value, "comms_delay": COMMS_DELAY[ctx.mission],
-        "deep_space_mode": ctx.deep_space_mode, "data_source": ctx.weather_source.value,
-        "data_as_of": ctx.weather_as_of.isoformat(),
-    }
+def _distance(ctx: RuleContext) -> DistanceMetrics:
+    return DistanceMetrics(
+        mission=ctx.mission.value,
+        comms_delay=COMMS_DELAY[ctx.mission],
+        deep_space_mode=ctx.deep_space_mode,
+        data_source=ctx.weather_source.value,
+        data_as_of=ctx.weather_as_of.isoformat(),
+    )
 
 
-def _gravity(ctx: RuleContext) -> Metrics:
+def _gravity(ctx: RuleContext) -> GravityMetrics:
+    ready = gravity.baseline_ready(ctx.records)
+    latest = ctx.records[-1]
+    drifting = gravity.drifting_metrics(ctx.records)
+    vitals: dict[str, Vital] = {}
+    for spec in gravity.VITALS:
+        value = getattr(latest, spec.attr)
+        if ready:
+            base = gravity.vital_baseline(ctx.records, spec)
+            vitals[spec.attr] = Vital(
+                value=value,
+                baseline_mean=round(base.mean, 2),
+                threshold=round(base.threshold, 2),
+                above_threshold=value > base.threshold,
+            )
+        else:
+            vitals[spec.attr] = Vital(value=value)
+    return GravityMetrics(
+        baseline_ready=ready,
+        resting_hr=vitals["resting_hr"],
+        sys_bp=vitals["sys_bp"],
+        dia_bp=vitals["dia_bp"],
+        exercise_min=latest.exercise_min,
+        exercise_missed_days=gravity.missed_exercise_days(ctx.records),
+        drifting=drifting,
+    )
+
+
+def _environment(ctx: RuleContext) -> EnvironmentMetrics:
     r = ctx.records[-1]
-    out: Metrics = {
-        "baseline_ready": len(ctx.records) > gravity.BASELINE_DAYS,
-        "exercise_min": r.exercise_min,
-        "exercise_missed_days": trailing_streak(
-            [x.exercise_min < gravity.MISSED_EXERCISE_MIN for x in ctx.records]),
-    }
-    base = ctx.records[: gravity.BASELINE_DAYS]
-    for attr, (_label, _unit, floor) in gravity.METRICS.items():
-        out[attr] = getattr(r, attr)
-        if out["baseline_ready"]:
-            mu, sd = mean_sd([getattr(x, attr) for x in base], floor)
-            out[f"{attr}_baseline_mean"] = round(mu, 2)
-            out[f"{attr}_threshold"] = round(mu + gravity.SD_MULTIPLIER * sd, 2)
-    out["drifting"] = ", ".join(gravity._drifting_metrics(list(ctx.records))) if out["baseline_ready"] else ""
-    return out
+    return EnvironmentMetrics(
+        co2_mmhg_1h=r.co2_mmhg_1h,
+        co2_1h_limit=t.CO2_1H_LIMIT_MMHG,
+        co2_mmhg_7d=r.co2_mmhg_7d,
+        co2_7d_limit=t.CO2_7D_LIMIT_MMHG,
+        cabin_temp_c=r.cabin_temp_c,
+        temp_min_c=t.TEMP_MIN_C,
+        temp_max_c=t.TEMP_MAX_C,
+    )
 
 
-def _environment(ctx: RuleContext) -> Metrics:
+def _mirror(ctx: RuleContext) -> MirrorMetrics:
+    gap = mirror_gap.gap_series(ctx.records)[-1]
     r = ctx.records[-1]
-    return {
-        "co2_mmhg_1h": r.co2_mmhg_1h, "co2_1h_limit": 3.0,
-        "co2_mmhg_7d": r.co2_mmhg_7d, "co2_7d_limit": 2.5,
-        "cabin_temp_c": r.cabin_temp_c, "temp_min_c": 18.0, "temp_max_c": 27.0,
-    }
+    return MirrorMetrics(
+        gap=None if gap is None else round(gap, 3),
+        amber_gap=t.GAP_AMBER,
+        red_gap=t.GAP_RED,
+        self_rating=r.self_rating,
+        pvt_mean_rt_ms=r.pvt_mean_rt,
+        pvt_lapses=r.pvt_lapses,
+        lapse_band=mirror_gap.lapse_band_label(r.pvt_lapses),
+        baseline_sessions=t.GAP_BASELINE_SESSIONS,
+    )
 
 
-def _mirror(ctx: RuleContext) -> Metrics:
-    gaps = mirror_gap.gap_series(ctx.records)
-    r = ctx.records[-1]
-    return {
-        "gap": None if gaps[-1] is None else round(gaps[-1], 3),
-        "amber_gap": mirror_gap.AMBER_GAP, "red_gap": mirror_gap.RED_GAP,
-        "self_rating": r.self_rating, "pvt_mean_rt_ms": r.pvt_mean_rt,
-        "pvt_lapses": r.pvt_lapses, "lapse_band": mirror_gap.lapse_band_label(r.pvt_lapses),
-        "baseline_sessions": mirror_gap.BASELINE_SESSIONS,
-    }
-
-
-_BUILDERS = {
-    Hazard.RADIATION: _radiation, Hazard.ISOLATION: _isolation, Hazard.DISTANCE: _distance,
-    Hazard.GRAVITY: _gravity, Hazard.ENVIRONMENT: _environment, Hazard.MIRROR: _mirror,
+_BUILDERS: dict[Hazard, Callable[[RuleContext], CardMetrics]] = {
+    Hazard.RADIATION: _radiation,
+    Hazard.ISOLATION: _isolation,
+    Hazard.DISTANCE: _distance,
+    Hazard.GRAVITY: _gravity,
+    Hazard.ENVIRONMENT: _environment,
+    Hazard.MIRROR: _mirror,
 }

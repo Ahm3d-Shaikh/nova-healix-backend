@@ -1,27 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter
 
-from app.api.deps import get_container
-from app.container import Container
+from app.api.deps import ContainerDep
 from app.models.mirror_gap import MirrorGapHistory, MirrorGapResult, MirrorGapSubmission
-from app.services.crew_service import UnknownAstronaut
-from app.services.mirror_gap_service import NoValidResponses
+from app.routers.crew import DayQuery
 
 router = APIRouter(prefix="/api/mirror-gap", tags=["mirror gap"])
 
 
-@router.post("/{astronaut_id}", response_model=MirrorGapResult)
-async def submit(astronaut_id: str, body: MirrorGapSubmission, c: Container = Depends(get_container)):
-    try:
-        return c.mirror_gap.submit(astronaut_id, body)
-    except UnknownAstronaut:
-        raise HTTPException(404, f"Unknown astronaut '{astronaut_id}'") from None
-    except NoValidResponses as exc:
-        raise HTTPException(422, str(exc)) from None
+@router.post("/{astronaut_id}")
+async def submit(
+    astronaut_id: str, body: MirrorGapSubmission, c: ContainerDep, day: DayQuery = None
+) -> MirrorGapResult:
+    return c.mirror_gap.submit(astronaut_id, body, c.crew.resolve_day(day))
 
 
-@router.get("/{astronaut_id}", response_model=MirrorGapHistory)
-async def history(astronaut_id: str, c: Container = Depends(get_container)):
-    try:
-        return c.mirror_gap.history(astronaut_id)
-    except UnknownAstronaut:
-        raise HTTPException(404, f"Unknown astronaut '{astronaut_id}'") from None
+@router.get("/{astronaut_id}")
+async def history(astronaut_id: str, c: ContainerDep) -> MirrorGapHistory:
+    return c.mirror_gap.history(astronaut_id)
