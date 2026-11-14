@@ -1,0 +1,46 @@
+[project]
+name = "ridge-monitor-backend"
+version = "2.0.0"
+description = "RIDGE Monitor backend: crew health rules engine on live NASA DONKI space-weather data"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "C4", "RUF", "PT", "PL", "TID", "ASYNC", "S"]
+ignore = [
+    "PLR2004",  # magic values are the domain thresholds, named where it matters
+    "PLR0913",  # constructors take explicit dependencies
+    "RUF012",
+    "RUF001", "RUF002", "RUF003",  # typographic dashes/symbols in user-facing text are intentional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "S105", "S106", "PLR", "PT011", "PT018", "PLC0415", "E731"]
+"scripts/**" = ["S101", "T201"]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+files = ["app", "scripts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+filterwarnings = ["ignore:The anyio.abc.BlockingPortal alias:DeprecationWarning"]
+markers = ["live: hits the real NASA DONKI API (needs NASA_API_KEY)"]
+
+[tool.coverage.run]
+source = ["app"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

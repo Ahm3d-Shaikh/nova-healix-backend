@@ -1,94 +1,128 @@
-# FastAPI Backend
+# RIDGE Monitor — Backend (Nova Healix)
 
-A backend application built with **FastAPI** and Python.
+FastAPI backend for **RIDGE Monitor**, a crew health dashboard built on NASA's five
+spaceflight hazards (**R**adiation, **I**solation, **D**istance, **G**ravity, **E**nvironment)
+plus **Mirror Gap**, which checks whether an astronaut's self-assessment can be trusted.
+Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astronauts on Space Missions*.
 
-## Tech Stack
+> **Decision support prototype, not a medical device. Crew data is simulated; space-weather data is real NASA data.**
 
-- **Python** – Programming language
-- **FastAPI** – Backend framework
-- **Uvicorn** – ASGI server
-- **Pydantic** – Data validation
-- **venv** – Virtual environment
+- **Live API docs (Swagger):** https://nova-healix-backend-production.up.railway.app/docs
+- Full product/context brief: [docs/RIDGE_CONTEXT.md](docs/RIDGE_CONTEXT.md)
 
-## Project Structure
+## Project structure
 
 ```text
-.
-├── app/
-│   ├── routers/
-│   ├── services/
-│   ├── models/
-│   └── main.py
-├── .env
-├── .env.example
-├── .gitignore
-├── requirements.txt
-└── README.md
+app/
+├── main.py              # create_app() factory, CORS/gzip/request-context middleware, error mapping
+├── container.py         # builds and wires all services (dependency injection root)
+├── core/                # config (env), mission timeline, domain errors, logging, middleware
+├── models/              # Pydantic schemas (enums, alert, crew, typed card metrics, ...)
+├── rules/               # pure rules engine; thresholds.py = single source of truth for every limit
+├── services/            # DONKI client + parsers, space-weather fallback, crew generator,
+│                        #   crew / mirror-gap / isolation / settings services, in-memory store
+├── routers/             # thin HTTP endpoints, typed return models
+├── api/deps.py          # FastAPI dependencies
+└── data/donki_snapshot.json   # real DONKI response used as offline fallback
+scripts/                 # build_snapshot.py, check_donki_live.py
+tests/                   # pytest suite (offline; real DONKI payload replays)
 ```
 
-## Getting Started
+Design rules: rules are pure functions of a `RuleContext` (no I/O); every threshold lives in
+`app/rules/thresholds.py` tagged `[NASA]` / `[CSA]` / `[PAPER]` / `[OURS]`; routers contain no
+business logic and no error handling (domain errors are mapped to HTTP in one place); the DONKI
+client and clocks are injected, so tests need no network and no sleeping.
 
-### 1. Clone the repository
+## Endpoints
+
+| Method | Path | Returns |
+|---|---|---|
+| GET | `/api/space-weather?deep_space_mode=` | Normalized DONKI events + `source: live \| cached \| snapshot` |
+| GET | `/api/crew?day=N` | Astronauts with overall + per-card status |
+| GET | `/api/crew/{id}?day=N` | Records up to day N, six cards (R/I/D/G/E/MIRROR), alerts, gap series |
+| GET | `/api/alerts?day=N` | All amber/red alerts across the crew, worst first |
+| POST | `/api/mirror-gap/{id}` | Body `{self_rating, reaction_times_ms[], mode}` → lapses, false starts, gap, level |
+| GET | `/api/mirror-gap/{id}` | Mirror Gap history (simulated + submitted) |
+| GET / POST | `/api/settings` | Mission (iss/moon/mars), deep space mode, current mission day |
+| GET | `/api/dashboard?day=N` | **One call for the dashboard**: settings, data-source status, 6 cards per astronaut (level + numeric `metrics` + rule results), alert panel |
+| GET | `/api/timeline?astronaut=` | Card levels for all 30 days (day slider, history charts) + real storm days |
+| GET | `/api/isolation/questionnaire` | Three-Item Loneliness Scale questions/options/bands |
+| POST | `/api/isolation/{id}` | Body `{q1,q2,q3}` (1-3) → score, level, consecutive-days-≥7 |
+| GET | `/api/isolation/{id}` | Loneliness score history (simulated + submitted) |
+| GET | `/health` | Liveness check |
+
+Every rule result is `{rule, hazard, level, what, why, action, source}`. Card `metrics` are typed and
+discriminated by `kind` (see `/openapi.json`). `day` must be 1-30 (otherwise HTTP 422); POST check-ins accept
+an optional `?day=` and default to the saved current day. Errors are `{"detail": "..."}`.
+Every response carries `X-Request-ID` and `X-Process-Time-Ms`.
+
+## Data: real vs simulated
+
+- **Real:** NASA DONKI space weather (SEP, flares, CME, storms, notifications); limits from NASA-STD-3001
+  briefs; neutron figures from CSA Radi-N2; Three-Item Loneliness Scale; PVT-B test design.
+- **Simulated (seeded):** crew vitals, sleep, exercise, CO2/temperature, questionnaire answers, daily dose.
+- One real DONKI solar episode (8–12 May 2024) is inserted into the mission timeline on day 20.
+- All thresholds we invented are marked *illustrative*. The app "flags readings for review"; it does not diagnose.
+- DONKI resilience: live (cached 1 h) → last cached copy → bundled snapshot. When `/DONKI/FLR` is unavailable,
+  flares are derived from DONKI notifications. A failing API is not retried for 60 s.
+
+## Getting started
 
 ```bash
-git clone https://github.com/Ahm3d-Shaikh/nova-healix-backend.git
-cd nova-healix-backend
+make install                       # venv + dev dependencies
+cp .env.example .env               # set NASA_API_KEY (free at https://api.nasa.gov)
+make run                           # uvicorn with reload
 ```
 
-### 2. Create a virtual environment
+- API: http://127.0.0.1:8000 · Swagger: http://127.0.0.1:8000/docs · ReDoc: http://127.0.0.1:8000/redoc
+
+### Quality gate
 
 ```bash
-python3 -m venv .venv
+make check      # ruff lint + format check, mypy --strict, pytest with coverage >= 90 % (what CI runs)
+make format     # auto-fix lint + formatting
 ```
 
-### 3. Activate the virtual environment
+CI (`.github/workflows/ci.yml`) runs the same gate and a Docker build. Optional: `pre-commit install`.
 
-**macOS / Linux:**
+### Verify live NASA DONKI access
+
+`DEMO_KEY` allows only ~10 calls/hour, so use your own free key from https://api.nasa.gov
+(one live refresh = 5 calls, cached for 1 h):
 
 ```bash
-source .venv/bin/activate
+NASA_API_KEY=your_key python -m scripts.check_donki_live   # per-feed report + snapshot comparison
+NASA_API_KEY=your_key pytest -m live                        # opt-in live test
 ```
 
-**Windows:**
+The regular test suite replays real saved DONKI responses (`tests/fixtures/donki`), including
+429 rate limits, 5xx retries and network errors. `/api/space-weather` reports `reason: rate_limited`
+when NASA throttles the key, and the app keeps serving cache/snapshot data.
+
+### Refresh the DONKI snapshot
+
+Save `SEP.json`, `CME.json`, `GST.json`, `notifications.json` (and optionally `FLR.json`) from
+`https://api.nasa.gov/DONKI/<feed>?startDate=…&endDate=…&api_key=…` into a folder, then:
 
 ```bash
-.venv\Scripts\activate
+python -m scripts.build_snapshot path/to/raw
 ```
 
-### 4. Install dependencies
+## Deployment
 
-```bash
-pip install -r requirements.txt
-```
+`Dockerfile`: slim Python 3.12, non-root user, installs the fully pinned `requirements.lock`, health check on
+`/health`, honours `$PORT` (Railway). Set `NASA_API_KEY` in the service variables.
+`requirements.txt` lists direct dependencies; regenerate the lock after changing them
+(`pip install -r requirements.txt && pip freeze > requirements.lock` in a clean venv).
 
-### 5. Configure environment variables
+## Known limitations (deliberate for the hackathon)
 
-Create a `.env` file using the example:
+- Settings (mission, day, deep-space mode) are one process-wide demo state, not per user.
+- Mirror Gap / isolation submissions are kept in memory (`InMemoryStore`) and are lost on restart;
+  swap the store for a database to persist them. Run a single worker.
+- No authentication or rate limiting on the API; CORS is restricted to configured origins.
+- Routes live under `/api` (no version prefix) to match the agreed frontend contract.
 
-```bash
-cp .env.example .env
-```
+## Use of AI
 
-Update the environment variables as needed.
-
-### 6. Run the development server
-
-```bash
-uvicorn app.main:app --reload
-```
-
-The API will be available at:
-
-- **API:** http://127.0.0.1:8000
-- **Swagger Documentation:** http://127.0.0.1:8000/docs
-- **ReDoc:** http://127.0.0.1:8000/redoc
-
-## Development
-
-Make sure your virtual environment is activated before installing dependencies or running the application.
-
-To update dependencies:
-
-```bash
-pip freeze > requirements.txt
-```
+Parts of this backend were written with AI assistance (Claude Code) and reviewed by the team.
