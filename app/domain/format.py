@@ -43,7 +43,7 @@ def to_fixed(v: float, decimals: int) -> str:
     q = Decimal(1).scaleb(-decimals)
     out = Decimal(abs(v)).quantize(q, rounding=ROUND_HALF_UP)
     text = f"{out:f}"
-    return f"-{text}" if v < 0 and float(text) != 0 else text if v >= 0 or float(text) != 0 else text
+    return f"-{text}" if v < 0 and float(text) != 0 else text
 
 
 def format_number(v: float, decimals: int) -> str:

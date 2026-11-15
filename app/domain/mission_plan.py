@@ -40,7 +40,7 @@ def at(day: int, hour_of_day: float) -> float:
 def distance_au_on_day(day: int) -> float:
     """Earth-ship distance on an outbound Mars transit, AU (~0 at launch to ~1.45 AU at arrival)."""
     x = min(1.0, max(0.0, day / MISSION_DURATION_DAYS))
-    return 0.004 + 1.45 * x**1.3
+    return float(0.004 + 1.45 * x**1.3)
 
 
 def default_trajectory_au() -> list[float]:

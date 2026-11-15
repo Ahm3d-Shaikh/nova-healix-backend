@@ -29,7 +29,7 @@ def js_round(x: float) -> float:
 
 
 def round_to(v: float, digits: int) -> float:
-    f = 10**digits
+    f = 10.0**digits
     return js_round(v * f) / f
 
 

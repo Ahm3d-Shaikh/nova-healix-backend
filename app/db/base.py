@@ -31,6 +31,8 @@ class Table(Protocol):
 
     async def update(self, eq: Mapping[str, object], values: Row) -> list[Row]: ...
 
+    async def delete(self, eq: Mapping[str, object]) -> None: ...
+
 
 class Database(Protocol):
     name: str

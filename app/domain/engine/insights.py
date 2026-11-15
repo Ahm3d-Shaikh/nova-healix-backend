@@ -18,7 +18,7 @@ from app.domain.engine.context import (
     symptom_count,
 )
 from app.domain.format import format_clock, format_delay, format_metric, format_mission_time, format_pct, to_fixed
-from app.domain.mission_plan import FLIGHT_DIRECTOR, FLIGHT_SURGEON, hour_to_day
+from app.domain.mission_plan import FLIGHT_DIRECTOR, hour_to_day
 from app.domain.prng import clamp, js_round
 from app.domain.questionnaires import QUESTIONNAIRES
 from app.domain.stats import mean
@@ -65,11 +65,11 @@ def _dir(now: float, ref: float) -> str:
 
 
 def _ev(label: str, value: str, **kw: object) -> Evidence:
-    return Evidence(label=label, value=value, **kw)  # type: ignore[arg-type]
+    return Evidence(label=label, value=value, **kw)
 
 
 def _short(label: str) -> str:
-    return label.split(" ")[0]
+    return label.split(" ", maxsplit=1)[0]
 
 
 # -- rules ------------------------------------------------------------------------------------------
@@ -91,25 +91,73 @@ def _sleep_debt(ctx: EngineContext, crew_id: str) -> Insight | None:
     eva_days = math.ceil((eva.start - ctx.hour) / H_PER_DAY) if eva else None
     eva_soon = eva_days is not None and eva_days <= 5
     shift = next(
-        (e for e in ctx.db.events() if e.kind == "sleep-shift" and crew_id in e.crew_ids and e.start <= ctx.hour <= e.end),
+        (
+            e
+            for e in ctx.db.events()
+            if e.kind == "sleep-shift" and crew_id in e.crew_ids and e.start <= ctx.hour <= e.end
+        ),
         None,
     )
 
-    evidence = [_ev("Sleep, 5-night mean", format_metric("sleepDuration", x), reference=format_metric("sleepDuration", b.mean), metric="sleepDuration", crew_id=crew_id, direction="down")]
+    evidence = [
+        _ev(
+            "Sleep, 5-night mean",
+            format_metric("sleepDuration", x),
+            reference=format_metric("sleepDuration", b.mean),
+            metric="sleepDuration",
+            crew_id=crew_id,
+            direction="down",
+        )
+    ]
     signals = 1
     if eff_b and eff < eff_b.low:
         signals += 1
-        evidence.append(_ev("Sleep efficiency, 5 nights", format_metric("sleepEfficiency", eff), reference=format_metric("sleepEfficiency", eff_b.mean), metric="sleepEfficiency", crew_id=crew_id, direction="down"))
+        evidence.append(
+            _ev(
+                "Sleep efficiency, 5 nights",
+                format_metric("sleepEfficiency", eff),
+                reference=format_metric("sleepEfficiency", eff_b.mean),
+                metric="sleepEfficiency",
+                crew_id=crew_id,
+                direction="down",
+            )
+        )
     if hrv_b and hrv < hrv_b.mean * 0.9:
         signals += 1
-        evidence.append(_ev("HRV, 7-day resting mean", format_metric("hrv", hrv), reference=format_metric("hrv", hrv_b.mean), metric="hrv", crew_id=crew_id, direction="down"))
+        evidence.append(
+            _ev(
+                "HRV, 7-day resting mean",
+                format_metric("hrv", hrv),
+                reference=format_metric("hrv", hrv_b.mean),
+                metric="hrv",
+                crew_id=crew_id,
+                direction="down",
+            )
+        )
     if math.isfinite(sq):
-        evidence.append(_ev("Self-rated sleep quality", format_metric("sleepQuality", sq), metric="sleepQuality", crew_id=crew_id, direction=_dir(sq, 3.5)))
+        evidence.append(
+            _ev(
+                "Self-rated sleep quality",
+                format_metric("sleepQuality", sq),
+                metric="sleepQuality",
+                crew_id=crew_id,
+                direction=_dir(sq, 3.5),
+            )
+        )
     rt_b = ctx.db.baseline(crew_id, "reactionTime")
     rt = ctx.db.series(crew_id, "reactionTime").last_at(ctx.hour)
     if rt_b and rt and rt[1] > rt_b.high:
         signals += 1
-        evidence.append(_ev("Reaction time, latest test", format_metric("reactionTime", rt[1]), reference=format_metric("reactionTime", rt_b.mean), metric="reactionTime", crew_id=crew_id, direction="up"))
+        evidence.append(
+            _ev(
+                "Reaction time, latest test",
+                format_metric("reactionTime", rt[1]),
+                reference=format_metric("reactionTime", rt_b.mean),
+                metric="reactionTime",
+                crew_id=crew_id,
+                direction="up",
+            )
+        )
     if shift:
         evidence.append(_ev("Active schedule change", shift.label))
     if eva_soon and eva:
@@ -120,16 +168,37 @@ def _sleep_debt(ctx: EngineContext, crew_id: str) -> Insight | None:
     severity = "alert" if deficit >= 2 or (eva_soon and deficit >= 1.8) else "watch"
     latest_sleep = ctx.db.series(crew_id, "sleepDuration").last_at(ctx.hour)
     recommended = [
-        RecommendedAction(kind="countermeasure", countermeasure="sleep-shift", label="Adjust sleep shift", detail="Return sleep start to baseline for 2 nights; resume shift D144."),
-        RecommendedAction(kind="countermeasure", countermeasure="rest", label="Protect sleep opportunity", detail="Block 8.5 h rest window; move evening procedure reviews."),
-        RecommendedAction(kind="questionnaire", questionnaire_id="sleep", label="Assign sleep questionnaire", detail="Short sleep-quality questionnaire to confirm the cause."),
+        RecommendedAction(
+            kind="countermeasure",
+            countermeasure="sleep-shift",
+            label="Adjust sleep shift",
+            detail="Return sleep start to baseline for 2 nights; resume shift D144.",
+        ),
+        RecommendedAction(
+            kind="countermeasure",
+            countermeasure="rest",
+            label="Protect sleep opportunity",
+            detail="Block 8.5 h rest window; move evening procedure reviews.",
+        ),
+        RecommendedAction(
+            kind="questionnaire",
+            questionnaire_id="sleep",
+            label="Assign sleep questionnaire",
+            detail="Short sleep-quality questionnaire to confirm the cause.",
+        ),
     ]
     if eva_soon:
-        recommended.append(RecommendedAction(kind="escalate", label="Escalate EVA go/no-go input", detail="Flag to Earth flight surgeon for EVA readiness review."))
+        recommended.append(
+            RecommendedAction(
+                kind="escalate",
+                label="Escalate EVA go/no-go input",
+                detail="Flag to Earth flight surgeon for EVA readiness review.",
+            )
+        )
     return Insight(
         id=f"sleep-debt:{crew_id}",
         crew_id=crew_id,
-        severity=severity,  # type: ignore[arg-type]
+        severity=severity,
         hazards=["isolation", "environment"],
         title=title,
         summary=(
@@ -160,7 +229,16 @@ def _isolation_stress(ctx: EngineContext, crew_id: str) -> Insight | None:
     mood = recent_mean(ctx, crew_id, "mood", 7)
     if mood_b and mood < mood_b.low:
         signals += 1
-        evidence.append(_ev("Mood, 7-day mean", format_metric("mood", mood), reference=format_metric("mood", mood_b.mean), metric="mood", crew_id=crew_id, direction="down"))
+        evidence.append(
+            _ev(
+                "Mood, 7-day mean",
+                format_metric("mood", mood),
+                reference=format_metric("mood", mood_b.mean),
+                metric="mood",
+                crew_id=crew_id,
+                direction="down",
+            )
+        )
     stress_b = ctx.db.baseline(crew_id, "stress")
     stress_all = ctx.db.series(crew_id, "stress").slice(0, ctx.hour).pairs()
     stress = stress_all[-1] if stress_all else None
@@ -171,7 +249,9 @@ def _isolation_stress(ctx: EngineContext, crew_id: str) -> Insight | None:
             _ev(
                 "Stress index, latest weekly",
                 format_metric("stress", stress[1]),
-                reference=f"{format_metric('stress', stress_3w[1])} 3 wk ago" if stress_3w else format_metric("stress", stress_b.mean),
+                reference=f"{format_metric('stress', stress_3w[1])} 3 wk ago"
+                if stress_3w
+                else format_metric("stress", stress_b.mean),
                 metric="stress",
                 crew_id=crew_id,
                 direction="up",
@@ -194,12 +274,23 @@ def _isolation_stress(ctx: EngineContext, crew_id: str) -> Insight | None:
     missed = missed_check_in_days(ctx, crew_id, 10)
     if len(missed) >= 2:
         signals += 1
-        evidence.append(_ev("Missed check-ins, 10 days", f"{len(missed)} ({', '.join(f'D{d}' for d in missed)})", direction="up"))
+        evidence.append(
+            _ev("Missed check-ins, 10 days", f"{len(missed)} ({', '.join(f'D{d}' for d in missed)})", direction="up")
+        )
     eff_b = ctx.db.baseline(crew_id, "sleepEfficiency")
     eff = recent_mean(ctx, crew_id, "sleepEfficiency", 7)
     if eff_b and eff < eff_b.low:
         signals += 1
-        evidence.append(_ev("Sleep efficiency, 7 nights", format_metric("sleepEfficiency", eff), reference=format_metric("sleepEfficiency", eff_b.mean), metric="sleepEfficiency", crew_id=crew_id, direction="down"))
+        evidence.append(
+            _ev(
+                "Sleep efficiency, 7 nights",
+                format_metric("sleepEfficiency", eff),
+                reference=format_metric("sleepEfficiency", eff_b.mean),
+                metric="sleepEfficiency",
+                crew_id=crew_id,
+                direction="down",
+            )
+        )
     if signals < 3:
         return None
     who = _name(ctx, crew_id)
@@ -223,10 +314,28 @@ def _isolation_stress(ctx: EngineContext, crew_id: str) -> Insight | None:
         evidence=evidence,
         confidence=_confidence(signals, 0.5),
         recommended=[
-            RecommendedAction(kind="message", label="Check in privately", detail="Send a private, low-pressure message from the flight surgeon."),
-            RecommendedAction(kind="questionnaire", questionnaire_id="team", label="Assign team dynamics questionnaire", detail="Short isolation and team-dynamics questionnaire."),
-            RecommendedAction(kind="countermeasure", countermeasure="rest", label="Protected off-duty block", detail="Schedule 2 h crew-choice time tomorrow."),
-            RecommendedAction(kind="escalate", label="Request psych conference", detail="Queue a private conference with the Earth-based psychologist."),
+            RecommendedAction(
+                kind="message",
+                label="Check in privately",
+                detail="Send a private, low-pressure message from the flight surgeon.",
+            ),
+            RecommendedAction(
+                kind="questionnaire",
+                questionnaire_id="team",
+                label="Assign team dynamics questionnaire",
+                detail="Short isolation and team-dynamics questionnaire.",
+            ),
+            RecommendedAction(
+                kind="countermeasure",
+                countermeasure="rest",
+                label="Protected off-duty block",
+                detail="Schedule 2 h crew-choice time tomorrow.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                label="Request psych conference",
+                detail="Queue a private conference with the Earth-based psychologist.",
+            ),
         ],
     )
 
@@ -244,8 +353,17 @@ def _radiation_outlier(ctx: EngineContext, crew_id: str) -> Insight | None:
     who = _name(ctx, crew_id)
     spe = next((e for e in ctx.db.events() if e.kind == "spe" and e.start <= ctx.hour), None)
     evidence = [
-        _ev("Cumulative effective dose", f"{to_fixed(dose, 0)} mSv", reference=f"{to_fixed(median, 0)} mSv crew median", metric="radDose", crew_id=crew_id, direction="up"),
-        _ev("Share of career limit", f"{to_fixed(pct, 0)}%", reference=f"{to_fixed(ctx.career_limit_msv, 0)} mSv limit"),
+        _ev(
+            "Cumulative effective dose",
+            f"{to_fixed(dose, 0)} mSv",
+            reference=f"{to_fixed(median, 0)} mSv crew median",
+            metric="radDose",
+            crew_id=crew_id,
+            direction="up",
+        ),
+        _ev(
+            "Share of career limit", f"{to_fixed(pct, 0)}%", reference=f"{to_fixed(ctx.career_limit_msv, 0)} mSv limit"
+        ),
         _ev("Projected at arrival", f"{to_fixed(projected, 0)} mSv"),
     ]
     if spe:
@@ -269,9 +387,20 @@ def _radiation_outlier(ctx: EngineContext, crew_id: str) -> Insight | None:
         evidence=evidence,
         confidence=0.92,
         recommended=[
-            RecommendedAction(kind="countermeasure", countermeasure="storm-shelter", label="Pre-assign shelter role", detail="Make another crew member responsible for the medical bay during the next SPE so this astronaut shelters first."),
-            RecommendedAction(kind="message", label="Review duty cycle", detail="Reduce scheduled time in low-shielding modules."),
-            RecommendedAction(kind="escalate", label="Career dose review", detail="Send dosimetry summary to the Earth radiation health officer."),
+            RecommendedAction(
+                kind="countermeasure",
+                countermeasure="storm-shelter",
+                label="Pre-assign shelter role",
+                detail="Make another crew member responsible for the medical bay during the next SPE so this astronaut shelters first.",
+            ),
+            RecommendedAction(
+                kind="message", label="Review duty cycle", detail="Reduce scheduled time in low-shielding modules."
+            ),
+            RecommendedAction(
+                kind="escalate",
+                label="Career dose review",
+                detail="Send dosimetry summary to the Earth radiation health officer.",
+            ),
         ],
     )
 
@@ -293,14 +422,32 @@ def _fluid_shift(ctx: EngineContext, crew_id: str) -> Insight | None:
     acc = ctx.db.series(crew_id, "visionAcuity").last_at(ctx.hour)
     if acc_b and acc and acc[1] < acc_b.low:
         signals += 1
-        evidence.append(_ev("Near visual acuity, latest check", format_metric("visionAcuity", acc[1]), reference=format_metric("visionAcuity", acc_b.mean), metric="visionAcuity", crew_id=crew_id, direction="down"))
+        evidence.append(
+            _ev(
+                "Near visual acuity, latest check",
+                format_metric("visionAcuity", acc[1]),
+                reference=format_metric("visionAcuity", acc_b.mean),
+                metric="visionAcuity",
+                crew_id=crew_id,
+                direction="down",
+            )
+        )
     congestion = symptom_count(ci, "congestion")
     if congestion:
         signals += 1
         evidence.append(_ev("Congestion reports, 7 days", f"{congestion}"))
     if sys_b and sys_ > sys_b.mean + 3:
         signals += 1
-        evidence.append(_ev("Systolic BP, 7-day resting mean", format_metric("bpSys", sys_), reference=format_metric("bpSys", sys_b.mean), metric="bpSys", crew_id=crew_id, direction="up"))
+        evidence.append(
+            _ev(
+                "Systolic BP, 7-day resting mean",
+                format_metric("bpSys", sys_),
+                reference=format_metric("bpSys", sys_b.mean),
+                metric="bpSys",
+                crew_id=crew_id,
+                direction="up",
+            )
+        )
     who = _name(ctx, crew_id)
     last_report = next((c for c in reversed(ci) if c.symptoms), None)
     return Insight(
@@ -323,9 +470,22 @@ def _fluid_shift(ctx: EngineContext, crew_id: str) -> Insight | None:
         evidence=evidence,
         confidence=_confidence(signals, 0.5),
         recommended=[
-            RecommendedAction(kind="message", label="Request ocular exam", detail="Ask for fundoscopy, Amsler grid and visual acuity tonight."),
-            RecommendedAction(kind="escalate", label="Ophthalmology consult", detail="Queue imaging review with the Earth ophthalmologist."),
-            RecommendedAction(kind="countermeasure", countermeasure="exercise", label="Add LBNP session", detail="Lower-body negative pressure, 30 min daily for 5 days."),
+            RecommendedAction(
+                kind="message",
+                label="Request ocular exam",
+                detail="Ask for fundoscopy, Amsler grid and visual acuity tonight.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                label="Ophthalmology consult",
+                detail="Queue imaging review with the Earth ophthalmologist.",
+            ),
+            RecommendedAction(
+                kind="countermeasure",
+                countermeasure="exercise",
+                label="Add LBNP session",
+                detail="Lower-body negative pressure, 30 min daily for 5 days.",
+            ),
         ],
     )
 
@@ -362,13 +522,29 @@ def _exercise_compliance(ctx: EngineContext, crew_id: str) -> Insight | None:
         primary_metric="muscleMass",
         evidence=[
             _ev("Sessions completed, 14 days", f"{done} / {len(sessions)}", direction="down"),
-            _ev("Bone density since launch", format_pct(b_pct, 1), reference="−0.5%/mo target", metric="boneDensity", crew_id=crew_id, direction="down"),
+            _ev(
+                "Bone density since launch",
+                format_pct(b_pct, 1),
+                reference="−0.5%/mo target",
+                metric="boneDensity",
+                crew_id=crew_id,
+                direction="down",
+            ),
             _ev("Lean mass since launch", format_pct(l_pct, 1), metric="muscleMass", crew_id=crew_id, direction="down"),
         ],
         confidence=0.83,
         recommended=[
-            RecommendedAction(kind="countermeasure", countermeasure="exercise", label="Reschedule exercise", detail="Move sessions to a fixed morning slot with a crew partner."),
-            RecommendedAction(kind="message", label="Ask about barriers", detail="Check whether workload, motivation or discomfort is the cause."),
+            RecommendedAction(
+                kind="countermeasure",
+                countermeasure="exercise",
+                label="Reschedule exercise",
+                detail="Move sessions to a fixed morning slot with a crew partner.",
+            ),
+            RecommendedAction(
+                kind="message",
+                label="Ask about barriers",
+                detail="Check whether workload, motivation or discomfort is the cause.",
+            ),
         ],
     )
 
@@ -422,9 +598,22 @@ def _workload_high(ctx: EngineContext, crew_id: str) -> Insight | None:
         why_it_matters="With signal delay, the crew carries more of the planning load. Sustained high workload erodes sleep and margin.",
         detected_at=w[0],
         primary_metric="workload",
-        evidence=[_ev("Workload index", format_metric("workload", w[1]), reference=format_metric("workload", b.mean), metric="workload", crew_id=crew_id, direction="up")],
+        evidence=[
+            _ev(
+                "Workload index",
+                format_metric("workload", w[1]),
+                reference=format_metric("workload", b.mean),
+                metric="workload",
+                crew_id=crew_id,
+                direction="up",
+            )
+        ],
         confidence=0.74,
-        recommended=[RecommendedAction(kind="message", label="Offer task re-plan", detail="Ask which tasks can move after the EVA.")],
+        recommended=[
+            RecommendedAction(
+                kind="message", label="Offer task re-plan", detail="Ask which tasks can move after the EVA."
+            )
+        ],
     )
 
 
@@ -459,7 +648,9 @@ def _check_in_flag(ctx: EngineContext, crew_id: str) -> Insight | None:
         primary_metric="mood",
         evidence=evidence,
         confidence=0.7,
-        recommended=[RecommendedAction(kind="message", label="Follow up", detail="Ask for details at the next convenient break.")],
+        recommended=[
+            RecommendedAction(kind="message", label="Follow up", detail="Ask for details at the next convenient break.")
+        ],
     )
 
 
@@ -487,13 +678,28 @@ def _cabin_co2(ctx: EngineContext) -> Insight | None:
         detected_at=anomaly.start + 6 if anomaly else ctx.hour,
         primary_metric="co2",
         evidence=[
-            _ev(f"{_name(ctx, cid)}, 48 h mean", format_metric("co2", v), reference="3.0 mmHg limit", metric="co2", crew_id=cid, direction="up")
+            _ev(
+                f"{_name(ctx, cid)}, 48 h mean",
+                format_metric("co2", v),
+                reference="3.0 mmHg limit",
+                metric="co2",
+                crew_id=cid,
+                direction="up",
+            )
             for cid, v in per
         ],
         confidence=0.9,
         recommended=[
-            RecommendedAction(kind="message", label="Crew ventilation advisory", detail="Increase fan speed in crew quarters; avoid sleeping near the galley."),
-            RecommendedAction(kind="escalate", label="ECLSS engineering support", detail="Send scrubber bed telemetry to the Earth ECLSS team."),
+            RecommendedAction(
+                kind="message",
+                label="Crew ventilation advisory",
+                detail="Increase fan speed in crew quarters; avoid sleeping near the galley.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                label="ECLSS engineering support",
+                detail="Send scrubber bed telemetry to the Earth ECLSS team.",
+            ),
         ],
     )
 
@@ -530,15 +736,39 @@ def _safety_insight(ctx: EngineContext, f: SafetyFlag) -> Insight:
     mood_b = ctx.db.baseline(f.crew_id, "mood")
     mood = recent_mean(ctx, f.crew_id, "mood", 7)
     if math.isfinite(mood):
-        evidence.append(_ev("Mood, 7-day mean", format_metric("mood", mood), reference=format_metric("mood", mood_b.mean) if mood_b else None, metric="mood", crew_id=f.crew_id))
+        evidence.append(
+            _ev(
+                "Mood, 7-day mean",
+                format_metric("mood", mood),
+                reference=format_metric("mood", mood_b.mean) if mood_b else None,
+                metric="mood",
+                crew_id=f.crew_id,
+            )
+        )
     sleep = recent_mean(ctx, f.crew_id, "sleepDuration", 5)
     sleep_b = ctx.db.baseline(f.crew_id, "sleepDuration")
     if math.isfinite(sleep):
-        evidence.append(_ev("Sleep, last 5 nights", format_metric("sleepDuration", sleep), reference=format_metric("sleepDuration", sleep_b.mean) if sleep_b else None, metric="sleepDuration", crew_id=f.crew_id))
+        evidence.append(
+            _ev(
+                "Sleep, last 5 nights",
+                format_metric("sleepDuration", sleep),
+                reference=format_metric("sleepDuration", sleep_b.mean) if sleep_b else None,
+                metric="sleepDuration",
+                crew_id=f.crew_id,
+            )
+        )
     hrv = recent_mean(ctx, f.crew_id, "hrv", 7)
     hrv_b = ctx.db.baseline(f.crew_id, "hrv")
     if math.isfinite(hrv):
-        evidence.append(_ev("HRV, 7-day resting", format_metric("hrv", hrv), reference=format_metric("hrv", hrv_b.mean) if hrv_b else None, metric="hrv", crew_id=f.crew_id))
+        evidence.append(
+            _ev(
+                "HRV, 7-day resting",
+                format_metric("hrv", hrv),
+                reference=format_metric("hrv", hrv_b.mean) if hrv_b else None,
+                metric="hrv",
+                crew_id=f.crew_id,
+            )
+        )
     missed = len(missed_check_in_days(ctx, f.crew_id, 7))
     evidence.append(_ev("Missed check-ins, 7 days", f"{missed}"))
     eva = next_eva_for(ctx, f.crew_id)
@@ -550,21 +780,71 @@ def _safety_insight(ctx: EngineContext, f: SafetyFlag) -> Insight:
 
     if medical:
         recommended = [
-            RecommendedAction(kind="escalate", log="in-person", label=f"Ask {cmo.name if cmo else 'the CMO'} to assess {who} now", detail="In-person assessment on board; do not wait for Earth."),
-            RecommendedAction(kind="message", label=f"Message {who}", detail="Acknowledge the symptoms and ask for a voice call at the next window."),
-            RecommendedAction(kind="escalate", log="medical", label="Request Earth medical consult", detail="Specialist review of symptoms and onboard findings."),
-            RecommendedAction(kind="countermeasure", countermeasure="rest", label="Stop exercise and hazardous tasks", detail=f"Pause exercise{f' and {_short(eva.label)} duties' if eva else ''} until cleared."),
-            RecommendedAction(kind="escalate", label=f"Escalate to {FLIGHT_DIRECTOR}", detail="Flight director decides on schedule changes."),
+            RecommendedAction(
+                kind="escalate",
+                log="in-person",
+                label=f"Ask {cmo.name if cmo else 'the CMO'} to assess {who} now",
+                detail="In-person assessment on board; do not wait for Earth.",
+            ),
+            RecommendedAction(
+                kind="message",
+                label=f"Message {who}",
+                detail="Acknowledge the symptoms and ask for a voice call at the next window.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                log="medical",
+                label="Request Earth medical consult",
+                detail="Specialist review of symptoms and onboard findings.",
+            ),
+            RecommendedAction(
+                kind="countermeasure",
+                countermeasure="rest",
+                label="Stop exercise and hazardous tasks",
+                detail=f"Pause exercise{f' and {_short(eva.label)} duties' if eva else ''} until cleared.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                label=f"Escalate to {FLIGHT_DIRECTOR}",
+                detail="Flight director decides on schedule changes.",
+            ),
         ]
     else:
         recommended = [
-            RecommendedAction(kind="message", label=f"Message {who} now", detail=f"Let {who} know you got the alert and ask for a call at the next window. Arrives after the signal delay."),
-            RecommendedAction(kind="escalate", log="in-person", label=f"Ask {cdr.name if cdr else 'a crewmate'} to check on {who} in person", detail=f"{who} should not be alone right now."),
-            RecommendedAction(kind="escalate", log="psych", label="Book urgent psychologist conference", detail="Private conference with the Earth psychologist at the next window."),
+            RecommendedAction(
+                kind="message",
+                label=f"Message {who} now",
+                detail=f"Let {who} know you got the alert and ask for a call at the next window. Arrives after the signal delay.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                log="in-person",
+                label=f"Ask {cdr.name if cdr else 'a crewmate'} to check on {who} in person",
+                detail=f"{who} should not be alone right now.",
+            ),
+            RecommendedAction(
+                kind="escalate",
+                log="psych",
+                label="Book urgent psychologist conference",
+                detail="Private conference with the Earth psychologist at the next window.",
+            ),
         ]
         if eva and eva_days is not None and eva_days <= 7:
-            recommended.append(RecommendedAction(kind="countermeasure", countermeasure="rest", label=f"Review {_short(eva.label)} assignment", detail=f"Hold {who}’s role until assessed."))
-        recommended.append(RecommendedAction(kind="escalate", label=f"Escalate to {FLIGHT_DIRECTOR}", detail="Flight director decides on schedule changes."))
+            recommended.append(
+                RecommendedAction(
+                    kind="countermeasure",
+                    countermeasure="rest",
+                    label=f"Review {_short(eva.label)} assignment",
+                    detail=f"Hold {who}’s role until assessed.",
+                )
+            )
+        recommended.append(
+            RecommendedAction(
+                kind="escalate",
+                label=f"Escalate to {FLIGHT_DIRECTOR}",
+                detail="Flight director decides on schedule changes.",
+            )
+        )
 
     return Insight(
         id=f"safety:{f.id}",
@@ -607,7 +887,11 @@ def _crew_mode_insights(ctx: EngineContext) -> list[Insight]:
                 detected_at=n.at,
                 evidence=[_ev("Source", "Shared from Nova by the astronaut")],
                 confidence=1,
-                recommended=[RecommendedAction(kind="message", label="Reply", detail=f"Thank {who} and follow up at a convenient time.")],
+                recommended=[
+                    RecommendedAction(
+                        kind="message", label="Reply", detail=f"Thank {who} and follow up at a convenient time."
+                    )
+                ],
             )
         )
     for a in (a for a in ctx.db.assignments() if a.status == "done" and (a.completed_at or 0) <= ctx.hour):
@@ -616,7 +900,13 @@ def _crew_mode_insights(ctx: EngineContext) -> list[Insight]:
         score = a.score or 0
         band = "high strain" if score >= 60 else "some strain" if score >= 35 else "low strain"
         comment = next(
-            (v for qq in q.questions if qq.kind == "text" for v in [a.answers.get(qq.id)] if isinstance(v, str) and v.strip()),
+            (
+                v
+                for qq in q.questions
+                if qq.kind == "text"
+                for v in [a.answers.get(qq.id)]
+                if isinstance(v, str) and v.strip()
+            ),
             None,
         )
         evidence = [_ev("Score", f"{score}/100", metric=q.feeds, crew_id=a.crew_id)]
@@ -635,13 +925,26 @@ def _crew_mode_insights(ctx: EngineContext) -> list[Insight]:
                 primary_metric=q.feeds,
                 evidence=evidence,
                 confidence=0.8,
-                recommended=[RecommendedAction(kind="acknowledge", label="Acknowledge", detail="Review the answers and follow up if needed.")],
+                recommended=[
+                    RecommendedAction(
+                        kind="acknowledge", label="Acknowledge", detail="Review the answers and follow up if needed."
+                    )
+                ],
             )
         )
     return out
 
 
-_RULES: list[Rule] = [_sleep_debt, _isolation_stress, _radiation_outlier, _fluid_shift, _exercise_compliance, _bone_on_track, _workload_high, _check_in_flag]
+_RULES: list[Rule] = [
+    _sleep_debt,
+    _isolation_stress,
+    _radiation_outlier,
+    _fluid_shift,
+    _exercise_compliance,
+    _bone_on_track,
+    _workload_high,
+    _check_in_flag,
+]
 
 
 def detect_insights(ctx: EngineContext) -> list[Insight]:
@@ -656,4 +959,6 @@ def detect_insights(ctx: EngineContext) -> list[Insight]:
         out.append(co2)
     out += _crew_mode_insights(ctx)
     # Nova safety alerts always come first: someone needs help now.
-    return sorted(out, key=lambda i: (0 if i.id.startswith("safety:") else 1, -SEVERITY_RANK[i.severity], -i.detected_at))
+    return sorted(
+        out, key=lambda i: (0 if i.id.startswith("safety:") else 1, -SEVERITY_RANK[i.severity], -i.detected_at)
+    )

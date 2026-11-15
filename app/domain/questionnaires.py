@@ -7,7 +7,8 @@ from app.domain.prng import js_round
 from app.schemas.crewmode import AnswerValue, Assignment, Questionnaire, QuestionnaireId
 
 QUESTIONNAIRES: dict[str, Questionnaire] = {
-    qid: Questionnaire.model_validate(q) for qid, q in json.loads((DATA_DIR / "questionnaires.json").read_text()).items()
+    qid: Questionnaire.model_validate(q)
+    for qid, q in json.loads((DATA_DIR / "questionnaires.json").read_text()).items()
 }
 
 

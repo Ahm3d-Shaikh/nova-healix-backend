@@ -2,39 +2,50 @@
 
 
 class DomainError(Exception):
-    """Base class for expected, client-visible errors."""
+    """Base class for expected, client-visible errors. Maps to 400 unless a subclass is registered."""
 
 
-class UnknownAstronautError(DomainError):
+class NotFoundError(DomainError):
+    """404."""
+
+
+class ConflictError(DomainError):
+    """409."""
+
+
+class UnavailableError(DomainError):
+    """503: something we depend on (database, Gemini) is not available."""
+
+
+class UnknownAstronautError(NotFoundError):
     def __init__(self, astronaut_id: str) -> None:
         super().__init__(f"Unknown astronaut '{astronaut_id}'")
 
 
-class InvalidDayError(DomainError):
-    def __init__(self, day: int, mission_days: int) -> None:
-        super().__init__(f"Mission day {day} is outside 1-{mission_days}")
+class UnknownMetricError(NotFoundError):
+    def __init__(self, metric: str) -> None:
+        super().__init__(f"Unknown metric '{metric}'")
 
 
-class SessionNotFoundError(DomainError):
-    def __init__(self, session_id: str) -> None:
-        super().__init__(f"Unknown check-in session '{session_id}'")
+class UnknownHazardError(NotFoundError):
+    def __init__(self, hazard: str) -> None:
+        super().__init__(f"Unknown hazard '{hazard}'")
 
 
-class SessionClosedError(DomainError):
+class UnknownAssignmentError(NotFoundError):
+    def __init__(self, assignment_id: str) -> None:
+        super().__init__(f"Unknown assignment '{assignment_id}'")
+
+
+class AlreadySubmittedError(ConflictError):
     def __init__(self) -> None:
-        super().__init__("This check-in session is already completed; start a new one")
+        super().__init__("This questionnaire is already submitted")
 
 
-class SessionTurnLimitError(DomainError):
-    def __init__(self, max_turns: int) -> None:
-        super().__init__(f"Reply limit of {max_turns} reached; complete the check-in to get a score")
+class InvalidAnswersError(DomainError):
+    pass
 
 
-class NotEnoughTurnsError(DomainError):
-    def __init__(self, have: int, need: int) -> None:
-        super().__init__(f"Need at least {need} astronaut replies to score the check-in (have {have})")
-
-
-class CompanionUnavailableError(DomainError):
+class CompanionUnavailableError(UnavailableError):
     def __init__(self, reason: str) -> None:
-        super().__init__(f"AI check-in companion unavailable: {reason}")
+        super().__init__(f"Companion unavailable: {reason}")

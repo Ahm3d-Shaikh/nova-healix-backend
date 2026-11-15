@@ -62,9 +62,9 @@ def _paint(arr: list[float], start: float, end: float, weight: float = 1.0) -> N
             arr[h] = min(1.0, arr[h] + overlap * weight)
 
 
-def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a flat port of the reference generator
+def generate_crew(crew_id: str) -> CrewBundle:
     p = PERSONAS[crew_id]
-    P = p.params  # noqa: N806
+    P = p.params
     rng = Rng(f"nhx-1:{crew_id}")
     eva_days = _eva_days_for(crew_id)
 
@@ -156,7 +156,9 @@ def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a fla
         # Weekly tablet tests: reaction time (PVT) and near vision
         if d % 7 == 0:
             rt_bump = 22 if d == 98 else 0  # post solar-event fatigue
-            push("reactionTime", at(d, 20.5), round_to(P["rt"] + story_value(p, "rt", d) + rng.gauss() * 7 + rt_bump, 0))
+            push(
+                "reactionTime", at(d, 20.5), round_to(P["rt"] + story_value(p, "rt", d) + rng.gauss() * 7 + rt_bump, 0)
+            )
             acuity = P["acuity"] + story_value(p, "acuity", d) + rng.gauss() * 0.025
             push("visionAcuity", at(d, 20.6), round_to(js_round(acuity * 20) / 20, 2))
         # Extra vision check the evening Sabaina reported blurred near vision
@@ -179,11 +181,17 @@ def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a fla
         # Weekly questionnaires
         if d % 7 == 0:
             spe_bump = 12 if d == 98 else 0
-            push("stress", at(d, 19), round_to(clamp(P["stress"] + story_value(p, "stress", d) + rng.gauss() * 4.5 + spe_bump, 0, 100), 0))
+            push(
+                "stress",
+                at(d, 19),
+                round_to(clamp(P["stress"] + story_value(p, "stress", d) + rng.gauss() * 4.5 + spe_bump, 0, 100), 0),
+            )
             push(
                 "workload",
                 at(d, 19),
-                round_to(clamp(P["workload"] + story_value(p, "workload", d) + rng.gauss() * 4.5 + spe_bump * 0.5, 0, 100), 0),
+                round_to(
+                    clamp(P["workload"] + story_value(p, "workload", d) + rng.gauss() * 4.5 + spe_bump * 0.5, 0, 100), 0
+                ),
             )
 
     # EVA and storm-shelter windows
@@ -226,8 +234,16 @@ def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a fla
         warm = min(1.0, d / 60)
 
         hr = (
-            P["hr"] + 3 * circ + 6 * awake - 5 * s + 42 * ex + 22 * ev + 6 * sh + 6 * adapt
-            + story_value(p, "hr", d) + n_hr.step()
+            P["hr"]
+            + 3 * circ
+            + 6 * awake
+            - 5 * s
+            + 42 * ex
+            + 22 * ev
+            + 6 * sh
+            + 6 * adapt
+            + story_value(p, "hr", d)
+            + n_hr.step()
         )
         hrv_factor = (1 + 0.22 * s - 0.45 * ex - 0.3 * ev - 0.15 * sh) * (1 + story_value(p, "hrvPct", d))
         hrv = P["hrv"] * hrv_factor * (1 + n_hrv.step())
@@ -259,8 +275,13 @@ def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a fla
         # Crew-quarters environment
         anomaly = 1 if d >= 140 else 0
         noise = (
-            47 * s + 56 * awake + 10 * ex + P["noiseOffset"] + 3 * anomaly
-            + s * story_value(p, "nightNoise", d) + n_noise.step()
+            47 * s
+            + 56 * awake
+            + 10 * ex
+            + P["noiseOffset"]
+            + 3 * anomaly
+            + s * story_value(p, "nightNoise", d)
+            + n_noise.step()
         )
         push("cabinNoise", h, round_to(clamp(noise, 38, 78), 1))
         push("cabinTemp", h, round_to(22.6 + 0.4 * circ + 0.3 * ex + 0.6 * anomaly + n_cab_t.step(), 2))
@@ -293,7 +314,7 @@ def generate_crew(crew_id: str) -> CrewBundle:  # noqa: PLR0912, PLR0915 - a fla
                 mood=mood,
                 sleep_quality=sleep_q,
                 energy=energy,
-                symptoms=p.symptoms.get(d, []),  # type: ignore[arg-type]
+                symptoms=p.symptoms.get(d, []),
                 note=p.notes.get(d),
             )
         )

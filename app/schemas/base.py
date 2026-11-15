@@ -15,7 +15,7 @@ class CamelModel(BaseModel):
 
     @model_serializer(mode="wrap")
     def _drop_unset_optionals(self, handler: Any) -> dict[str, Any]:
-        data = handler(self)
+        data: dict[str, Any] = handler(self)
         for name in self.omit_when_none:
             field = self.__class__.model_fields[name]
             key = field.serialization_alias or field.alias or name

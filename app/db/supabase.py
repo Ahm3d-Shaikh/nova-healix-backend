@@ -53,6 +53,11 @@ class SupabaseTable:
     async def update(self, eq: Mapping[str, object], values: Row) -> list[Row]:
         return _rows(await self._send("PATCH", params=_filters(eq), json=values, prefer="return=representation"))
 
+    async def delete(self, eq: Mapping[str, object]) -> None:
+        if not eq:
+            raise DatabaseError(f"refusing to delete every row of {self._name}")
+        await self._send("DELETE", params=_filters(eq), prefer="return=minimal")
+
     async def _send(
         self, method: str, *, params: dict[str, str] | None = None, json: Any = None, prefer: str | None = None
     ) -> httpx.Response:

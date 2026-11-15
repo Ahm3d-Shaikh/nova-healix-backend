@@ -75,7 +75,14 @@ def _related_out_of_range(ctx: EngineContext, crew_id: str, metric: str) -> list
         out.append(
             (
                 abs(z),
-                Evidence(label=m.label, value=format_metric(k, x), reference=format_metric(k, b.mean), metric=k, crew_id=crew_id, direction="up" if z > 0 else "down"),
+                Evidence(
+                    label=m.label,
+                    value=format_metric(k, x),
+                    reference=format_metric(k, b.mean),
+                    metric=k,
+                    crew_id=crew_id,
+                    direction="up" if z > 0 else "down",
+                ),
             )
         )
     out.sort(key=lambda p: -p[0])
@@ -128,29 +135,43 @@ def interpret_metric(ctx: EngineContext, crew_id: str, metric: str) -> MetricInt
         summary += f", {format_metric('radDose', avg / ctx.career_limit_msv * 100, False).split('.')[0]}% of the {int(ctx.career_limit_msv)} mSv career limit."
     else:
         summary += "."
-    summary += " The trend is stable." if trend == "flat" else f" The trend is {'rising' if trend == 'up' else 'falling'}."
+    summary += (
+        " The trend is stable." if trend == "flat" else f" The trend is {'rising' if trend == 'up' else 'falling'}."
+    )
 
     # Related findings
     insights = [
         i
         for i in detect_insights(ctx)
         if (i.crew_id == crew_id or i.crew_id is None)
-        and (i.primary_metric == metric or any(e.metric == metric and (e.crew_id or crew_id) == crew_id for e in i.evidence))
+        and (
+            i.primary_metric == metric
+            or any(e.metric == metric and (e.crew_id or crew_id) == crew_id for e in i.evidence)
+        )
     ]
     top = insights[0] if insights else None
-    contributing = [e for e in top.evidence if e.metric != metric][:4] if top else _related_out_of_range(ctx, crew_id, metric)
+    contributing = (
+        [e for e in top.evidence if e.metric != metric][:4] if top else _related_out_of_range(ctx, crew_id, metric)
+    )
 
     if top:
         recommended = top.recommended
     elif status == "nominal":
-        recommended = [RecommendedAction(kind="acknowledge", label="No action needed", detail="Keep monitoring at the usual cadence.")]
+        recommended = [
+            RecommendedAction(
+                kind="acknowledge", label="No action needed", detail="Keep monitoring at the usual cadence."
+            )
+        ]
     else:
         recommended = [
-            RecommendedAction(kind="message", label="Review countermeasure", detail=HAZARD_COUNTERMEASURES[h][0]) for h in d.hazards[:1]
+            RecommendedAction(kind="message", label="Review countermeasure", detail=HAZARD_COUNTERMEASURES[h][0])
+            for h in d.hazards[:1]
         ]
 
     samples = len(recent_pairs)
-    confidence = top.confidence if top else js_round(min(0.92, 0.55 + min(samples, 40) * 0.008 + (0.06 if b else 0)) * 100) / 100
+    confidence = (
+        top.confidence if top else js_round(min(0.92, 0.55 + min(samples, 40) * 0.008 + (0.06 if b else 0)) * 100) / 100
+    )
 
     return MetricInterpretation(
         crew_id=crew_id,
@@ -160,6 +181,6 @@ def interpret_metric(ctx: EngineContext, crew_id: str, metric: str) -> MetricInt
         contributing=contributing,
         confidence=confidence,
         recommended=recommended,
-        trend=trend,  # type: ignore[arg-type]
-        status=status,  # type: ignore[arg-type]
+        trend=trend,
+        status=status,
     )

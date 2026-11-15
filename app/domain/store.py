@@ -121,12 +121,25 @@ class MissionData:
     def events(self) -> list[MissionEvent]:
         return [*MISSION_EVENTS, *self._extra_events]
 
+    def set_external_events(self, events: list[MissionEvent]) -> None:
+        """Events that come from real NASA data (replaced wholesale on every refresh)."""
+        self._extra_events = list(events)
+        self._bump()
+
+    def touch(self) -> None:
+        """Something the analysis depends on changed outside the store (e.g. the trajectory)."""
+        self._bump()
+
     # -- crew mode --------------------------------------------------------------------
     def assignments(self, crew_id: str | None = None) -> list[Assignment]:
         return [a for a in self._assignments if crew_id is None or a.crew_id == crew_id]
 
-    def update_assignment(self, a: Assignment) -> None:
-        self._assignments = [a if x.id == a.id else x for x in self._assignments]
+    def upsert_assignment(self, a: Assignment) -> None:
+        """Replace the assignment with the same id, or add it."""
+        if any(x.id == a.id for x in self._assignments):
+            self._assignments = [a if x.id == a.id else x for x in self._assignments]
+        else:
+            self._assignments = [*self._assignments, a]
         self._bump()
 
     def safety_flags(self) -> list[SafetyFlag]:

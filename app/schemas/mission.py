@@ -21,11 +21,12 @@ class MissionConfig(CamelModel):
     career_dose_limit_msv: float
     current_day: int
     trajectory_au: list[float]
+    trajectory_source: str = "model"  # "NASA JPL Horizons" when the arrival distance is real NASA data
     team: Team
 
 
 class MissionEvent(CamelModel):
-    omit_when_none = frozenset({"planned", "missed"})
+    omit_when_none = frozenset({"planned", "missed", "source"})
 
     id: str
     kind: MissionEventKind
@@ -36,3 +37,4 @@ class MissionEvent(CamelModel):
     hazards: list[HazardKey]
     planned: bool | None = None
     missed: bool | None = None
+    source: str | None = None  # e.g. "NASA DONKI" for events that come from real NASA data
