@@ -10,9 +10,9 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 | # | Decision | Status |
 |---|---|---|
-| D1 | v2 **replaces** RIDGE: old `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`, `/api/mobility/*` are removed | [x] |
-| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"); kept as **additive** endpoints (frontend unchanged): feeds a Gravity driver and a `mobility:<crew>` finding. See docs/MOBILITY.md | [x] |
-| D3 | ECHO Gemini chat (stored sessions, loneliness scoring) is replaced by stateless Nova; nothing from Nova is stored or logged | [x] |
+| D1 | v2 runs **next to** RIDGE; nothing is removed. `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*` (ECHO) keep their paths; only `/api/crew*` and `/api/mobility*` collide with v2, so the RIDGE ones moved to `/api/ridge/crew*` and `/api/ridge/mobility*` | [x] |
+| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"); kept as **additive** endpoints (frontend unchanged): feeds a Gravity driver and a `mobility:<crew>` finding. See docs/BACKEND_UPDATE.md section 2.1 | [x] |
+| D3 | ECHO (stored, scored chat) stays for the RIDGE app; Nova is the separate private, stateless companion; nothing from Nova is stored or logged | [x] |
 | D4 | JSON is camelCase on the wire (pydantic `alias_generator=to_camel`) | [x] |
 | D5 | Every time is a mission hour (float since launch); never evaluate past "now" | [x] |
 
@@ -59,7 +59,18 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | A3 | GET | `/api/mobility/{crewId}` | [x] |
 | A4 | static | `/demo/mobility/` (MediaPipe test page) | [x] |
 | A5 | engine | Gravity driver "Mobility & balance check" + finding `mobility:<crew>` (no checks: scores unchanged, proven by parity tests) | [x] |
-| A6 | db | `mobility_sessions` table (distinct name: the old RIDGE `mobility_checks` is dropped by `drop_ridge_tables.sql`) | [x] |
+| A6 | db | `mobility_sessions` table (distinct name: the RIDGE `mobility_checks` table is kept for the RIDGE app) | [x] |
+
+## 1c. Restored RIDGE app (Ahmed's ECHO and distance, the dashboard)
+
+| Item | Status |
+|---|---|
+| `GET /api/dashboard`, `/api/alerts`, `/api/distance` (original paths) | [x] |
+| ECHO: `GET /api/isolation/method`, `POST/GET /api/isolation/{id}/sessions…`, `GET /api/isolation/{id}` (original paths) | [x] |
+| RIDGE crew list and detail | [x] moved to `/api/ridge/crew*` (v2 owns `/api/crew*`) |
+| RIDGE mobility | [x] moved to `/api/ridge/mobility*` (v2 owns `/api/mobility*`) |
+| RIDGE tests (rules, crew story, dashboard, ECHO, distance, DB) | [x] restored, 100% of the old suite passes |
+| One DONKI feed shared by both APIs | [x] |
 
 ## 2. Foundation
 
@@ -121,7 +132,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 | Item | Status |
 |---|---|
-| DONKI events → `MissionEvent` (`spe`) + `doseRate` samples; live / cached / snapshot fallback kept | [~] events mapped onto D97 (18, `source: "NASA DONKI"`); `doseRate`/`radDose` deliberately NOT driven by them, to keep parity with the frontend demo data (see API_V2.md section 6) |
+| DONKI events → `MissionEvent` (`spe`) + `doseRate` samples; live / cached / snapshot fallback kept | [~] events mapped onto D97 (18, `source: "NASA DONKI"`); `doseRate`/`radDose` deliberately NOT driven by them, to keep parity with the frontend demo data (see BACKEND_UPDATE.md section 1) |
 | JPL Horizons → `MissionConfig.trajectoryAu` (≥ durationDays + 1 values) | [x] |
 
 ## 7. Database
@@ -129,7 +140,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | Item | Status |
 |---|---|
 | New `supabase/schema.sql` (tables in guide section 9, no chat table) | [~] written and cross-checked column-by-column against the repository; not yet run in a real Supabase project |
-| Drop RIDGE tables (`isolation_chat_*`, `loneliness_assessments`, `mobility_checks`, `daily_records`) in a migration note | [x] `supabase/drop_ridge_tables.sql`; run it deliberately (it deletes old chat transcripts) |
+| RIDGE tables kept (nothing dropped); v2 tables added beside them | [x] one `supabase/schema.sql` |
 
 ## 8. Quality and docs
 
@@ -137,7 +148,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 |---|---|
 | Tests per endpoint group; checklist from guide section 10 automated | [x] |
 | `make check` green (ruff, mypy strict, coverage ≥ 90%) | [x] |
-| `docs/API_V2.md` replaces `FRONTEND_API_GUIDE.md` (it links to the contract in the frontend repo instead of copying it) | [x] |
+| `docs/BACKEND_UPDATE.md`: the one file for the frontend team (v2 summary, every extra API, what to use); RIDGE docs kept under `docs/ridge/` | [x] |
 | README / FEATURES updated | [x] |
 | Compare with frontend `scripts/calibrate.ts` output at Day 142, 14:00 | [x] |
 | Run frontend with `?data=api` against this server | [x] Mission Control, profile, Nova (greeting, check-in, safety), insights, action log and resolve driven in the browser; the questionnaire form was only load-checked (covered by API tests) |
@@ -169,4 +180,4 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 ## Result
 
-`make check`: ruff and `mypy --strict` clean, 180 tests passing, 93.7 % coverage.
+`make check`: ruff and `mypy --strict` clean, 287 tests passing (v2, parity, Mobility and the restored RIDGE/ECHO suites).

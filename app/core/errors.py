@@ -17,11 +17,16 @@ class UnavailableError(DomainError):
     """503: something we depend on (database, Gemini) is not available."""
 
 
+class InvalidInputError(DomainError):
+    """422: the request is well-formed but its values are not acceptable."""
+
+
 class UnknownAstronautError(NotFoundError):
     def __init__(self, astronaut_id: str) -> None:
         super().__init__(f"Unknown astronaut '{astronaut_id}'")
 
 
+# -- Nova Healix API v2 ---------------------------------------------------------------------------------------
 class UnknownMetricError(NotFoundError):
     def __init__(self, metric: str) -> None:
         super().__init__(f"Unknown metric '{metric}'")
@@ -42,10 +47,45 @@ class AlreadySubmittedError(ConflictError):
         super().__init__("This questionnaire is already submitted")
 
 
-class InvalidAnswersError(DomainError):
+class InvalidAnswersError(InvalidInputError):
     pass
 
 
 class CompanionUnavailableError(UnavailableError):
+    """Nova (the private companion) cannot answer."""
+
     def __init__(self, reason: str) -> None:
         super().__init__(f"Companion unavailable: {reason}")
+
+
+# -- RIDGE API (ECHO check-in chat, mission days) -----------------------------------------------------------------
+class InvalidDayError(InvalidInputError):
+    def __init__(self, day: int, mission_days: int) -> None:
+        super().__init__(f"Mission day {day} is outside 1-{mission_days}")
+
+
+class SessionNotFoundError(NotFoundError):
+    def __init__(self, session_id: str) -> None:
+        super().__init__(f"Unknown check-in session '{session_id}'")
+
+
+class SessionClosedError(ConflictError):
+    def __init__(self) -> None:
+        super().__init__("This check-in session is already completed; start a new one")
+
+
+class SessionTurnLimitError(ConflictError):
+    def __init__(self, max_turns: int) -> None:
+        super().__init__(f"Reply limit of {max_turns} reached; complete the check-in to get a score")
+
+
+class NotEnoughTurnsError(ConflictError):
+    def __init__(self, have: int, need: int) -> None:
+        super().__init__(f"Need at least {need} astronaut replies to score the check-in (have {have})")
+
+
+class EchoUnavailableError(UnavailableError):
+    """ECHO (the AI check-in companion) cannot answer."""
+
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"AI check-in companion unavailable: {reason}")

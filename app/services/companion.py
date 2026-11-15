@@ -1,6 +1,6 @@
 """Nova, the astronaut's private companion (stateless).
 
-Privacy contract (see docs/API_V2.md section 6): the conversation is never stored, logged or analysed.
+Privacy contract (see docs/BACKEND_UPDATE.md): the conversation is never stored, logged or analysed.
 Only an explicit share (a check-in or a note the astronaut confirms) leaves the chat, through its own
 endpoint. The one exception is the safety exception: a flag with a category and a signal, no text.
 """

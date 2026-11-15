@@ -8,11 +8,11 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 > distance (NASA JPL Horizons) can be real NASA data.**
 
 - **Live API docs (Swagger):** https://nova-healix-backend-production.up.railway.app/docs
-- **How it works, what is verified, deliberate differences:** [docs/API_V2.md](docs/API_V2.md)
+- **What changed and every API, for the frontend team (one file):** [docs/BACKEND_UPDATE.md](docs/BACKEND_UPDATE.md)
 - **Build tracker (every endpoint and rule, with status):** [docs/V2_TRACKER.md](docs/V2_TRACKER.md)
 - **Contract (types, endpoints, rules):** the v2 guide in the frontend repo
   [hashir4825/Nova-Helix](https://github.com/hashir4825/Nova-Helix) → `docs/BACKEND_API_GUIDE.md`
-- Earlier RIDGE brief (historical): [docs/archive/RIDGE_CONTEXT.md](docs/archive/RIDGE_CONTEXT.md)
+- RIDGE app (still running: ECHO chat, distance, dashboard): guide and brief in [docs/ridge/](docs/ridge/)
 
 ## What it does
 
@@ -26,7 +26,8 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 - **Nova**: the astronaut's private companion. Nothing from the chat is stored, logged or analysed; the only things
   that leave it are what the astronaut confirms, plus a content-free safety alert under the safety exception.
 - **Mission Control**: findings, action log, messages that carry the real signal delay, resolve / reopen.
-- **Mobility & Balance Check** (extra endpoints, [docs/MOBILITY.md](docs/MOBILITY.md)): three short movement tests measured in the browser with MediaPipe; results feed the Gravity hazard and a finding. Test page at `/demo/mobility/`.
+- **Mobility & Balance Check** (extra endpoints, see [docs/BACKEND_UPDATE.md](docs/BACKEND_UPDATE.md)): three short movement tests measured in the browser with MediaPipe; results feed the Gravity hazard and a finding. Test page at `/demo/mobility/`.
+- **ECHO check-in chat, distance, RIDGE dashboard and alerts** (Ahmed's and the earlier RIDGE work): unchanged, running next to v2.
 - **Real NASA data**: DONKI storm events on mission day 97; JPL Horizons Earth-Mars distance for the trajectory.
 
 ## Getting started
@@ -50,8 +51,10 @@ NASA_API_KEY=your_key python -m scripts.check_donki_live   # verify live NASA ac
 
 ```text
 app/
-├── main.py          # create_app() factory, CORS (GET/POST/PUT), middleware, error mapping
-├── container.py     # wires the services
+├── main.py          # create_app(): one service, two APIs (v2 and RIDGE), CORS (GET/POST/PUT), error mapping
+├── container.py     # wires the v2 services
+├── ridge_container.py # wires the RIDGE services (A/B/C crew, ECHO, distance)
+├── models/ rules/   # RIDGE app: cards, rules engine (Ahmed's and the earlier work)
 ├── domain/          # pure logic: generator, store, scoring engine, Nova rules
 ├── schemas/         # pydantic models = the frontend's types (camelCase)
 ├── services/        # clock, telemetry, analysis, crew mode, companion, actions, NASA feeds
@@ -59,7 +62,7 @@ app/
 ├── db/              # Supabase (PostgREST) and in-memory backends
 ├── routers/         # thin HTTP endpoints
 └── data/            # data exported from the frontend; real DONKI snapshot
-supabase/            # schema.sql (run once), drop_ridge_tables.sql (one-off cleanup)
+supabase/            # schema.sql (run once; RIDGE and v2 tables side by side, nothing is dropped)
 scripts/             # check_donki_live, build_snapshot, frontend-golden (regenerate parity fixtures)
 tests/               # pytest: parity with the frontend engine, every endpoint, persistence, NASA, Nova privacy
 ```

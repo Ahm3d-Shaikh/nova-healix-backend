@@ -388,15 +388,16 @@ def test_cors_allows_put_and_the_frontend_origin(api):
     assert r.headers["access-control-allow-origin"] == "http://localhost:4200"
 
 
-def test_old_ridge_endpoints_are_gone(api):
-    for path in (
-        "/api/dashboard",
-        "/api/alerts",
-        "/api/distance",
-        "/api/isolation/method",
-        "/api/timeline",
-    ):
-        assert api.get(path).status_code == 404
+def test_ridge_endpoints_still_work_next_to_v2(api):
+    """Nothing was removed: the RIDGE API (ECHO chat, dashboard, alerts, distance) runs beside v2."""
+    assert api.get("/api/dashboard").status_code == 200 and api.get("/api/distance").status_code == 200
+    assert api.get("/api/alerts").status_code == 200 and api.get("/api/isolation/method").status_code == 200
+    # the two paths v2 needs for itself moved under /api/ridge/
+    assert [a["astronaut"]["id"] for a in api.get("/api/ridge/crew").json()] == ["A", "B", "C"]
+    assert [a["id"] for a in api.get("/api/crew").json()] == ["hashir", "ahmad", "hannan", "sabaina"]
+    assert (
+        api.get("/api/ridge/mobility/method").status_code == 200 and api.get("/api/mobility/method").status_code == 200
+    )
 
 
 @pytest.mark.parametrize("path", ["/api/assessment/hazards", "/api/insights", "/api/mission", "/api/crew"])
