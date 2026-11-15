@@ -11,8 +11,8 @@ import httpx
 import pytest
 
 from app.core.config import Settings
-from app.models.enums import EventKind
-from app.services.donki_client import DonkiClient, DonkiRateLimited
+from app.nasa.donki_client import DonkiClient, DonkiRateLimited
+from app.nasa.models import EventKind
 
 pytestmark = pytest.mark.live
 

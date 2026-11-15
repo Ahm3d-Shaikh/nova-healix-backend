@@ -10,7 +10,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 | # | Decision | Status |
 |---|---|---|
-| D1 | v2 runs **next to** RIDGE; nothing is removed. `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*` (ECHO) keep their paths; only `/api/crew*` and `/api/mobility*` collide with v2, so the RIDGE ones moved to `/api/ridge/crew*` and `/api/ridge/mobility*` | [x] |
+| D1 | One system: the RIDGE app (3 crew, mission days, cards) is retired; its features (ECHO, distance, dashboard, alerts, mobility) are re-expressed on the v2 core | [x] |
 | D2 | Mobility & Balance Check is not in the v2 guide ("Removed"); kept as **additive** endpoints (frontend unchanged): feeds a Gravity driver and a `mobility:<crew>` finding. See docs/BACKEND_UPDATE.md section 2.1 | [x] |
 | D3 | ECHO (stored, scored chat) stays for the RIDGE app; Nova is the separate private, stateless companion; nothing from Nova is stored or logged | [x] |
 | D4 | JSON is camelCase on the wire (pydantic `alias_generator=to_camel`) | [x] |
@@ -61,16 +61,17 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | A5 | engine | Gravity driver "Mobility & balance check" + finding `mobility:<crew>` (no checks: scores unchanged, proven by parity tests) | [x] |
 | A6 | db | `mobility_sessions` table (distinct name: the RIDGE `mobility_checks` table is kept for the RIDGE app) | [x] |
 
-## 1c. Restored RIDGE app (Ahmed's ECHO and distance, the dashboard)
+## 1c. Extra features on the one core
 
 | Item | Status |
 |---|---|
-| `GET /api/dashboard`, `/api/alerts`, `/api/distance` (original paths) | [x] |
-| ECHO: `GET /api/isolation/method`, `POST/GET /api/isolation/{id}/sessions…`, `GET /api/isolation/{id}` (original paths) | [x] |
-| RIDGE crew list and detail | [x] moved to `/api/ridge/crew*` (v2 owns `/api/crew*`) |
-| RIDGE mobility | [x] moved to `/api/ridge/mobility*` (v2 owns `/api/mobility*`) |
-| RIDGE tests (rules, crew story, dashboard, ECHO, distance, DB) | [x] restored, 100% of the old suite passes |
-| One DONKI feed shared by both APIs | [x] |
+| ECHO (Ahmed): `/api/isolation/*` with camelCase, crew slugs, today's mission day; feeds an Isolation driver and a `loneliness:<crew>` finding | [x] |
+| Distance (Ahmed): `GET /api/distance` from the trajectory (real Horizons at the Mars end) | [x] |
+| Dashboard and alerts: `GET /api/dashboard`, `GET /api/alerts` | [x] |
+| One Gemini wrapper for Nova and ECHO; one companion error (503) | [x] |
+| One database: 14 tables in one `supabase/schema.sql`; `cleanup_old_tables.sql` is optional | [x] |
+| Duplicated RIDGE engine, models, crew generator, containers, 4 repositories removed | [x] |
+| `insights.py` (1000 lines) split into a package, one module per concern; parity unchanged | [x] |
 
 ## 2. Foundation
 
@@ -140,7 +141,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | Item | Status |
 |---|---|
 | New `supabase/schema.sql` (tables in guide section 9, no chat table) | [~] written and cross-checked column-by-column against the repository; not yet run in a real Supabase project |
-| RIDGE tables kept (nothing dropped); v2 tables added beside them | [x] one `supabase/schema.sql` |
+| One `supabase/schema.sql` (v2, ECHO, mobility, cache); optional `cleanup_old_tables.sql` for the earlier RIDGE tables | [x] |
 
 ## 8. Quality and docs
 
@@ -180,4 +181,4 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 ## Result
 
-`make check`: ruff and `mypy --strict` clean, 287 tests passing (v2, parity, Mobility and the restored RIDGE/ECHO suites).
+`make check`: ruff and `mypy --strict` clean, 215 tests passing (parity, every endpoint, ECHO, Mobility, persistence, NASA).

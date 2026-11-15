@@ -4,7 +4,7 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from app.domain import mobility
+from app.domain import loneliness, mobility
 from app.domain.engine.context import (
     H_PER_DAY,
     EngineContext,
@@ -139,7 +139,7 @@ def _radiation(ctx: EngineContext, crew_id: str) -> list[Part]:
     ]
 
 
-def _isolation(ctx: EngineContext, crew_id: str) -> list[Part]:
+def _isolation_core(ctx: EngineContext, crew_id: str) -> list[Part]:
     missed = len(missed_check_in_days(ctx, crew_id, 7))
     return [
         _low_driver(ctx, crew_id, "mood", 7, "Mood, 7-day mean", 0.22, "mood has been lower than usual"),
@@ -161,6 +161,26 @@ def _isolation(ctx: EngineContext, crew_id: str) -> list[Part]:
         ),
         _driver(
             "Missed check-ins, 7 days", f"{missed} of 7", missed * 22, 0.15, None, "several daily check-ins were missed"
+        ),
+    ]
+
+
+def _isolation(ctx: EngineContext, crew_id: str) -> list[Part]:
+    """The frontend engine's isolation drivers, plus the latest scored ECHO check-in once there is one."""
+    parts = _isolation_core(ctx, crew_id)
+    a = loneliness.current(ctx.db.echo_assessments(crew_id), ctx.hour)
+    if a is None:
+        return parts
+    contribution = {"nominal": 0.0, "watch": 55.0, "alert": 85.0}[a.status]
+    return [
+        *parts,
+        _driver(
+            "Loneliness, ECHO check-in",
+            f"{a.score}/{loneliness.SCORE_MAX}",
+            contribution,
+            0.12,
+            None,
+            "recent check-ins point to loneliness",
         ),
     ]
 

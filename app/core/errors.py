@@ -52,18 +52,13 @@ class InvalidAnswersError(InvalidInputError):
 
 
 class CompanionUnavailableError(UnavailableError):
-    """Nova (the private companion) cannot answer."""
+    """A companion (Nova or ECHO) cannot answer: not configured, rate limited, timed out or blocked."""
 
     def __init__(self, reason: str) -> None:
         super().__init__(f"Companion unavailable: {reason}")
 
 
-# -- RIDGE API (ECHO check-in chat, mission days) -----------------------------------------------------------------
-class InvalidDayError(InvalidInputError):
-    def __init__(self, day: int, mission_days: int) -> None:
-        super().__init__(f"Mission day {day} is outside 1-{mission_days}")
-
-
+# -- ECHO check-in chat -------------------------------------------------------------------------------------------
 class SessionNotFoundError(NotFoundError):
     def __init__(self, session_id: str) -> None:
         super().__init__(f"Unknown check-in session '{session_id}'")
@@ -82,10 +77,3 @@ class SessionTurnLimitError(ConflictError):
 class NotEnoughTurnsError(ConflictError):
     def __init__(self, have: int, need: int) -> None:
         super().__init__(f"Need at least {need} astronaut replies to score the check-in (have {have})")
-
-
-class EchoUnavailableError(UnavailableError):
-    """ECHO (the AI check-in companion) cannot answer."""
-
-    def __init__(self, reason: str) -> None:
-        super().__init__(f"AI check-in companion unavailable: {reason}")

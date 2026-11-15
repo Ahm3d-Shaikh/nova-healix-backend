@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.config import get_settings
-from app.services import donki_parsers as p
+from app.nasa import donki_parsers as p
 
 
 def load(raw_dir: Path, name: str) -> list[Any] | None:

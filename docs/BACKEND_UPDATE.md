@@ -1,18 +1,20 @@
 # Backend update: what changed, and the extra APIs you can use
 
-**For the frontend team.** One service, two sets of endpoints:
+**For the frontend team.** The backend is now **one system**: one crew (Hashir, Ahmad, Hannan, Sabaina), one clock
+(mission hours), one analysis engine and one database. Everything is in the shape the frontend uses (camelCase JSON,
+mission hours, `nominal | watch | alert`).
 
-1. **Everything in the Nova Healix API v2 guide is implemented** (all 29 endpoints). Section 1, short.
-2. **Nothing else was removed.** Our own endpoints (Mobility & Balance Check) and Ahmed's (ECHO check-in chat,
-   distance, RIDGE dashboard and alerts) are all still here, running next to v2. Section 2, with details.
-   **Please use them** (section 3).
+1. **All 29 endpoints of the Nova Healix API v2 guide are implemented** (section 1, short).
+2. **Four extra features are on the same core** (section 2, with details): the **Mobility & Balance Check**, **ECHO**
+   (the scored isolation check-in chat), **distance**, and a one-call **dashboard** with **alerts**.
+   Each one feeds the screens you already have (Isolation and Gravity hazards, findings), so they need little or no
+   frontend work. **Please use them** (section 3).
 
 > Decision support prototype, not a medical device. Crew data is simulated. Space weather (NASA DONKI) and distance
 > (NASA JPL Horizons) can be real NASA data.
 
-Base URL (Railway): `https://nova-healix-backend-production.up.railway.app` · Swagger: `/docs` ·
-Local: `http://127.0.0.1:8000`. All times in v2 are **mission hours** (float); camelCase JSON. The RIDGE endpoints
-(ECHO, distance, dashboard) keep their original **snake_case** and mission **days**.
+Railway: `https://nova-healix-backend-production.up.railway.app` · Swagger: `/docs` · Local: `http://127.0.0.1:8000`.
+Crew ids: `hashir`, `ahmad`, `hannan`, `sabaina`. Status words everywhere: `nominal | watch | alert`.
 
 ---
 
@@ -28,39 +30,34 @@ Local: `http://127.0.0.1:8000`. All times in v2 are **mission hours** (float); c
 | Nova | `POST /api/crew/{id}/companion/reply`, `POST /api/crew/{id}/shared-notes` |
 | Mission Control | `GET/POST /api/actions`, `GET/POST /api/crew/{id}/messages`, `POST /api/insights/{id}/resolve`, `…/reopen` |
 
-- **Verified**: the analysis engine matches the frontend's own engine exactly (scores, drivers, insights, Nova
-  replies; `tests/test_parity.py`). The real frontend (`?data=api`) runs against it: Mission Control, profile, Nova,
-  check-in, resolve, no console errors.
-- **Nova is private**: the reply endpoint is stateless; nothing is stored, logged or scored. The only exception is the
-  safety exception (a content-free alert for Mission Control).
-- **Small differences from the guide** (all deliberate):
-  - The check-in draft example in the guide shows `energy: 3`; the frontend's engine returns `2`, so we match the engine.
-  - Real NASA storm events are added to `GET /api/mission/events` (`source: "NASA DONKI"`) but do not change dose numbers
-    (that keeps us identical to the frontend's demo data).
-  - `GET /api/mission` also returns `trajectorySource` (`"NASA JPL Horizons"` when the Mars arrival distance is live NASA data).
+- **Verified**: the analysis engine matches the frontend's own engine exactly (scores, drivers, insights, Nova replies;
+  `tests/test_parity.py`). The real frontend (`?data=api`) runs against it with no console errors.
+- **Nova is private**: stateless; nothing is stored, logged or scored. The only exception is the safety exception
+  (a content-free alert for Mission Control).
+- **Small differences from the guide** (deliberate):
+  - The guide's check-in draft example shows `energy: 3`; the frontend's engine returns `2`, so we match the engine.
+  - Real NASA storm events are added to `GET /api/mission/events` (`source: "NASA DONKI"`) but do not change dose numbers.
+  - `GET /api/mission` also returns `trajectorySource` (`"NASA JPL Horizons"` when the arrival distance is real NASA data).
   - 422 bodies are `{"detail": "field: message"}` and never echo what was sent. Questionnaire scale answers must be 1 to 5.
-  - `GET /health` returns `{status, version, companion, missionHour, database, ai_checkin}`.
-- **Two paths moved** because v2 needs them: the old RIDGE `GET /api/crew` and `GET /api/crew/{id}` are now
-  `GET /api/ridge/crew` and `GET /api/ridge/crew/{id}`; the old RIDGE mobility is `/api/ridge/mobility/*`.
+  - `GET /health` → `{status, version, companion, echo, database, missionHour}`.
 
 ---
 
-## 2. Extra APIs (not in the guide, all working)
+## 2. Extra features (not in the guide), all on the same core
 
-### 2.1 Mobility & Balance Check (our addition)
+### 2.1 Mobility & Balance Check
 
 Three short movement tests (about 2 minutes): single-leg balance, 5x sit-to-stand, squat knee bend.
 **MediaPipe Pose runs in the browser** (live skeleton and measurements); the server only receives five numbers and
 scores them. No video leaves the device, no YOLO. It measures movement only, **not bone health**.
 
-**It needs no changes to existing screens**: once a check exists it appears by itself as
-a **Gravity driver** "Mobility & balance check" in `GET /api/assessment/hazards` (no `metric`, so nothing to special-case),
-and as a **finding** `mobility:<crewId>` (watch or alert, `primaryMetric: "legStrength"`) in `GET /api/insights`.
-It resolves, reopens and logs like any other finding.
+**No change to existing screens needed**: a check shows up by itself as a **Gravity driver** "Mobility & balance check"
+in `GET /api/assessment/hazards` (no `metric`, nothing to special-case) and as a **finding** `mobility:<crewId>`
+(watch or alert, `primaryMetric: "legStrength"`) in `GET /api/insights`.
 
 `GET /api/mobility/method`: the tests, what to send, thresholds, `minPoseConfidence` (0.6), the limits text.
 
-`POST /api/mobility/{crewId}` (201), crewId is `hashir|ahmad|hannan|sabaina`:
+`POST /api/mobility/{crewId}` (201):
 ```json
 { "balanceHoldS": 22, "swayPctHeight": 1.4, "sitToStandS": 10.8, "kneeFlexionDeg": 112, "poseConfidence": 0.91 }
 ```
@@ -87,8 +84,7 @@ It resolves, reopens and logs like any other finding.
 ```
 `baseline` and `changePct` are `null` on the first check (later checks are compared with the first reliable one).
 If `counted` is `false`, `result` is `null`: show `message` and ask for a retake. Errors: 404 unknown crew, 422 bad values.
-
-`GET /api/mobility/{crewId}` → `{ crewId, checks[], latest }` (for a history chart).
+`GET /api/mobility/{crewId}` → `{ crewId, checks[], latest }` for a history chart.
 
 Cut-offs are illustrative, ours: balance hold under 10 s watch, under 5 s alert; sit-to-stand 12 s / 15 s; squat under
 100° / 80°; 25% / 50% worse than the astronaut's own first check.
@@ -100,69 +96,71 @@ Port it into an Angular component with `@mediapipe/tasks-vision` (`PoseLandmarke
 - Balance: foot lifted when the ankle height gap exceeds 8% of body height (nose to mid-ankle) for 0.3 s; hold ends on
   touch-down (over 0.5 s) or 30 s; sway = RMS of the hip-centre around its mean, % of body height.
 - Sit-to-stand (start seated): leave seat at bend below 45°, stand below 25°, sit again above 55°; time to the 5th stand.
-- Squat: a rep is bend above 50° then below 25°; `kneeFlexionDeg` = median of 3 peaks. `poseConfidence` = mean visibility
-  of hips, knees, ankles.
+- Squat: a rep is bend above 50° then below 25°; `kneeFlexionDeg` = median of 3 peaks. `poseConfidence` = mean
+  visibility of hips, knees, ankles.
 - **Side-on to the camera, whole body in view**; show a "turn side-on / step back" hint when tracking is poor.
-- Host the WASM files and `pose_landmarker_lite.task` in `assets/` to work offline (the page loads them from a CDN).
-  Try `delegate: "GPU"`, fall back to `"CPU"`. Camera needs https or `localhost`.
+- Host the WASM files and `pose_landmarker_lite.task` in `assets/` to work offline. Try `delegate: "GPU"`, fall back
+  to `"CPU"`. The camera needs https or `localhost`.
 - Keep visible: "Decision-support prototype, not a medical device. Measures movement, not bone health. Video stays on this device."
 
-### 2.2 ECHO isolation check-in chat (Ahmed's work)
+### 2.2 ECHO: the scored isolation check-in chat (Ahmed's work)
 
-A Gemini-powered chat that **scores** loneliness (Three-Item Loneliness Scale, 3 to 9). It uses the RIDGE crew
-(`A`, `B`, `C`) and mission **days** (`?day=`, 1 to 30). Unlike Nova it is stored and scored, so use it where a
-measured, auditable check-in is wanted, and Nova where privacy matters.
+A Gemini-powered chat that **scores** loneliness (Three-Item Loneliness Scale, 3 to 9). Unlike Nova it is **stored**
+(transcript and score), so use it where a measured, auditable check-in is wanted, and Nova where privacy matters.
+It uses the same crew and today's mission day.
 
 | Call | Purpose |
 |---|---|
-| `GET /api/isolation/method` | instrument, items, 1-3 scale, `min_turns` 3, `max_turns` 10, bands (green 3-5, amber 6+, red 7+ for 3 days or a safety concern) |
-| `POST /api/isolation/{id}/sessions?day=` (201) | start the chat → `{session, messages:[opening message], min_turns, max_turns}` |
-| `POST /api/isolation/{id}/sessions/{sid}/messages` | body `{"content": "text"}` → `{session_id, reply, astronaut_turns, can_complete, must_complete}` |
-| `POST /api/isolation/{id}/sessions/{sid}/complete` | score it (idempotent) → `{q1,q2,q3,score,confidence,reliable,safety_concern,level,consecutive_days_at_or_above_7,rationale,evidence[],alert{what,why,action,source},model,...}` |
-| `GET /api/isolation/{id}/sessions/{sid}` | transcript and assessment |
-| `GET /api/isolation/{id}` | `{astronaut_id, items:[{day, source:"simulated"|"ai_checkin", score, level, confidence, reliable, session_id}]}` (score per day) |
+| `GET /api/isolation/method` | instrument, items, 1-3 scale, `minTurns` 3, `maxTurns` 10, `bands` (nominal 3-5, watch 6+, alert 7+ for 3 days in a row or a safety concern) |
+| `POST /api/isolation/{crewId}/sessions` (201) | start → `{session, messages:[opening message], minTurns, maxTurns}` |
+| `POST …/sessions/{sid}/messages` | body `{"content": "text"}` → `{sessionId, reply, astronautTurns, canComplete, mustComplete}` |
+| `POST …/sessions/{sid}/complete` | score it (idempotent) → `{id, sessionId, crewId, missionDay, at, q1, q2, q3, score, confidence, reliable, safetyConcern, status, consecutiveHighDays, rationale, evidence[], what, why, action, source, model, createdAt}` |
+| `GET …/sessions/{sid}` | `{session, messages, assessment}` |
+| `GET /api/isolation/{crewId}` | `{crewId, items:[{day, score, status, confidence, reliable, sessionId}]}` |
 
-Flow: start, send 3 to 10 replies, call `/complete` once `can_complete` is true (required when `must_complete`). Errors:
-404 unknown id/session, 409 closed session or reply limit, 422 empty message, **503 when `GEMINI_API_KEY` is not set**
-(the rest of the app still works). Reliable check-ins also replace that day's simulated score on the RIDGE Isolation card.
+Flow: start, send 3 to 10 replies, call `/complete` once `canComplete` is true (required when `mustComplete`).
+Errors: 404 unknown crew/session, 409 closed session, reply limit or too few replies, 422 empty message,
+**503 when `GEMINI_API_KEY` is not set or Gemini is unavailable** (nothing else is affected; `GET /health` shows `echo`).
+
+**It feeds the Isolation hazard by itself**: a scored check-in adds the driver "Loneliness, ECHO check-in" (value
+`7/9`, no `metric`) to `GET /api/assessment/hazards`, and an elevated or safety-flagged one raises a finding
+`loneliness:<crewId>` (watch or alert) in `GET /api/insights`. A low-confidence rating is stored but ignored, except that
+a safety concern is always shown.
 
 ### 2.3 Distance from Earth (Ahmed's work)
 
-`GET /api/distance` → `{ mission, target_name, source, data_as_of, reason, days:[{day, distance_km, light_time_s}] }`.
-Real JPL Horizons distance and one-way light time for each mission day (`source` is `live`, `cached` or `snapshot`,
-with `reason` when not live). Good for a distance / signal-delay chart. (v2's `trajectoryAu` in `/api/mission` is the
-simulated 260-day transfer; this endpoint is the real geocentric ephemeris for the RIDGE 30-day mission.)
+`GET /api/distance` → `{ mission:"mars", target:"Mars", source, asOf, durationDays:260, days:[{day, distanceKm, lightTimeS}] }`.
+Earth-ship distance and one-way signal delay at the start of every mission day, from the same trajectory that sets the
+signal delay everywhere else. `source` is `"NASA JPL Horizons"` when the Mars arrival distance is real NASA data
+(`asOf` says when it was fetched), else `"model"`. Good for a distance / delay chart.
 
-### 2.4 RIDGE dashboard, alerts and crew (the earlier 3-astronaut app)
+### 2.4 Dashboard and alerts
 
-| Call | Returns |
-|---|---|
-| `GET /api/dashboard?day=N` | everything for one screen: settings, data-source status, space-weather events in the last 24 h, per astronaut six cards (R, I, D, G, E, MIRROR) with level, headline and typed `metrics`, plus the alert list |
-| `GET /api/alerts?day=N` | all amber/red alerts across the crew, worst first |
-| `GET /api/ridge/crew?day=N` | astronauts with overall and per-card level |
-| `GET /api/ridge/crew/{id}?day=N` | one astronaut: records up to day N, cards, alerts, Mirror Gap series |
-
-Day `N` is 1 to 30 (422 otherwise). Cards use levels `green|amber|red`; v2 uses `nominal|watch|alert`.
-Details for every field: [ridge/FRONTEND_API_GUIDE.md](ridge/FRONTEND_API_GUIDE.md).
+- `GET /api/dashboard?at&autonomous` → one call for an overview screen:
+  `{disclaimer, missionHour, day, durationDays, link:{mode, delaySeconds, distanceAu}, recentSpaceEvents[] (real NASA
+  events in the last 24 h), crew:[{astronaut, summary, hazards[5], insights[] (active)}], crewWideInsights[]}`.
+- `GET /api/alerts?at&autonomous` → active (unresolved) findings at `watch` or `alert` severity, most urgent first
+  (`Insight[]`, the same shape as `/api/insights`).
 
 ---
 
 ## 3. Frontend team: please use these
 
-1. **Build the Mobility & Balance Check page** (section 2.1). It is the only new feature with no screen yet; it feeds
-   the Gravity hazard and findings you already show, so it costs one component and one POST.
-2. **Use `GET /api/distance`** for a real distance and signal-delay chart (section 2.3).
-3. **Offer ECHO** where a scored isolation check-in is useful (section 2.2), next to the private Nova chat. If you
-   want it, we can also expose its result as a v2 finding.
-4. **Use `GET /api/dashboard`** if you want a single-call overview for a simple screen (section 2.4).
+1. **Build the Mobility & Balance Check page** (2.1). It is the only feature with no screen yet; it costs one component
+   and one POST, and the Gravity hazard and findings you already show pick it up.
+2. **Offer ECHO** (2.2) next to the private Nova chat where a scored check-in is useful. Its results appear in the
+   Isolation hazard and findings with no extra work.
+3. **Use `GET /api/distance`** (2.3) for a real distance and signal-delay chart.
+4. **Use `GET /api/dashboard`** (2.4) if a simple overview screen should load in one request.
 5. Read `trajectorySource` and the `source` on mission events if you want to label what is real NASA data.
 
-Tell us which of these you will use and any field you need changed; the backend can adapt the shapes.
+Tell us which of these you will use and any field you want changed; the backend can adapt the shapes.
 
-## 4. Setup and checks (backend)
+## 4. Setup (backend)
 
 - Env (`.env.example`): `NASA_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGINS` (add the deployed
-  frontend), optional `GEMINI_API_KEY` (ECHO and Nova's open-ended replies).
-- Run `supabase/schema.sql` once in Supabase. It keeps the RIDGE tables and adds the v2 ones (nothing is dropped).
-- `make run` → `/docs`; `make check` (ruff, strict mypy, 287 tests). Per-item status: [V2_TRACKER.md](V2_TRACKER.md).
+  frontend), optional `GEMINI_API_KEY` (ECHO, and Nova's open-ended replies).
+- **One database**: run `supabase/schema.sql` once. If the project still has the old RIDGE tables, `supabase/cleanup_old_tables.sql`
+  removes them (optional, it deletes their data).
+- `make run` → `/docs`; `make check` (ruff, strict mypy, 215 tests). Per-item status: [V2_TRACKER.md](V2_TRACKER.md).
 - Frontend against it: in `Nova-Helix` run `npm start`, open `http://localhost:4200/?data=api`.

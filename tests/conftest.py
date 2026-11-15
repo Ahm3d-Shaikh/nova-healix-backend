@@ -1,9 +1,4 @@
-"""Fixtures for both APIs in the one service.
-
-* v2 (Nova Healix): `container`, `hour`, `replier`.
-* RIDGE (ECHO chat, dashboard, distance): `offline_container` (the RIDGE container), `companion` (scripted ECHO).
-* `api` is the one combined app (both containers on one in-memory database).
-"""
+"""Shared fixtures: one container, one database, one app."""
 
 import asyncio
 from collections.abc import Sequence
@@ -17,12 +12,10 @@ from app.container import build_container
 from app.core.config import Settings
 from app.db.memory import InMemoryDatabase
 from app.main import create_app
-from app.models.crew import Astronaut
-from app.models.isolation import ChatMessage, ItemRating, LonelinessRating
-from app.models.settings import MissionSettings
-from app.ridge_container import build_ridge_container
-from app.services.donki_client import DonkiClient
-from app.services.horizons_client import HorizonsClient
+from app.nasa.donki_client import DonkiClient
+from app.nasa.horizons_client import HorizonsClient
+from app.schemas.crew import Astronaut
+from app.schemas.echo import EchoMessage, ItemRating, LonelinessRating
 
 # Mission day 142, 14:00 UTC: the moment the frontend's calibration output was recorded.
 NOW_MS = datetime(2026, 11, 14, 14, 0, tzinfo=UTC).timestamp() * 1000
@@ -53,8 +46,8 @@ def rating(q1: int = 1, q2: int = 1, q3: int = 1, confidence: float = 0.9, safet
     )
 
 
-class FakeCompanion:
-    """Scripted stand-in for Gemini (ECHO): echoes replies and returns a preset rating."""
+class FakeEchoCompanion:
+    """Scripted stand-in for ECHO's Gemini: echoes replies and returns a preset rating."""
 
     model = "fake-model"
 
@@ -63,19 +56,19 @@ class FakeCompanion:
         self.reply_calls: list[tuple[int, int]] = []  # (transcript length, replies left)
         self.fail_next: Exception | None = None  # raise this from the next reply()
 
-    async def reply(self, astronaut: Astronaut, day: int, transcript: Sequence[ChatMessage], replies_left: int) -> str:
+    async def reply(self, astronaut: Astronaut, day: int, transcript: Sequence[EchoMessage], replies_left: int) -> str:
         self.reply_calls.append((len(transcript), replies_left))
         if self.fail_next is not None:
             exc, self.fail_next = self.fail_next, None
             raise exc
         return f"ECHO heard: {transcript[-1].content}"
 
-    async def rate(self, astronaut: Astronaut, day: int, transcript: Sequence[ChatMessage]) -> LonelinessRating:
+    async def rate(self, astronaut: Astronaut, day: int, transcript: Sequence[EchoMessage]) -> LonelinessRating:
         return self.next_rating
 
 
 class FakeReplier:
-    """Scripted stand-in for Gemini (Nova's open-ended replies)."""
+    """Scripted stand-in for Nova's Gemini replies."""
 
     mode = "gemini"
 
@@ -103,8 +96,8 @@ def db() -> InMemoryDatabase:
 
 
 @pytest.fixture
-def companion() -> FakeCompanion:
-    return FakeCompanion()
+def echo_companion() -> FakeEchoCompanion:
+    return FakeEchoCompanion()
 
 
 @pytest.fixture
@@ -113,37 +106,26 @@ def replier() -> FakeReplier:
 
 
 @pytest.fixture
-def container(settings, db):
-    """The v2 (Nova Healix) container."""
-    return asyncio.run(build_container(settings, db, now_ms=NOW_MS))
+def container(settings, db, echo_companion):
+    """Nova on its rules, ECHO scripted, NASA feeds offline (the bundled snapshots)."""
+    return asyncio.run(
+        build_container(
+            settings,
+            db,
+            donki=make_client(failing),
+            horizons=make_horizons(failing),
+            echo_companion=echo_companion,
+            now_ms=NOW_MS,
+        )
+    )
 
 
 @pytest.fixture
-def offline_container(settings, db, companion):
-    """The RIDGE container: NASA calls always fail -> serves the bundled snapshots."""
-    return asyncio.run(build_ridge_container(settings, make_client(failing), make_horizons(failing), db, companion))
-
-
-@pytest.fixture
-def api(settings, container, offline_container):
-    with TestClient(create_app(settings, container, offline_container)) as client:
+def api(settings, container):
+    with TestClient(create_app(settings, container)) as client:
         yield client
 
 
 @pytest.fixture
 def hour(container) -> float:
     return container.clock.now_hour()
-
-
-def combined_app(settings: Settings, ridge, db: InMemoryDatabase | None = None):
-    """The one app from a RIDGE container; the v2 container is built on the same (or a fresh) database."""
-    v2 = asyncio.run(build_container(settings, db or InMemoryDatabase(), now_ms=NOW_MS))
-    return create_app(settings, v2, ridge)
-
-
-def set_settings(api: TestClient, mission: str = "mars", deep_space_mode: bool = False, current_day: int = 5) -> None:
-    """Change the saved RIDGE mission settings (there is no public settings endpoint)."""
-    service = api.app.state.ridge.mission_settings
-    asyncio.run(
-        service.update(MissionSettings(mission=mission, deep_space_mode=deep_space_mode, current_day=current_day))
-    )

@@ -4,6 +4,7 @@ import math
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import datetime
 
 from app.domain.mission_plan import (
     CURRENT_DAY,
@@ -23,6 +24,7 @@ class Trajectory:
         default_factory=lambda: [distance_au_on_day(i + 1) for i in range(MISSION_DURATION_DAYS + 1)]
     )
     source: str = "model"
+    as_of: datetime | None = None  # when the real arrival distance was fetched
 
 
 class MissionClock:

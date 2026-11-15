@@ -1,4 +1,4 @@
-.PHONY: install run lint format typecheck test cov check live-check snapshot
+.PHONY: install run lint format typecheck test cov check live-check
 
 PY ?= .venv/bin/python
 

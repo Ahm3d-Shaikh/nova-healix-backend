@@ -18,6 +18,7 @@ from app.schemas.actions import ActionLogEntry, CrewMessage
 from app.schemas.assessment import Resolution
 from app.schemas.crew import Astronaut
 from app.schemas.crewmode import Assignment
+from app.schemas.echo import LonelinessAssessment
 from app.schemas.mission import MissionEvent
 from app.schemas.mobility import MobilityCheck
 from app.schemas.nova import SharedNote
@@ -66,6 +67,7 @@ class MissionData:
     _log: list[ActionLogEntry] = field(default_factory=list)
     _outbox: list[CrewMessage] = field(default_factory=list)
     _mobility: list[MobilityCheck] = field(default_factory=list)
+    _echo: list[LonelinessAssessment] = field(default_factory=list)
     _resolutions: dict[str, Resolution] = field(default_factory=dict)
     version: int = 0
 
@@ -164,6 +166,14 @@ class MissionData:
 
     def add_mobility_check(self, c: MobilityCheck) -> None:
         self._mobility = sorted([*self._mobility, c], key=lambda x: x.at)
+        self._bump()
+
+    def echo_assessments(self, crew_id: str | None = None) -> list[LonelinessAssessment]:
+        """ECHO loneliness assessments, oldest first."""
+        return [a for a in self._echo if crew_id is None or a.crew_id == crew_id]
+
+    def add_echo_assessment(self, a: LonelinessAssessment) -> None:
+        self._echo = sorted([*self._echo, a], key=lambda x: x.at)
         self._bump()
 
     # -- mission control -----------------------------------------------------------------

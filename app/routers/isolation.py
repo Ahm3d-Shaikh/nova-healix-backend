@@ -1,51 +1,50 @@
 from fastapi import APIRouter, status
 
-from app.api.deps import RidgeDep
-from app.models.isolation import (
-    ChatMessageIn,
-    ChatSessionDetail,
-    ChatTurnResponse,
-    IsolationHistory,
+from app.api.deps import ContainerDep
+from app.schemas.echo import (
+    EchoHistory,
+    EchoMessageIn,
+    EchoMethod,
+    EchoSessionDetail,
+    EchoTurnResponse,
     LonelinessAssessment,
-    ScoringMethod,
-    StartSessionResponse,
+    StartEchoResponse,
 )
-from app.routers.ridge_crew import DayQuery
-from app.services.isolation_service import METHOD
+from app.services.echo import METHOD
 
-router = APIRouter(prefix="/api/isolation", tags=["isolation"])
+router = APIRouter(prefix="/api/isolation", tags=["echo"])
 
 
 @router.get("/method")
-async def method() -> ScoringMethod:
-    """How the AI check-in is scored: instrument, item scale, thresholds and turn limits."""
+async def method() -> EchoMethod:
+    """How ECHO check-ins are scored: instrument, items, thresholds and turn limits."""
     return METHOD
 
 
-@router.post("/{astronaut_id}/sessions", status_code=status.HTTP_201_CREATED)
-async def start_session(astronaut_id: str, c: RidgeDep, day: DayQuery = None) -> StartSessionResponse:
-    """Open today's check-in chat; returns the companion's opening message."""
-    return await c.isolation.start(astronaut_id, await c.crew.resolve_day(day))
+@router.post("/{crew_id}/sessions", status_code=status.HTTP_201_CREATED)
+async def start_session(crew_id: str, c: ContainerDep) -> StartEchoResponse:
+    """Open today's check-in chat; returns ECHO's opening message. 503 when no Gemini key is configured."""
+    return await c.echo.start(crew_id)
 
 
-@router.post("/{astronaut_id}/sessions/{session_id}/messages")
-async def send_message(astronaut_id: str, session_id: str, body: ChatMessageIn, c: RidgeDep) -> ChatTurnResponse:
-    """Send what the astronaut said; returns the companion's reply."""
-    return await c.isolation.send(astronaut_id, session_id, body.content)
+@router.post("/{crew_id}/sessions/{session_id}/messages")
+async def send_message(crew_id: str, session_id: str, body: EchoMessageIn, c: ContainerDep) -> EchoTurnResponse:
+    """Send what the astronaut said; returns ECHO's reply."""
+    return await c.echo.send(crew_id, session_id, body.content)
 
 
-@router.post("/{astronaut_id}/sessions/{session_id}/complete")
-async def complete_session(astronaut_id: str, session_id: str, c: RidgeDep) -> LonelinessAssessment:
-    """Score the chat: loneliness score (3-9), level, alert. Idempotent."""
-    return await c.isolation.complete(astronaut_id, session_id)
+@router.post("/{crew_id}/sessions/{session_id}/complete")
+async def complete_session(crew_id: str, session_id: str, c: ContainerDep) -> LonelinessAssessment:
+    """Score the chat: loneliness score (3-9), status and advice. Idempotent."""
+    return await c.echo.complete(crew_id, session_id)
 
 
-@router.get("/{astronaut_id}/sessions/{session_id}")
-async def session_detail(astronaut_id: str, session_id: str, c: RidgeDep) -> ChatSessionDetail:
-    return await c.isolation.detail(astronaut_id, session_id)
+@router.get("/{crew_id}/sessions/{session_id}")
+async def session_detail(crew_id: str, session_id: str, c: ContainerDep) -> EchoSessionDetail:
+    return await c.echo.detail(crew_id, session_id)
 
 
-@router.get("/{astronaut_id}")
-async def history(astronaut_id: str, c: RidgeDep) -> IsolationHistory:
-    """Loneliness score per day: simulated baseline plus every AI check-in."""
-    return await c.isolation.history(astronaut_id)
+@router.get("/{crew_id}")
+async def history(crew_id: str, c: ContainerDep) -> EchoHistory:
+    """Every scored ECHO check-in for this astronaut, oldest first."""
+    return c.echo.history(crew_id)

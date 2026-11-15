@@ -284,7 +284,7 @@ def test_nova_open_ended_reply_uses_gemini_and_failures_are_503(settings, db):
     from tests.conftest import NOW_MS
 
     replier = FakeReplier()
-    c = asyncio.run(build_container(settings, db, replier, now_ms=NOW_MS))
+    c = asyncio.run(build_container(settings, db, replier=replier, now_ms=NOW_MS))
     with TestClient(create_app(settings, c)) as api:
         assert api.get("/health").json()["companion"] == "gemini"
         r = nova(
@@ -372,6 +372,7 @@ def test_worsened_finding_reopens_itself(api):
 def test_health_and_root(api, hour):
     h = api.get("/health").json()
     assert h["status"] == "ok" and h["companion"] == "rules" and abs(h["missionHour"] - hour) < 0.01
+    assert h["echo"] is True and h["database"] == "memory" and h["version"] == "3.0.0"
     assert "disclaimer" in api.get("/").json()
 
 
@@ -388,16 +389,13 @@ def test_cors_allows_put_and_the_frontend_origin(api):
     assert r.headers["access-control-allow-origin"] == "http://localhost:4200"
 
 
-def test_ridge_endpoints_still_work_next_to_v2(api):
-    """Nothing was removed: the RIDGE API (ECHO chat, dashboard, alerts, distance) runs beside v2."""
-    assert api.get("/api/dashboard").status_code == 200 and api.get("/api/distance").status_code == 200
-    assert api.get("/api/alerts").status_code == 200 and api.get("/api/isolation/method").status_code == 200
-    # the two paths v2 needs for itself moved under /api/ridge/
-    assert [a["astronaut"]["id"] for a in api.get("/api/ridge/crew").json()] == ["A", "B", "C"]
+def test_one_service_serves_the_guide_and_the_extra_endpoints(api):
+    """The guide's endpoints and the extras (ECHO, distance, dashboard, alerts, mobility) share one core."""
+    for path in ("/api/dashboard", "/api/distance", "/api/alerts", "/api/isolation/method", "/api/mobility/method"):
+        assert api.get(path).status_code == 200
     assert [a["id"] for a in api.get("/api/crew").json()] == ["hashir", "ahmad", "hannan", "sabaina"]
-    assert (
-        api.get("/api/ridge/mobility/method").status_code == 200 and api.get("/api/mobility/method").status_code == 200
-    )
+    for gone in ("/api/ridge/crew", "/api/timeline", "/api/ridge/mobility/method"):
+        assert api.get(gone).status_code == 404
 
 
 @pytest.mark.parametrize("path", ["/api/assessment/hazards", "/api/insights", "/api/mission", "/api/crew"])

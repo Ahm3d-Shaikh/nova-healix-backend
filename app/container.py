@@ -1,4 +1,4 @@
-"""Wires services together. Built once at startup; tests build their own."""
+"""Wires the services together. Built once at startup; tests build their own."""
 
 import logging
 import time
@@ -14,14 +14,24 @@ from app.domain.mission_plan import (
     MISSION_DURATION_DAYS,
 )
 from app.domain.store import MissionData
+from app.nasa.donki_client import DonkiClient
+from app.nasa.horizons_client import HorizonsClient
+from app.nasa.service import NasaDataService
+from app.nasa.space_weather_service import SpaceWeatherService
+from app.repositories.cache import CacheRepository
+from app.repositories.echo import EchoRepository
 from app.repositories.state import StateRepository
 from app.schemas.mission import MissionConfig, Team
 from app.services.actions import ActionsService
 from app.services.analysis import AnalysisService
 from app.services.clock import MissionClock, Trajectory
-from app.services.companion import CompanionService, Replier
+from app.services.companion import CompanionService, GeminiReplier, Replier
 from app.services.crew_mode import CrewModeService
+from app.services.echo import EchoService
+from app.services.echo_companion import EchoCompanion, GeminiEchoCompanion
+from app.services.gemini import GeminiClient
 from app.services.mobility import MobilityService
+from app.services.overview import OverviewService
 from app.services.telemetry import TelemetryService
 
 log = logging.getLogger(__name__)
@@ -37,9 +47,12 @@ class Container:
     telemetry: TelemetryService
     analysis: AnalysisService
     crew_mode: CrewModeService
-    companion: CompanionService
+    companion: CompanionService  # Nova, the private companion
+    echo: EchoService  # ECHO, the scored isolation check-in chat
     actions: ActionsService
     mobility: MobilityService
+    overview: OverviewService
+    nasa: NasaDataService | None  # None when no NASA clients were given (offline tests)
     database: str  # "supabase" | "memory"
 
     def mission_config(self) -> MissionConfig:
@@ -82,19 +95,49 @@ async def resolve_launch_epoch(settings: Settings, repo: StateRepository, now_ms
 async def build_container(
     settings: Settings,
     db: Database,
+    *,
+    donki: DonkiClient | None = None,
+    horizons: HorizonsClient | None = None,
+    gemini: GeminiClient | None = None,
     replier: Replier | None = None,
+    echo_companion: EchoCompanion | None = None,
     now_ms: float | None = None,
     trajectory: Trajectory | None = None,
 ) -> Container:
     now = now_ms if now_ms is not None else time.time() * 1000
     repo = StateRepository(db)
-    epoch = await resolve_launch_epoch(settings, repo, now)
-    clock = MissionClock(epoch, (lambda: now) if now_ms is not None else None)
+    echo_repo = EchoRepository(db)
+    clock = MissionClock(await resolve_launch_epoch(settings, repo, now), (lambda: now) if now_ms is not None else None)
     data = MissionData()
     await repo.load_into(data)
+    try:
+        await echo_repo.load_into(data)
+    except DatabaseError as exc:
+        log.error("Could not load saved ECHO check-ins (%s)", exc)
     traj = trajectory or Trajectory()
     if len(traj.au) < MISSION_DURATION_DAYS + 1:
         raise ValueError(f"trajectory needs at least {MISSION_DURATION_DAYS + 1} values")
+
+    if gemini is not None:
+        replier = replier or GeminiReplier(gemini, settings.gemini_chat_model)
+        echo_companion = echo_companion or GeminiEchoCompanion(
+            gemini, settings.gemini_model, settings.gemini_chat_model, settings.gemini_chat_timeout_seconds
+        )
+    nasa = None
+    if donki is not None and horizons is not None:
+        cache = CacheRepository(db)
+        weather = SpaceWeatherService(
+            donki,
+            settings.storm_window_start,
+            settings.storm_window_end,
+            settings.donki_snapshot_path,
+            cache=cache,
+            cache_ttl_seconds=settings.donki_cache_ttl_seconds,
+            fetch_timeout_seconds=settings.donki_total_timeout_seconds,
+        )
+        nasa = NasaDataService(weather=weather, horizons=horizons, cache=cache, data=data, trajectory=traj, clock=clock)
+
+    analysis = AnalysisService(data, clock, traj)
     return Container(
         settings=settings,
         clock=clock,
@@ -102,15 +145,15 @@ async def build_container(
         data=data,
         state=repo,
         telemetry=TelemetryService(data, clock),
-        analysis=AnalysisService(data, clock, traj),
+        analysis=analysis,
         crew_mode=CrewModeService(data, clock, repo),
         companion=CompanionService(
             data, clock, traj, repo, FLIGHT_SURGEON, replier=replier, enabled=settings.companion_enabled
         ),
+        echo=EchoService(data, clock, echo_repo, echo_companion),
         actions=ActionsService(data, clock, traj, repo, FLIGHT_SURGEON),
         mobility=MobilityService(data, clock, repo),
+        overview=OverviewService(data, clock, traj, analysis),
+        nasa=nasa,
         database=db.name,
     )
-
-
-__all__ = ["Container", "build_container"]

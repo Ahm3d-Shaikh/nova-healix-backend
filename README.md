@@ -12,7 +12,7 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 - **Build tracker (every endpoint and rule, with status):** [docs/V2_TRACKER.md](docs/V2_TRACKER.md)
 - **Contract (types, endpoints, rules):** the v2 guide in the frontend repo
   [hashir4825/Nova-Helix](https://github.com/hashir4825/Nova-Helix) → `docs/BACKEND_API_GUIDE.md`
-- RIDGE app (still running: ECHO chat, distance, dashboard): guide and brief in [docs/ridge/](docs/ridge/)
+- Earlier RIDGE app (superseded, kept for history): [docs/archive/ridge/](docs/archive/ridge/)
 
 ## What it does
 
@@ -27,7 +27,7 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
   that leave it are what the astronaut confirms, plus a content-free safety alert under the safety exception.
 - **Mission Control**: findings, action log, messages that carry the real signal delay, resolve / reopen.
 - **Mobility & Balance Check** (extra endpoints, see [docs/BACKEND_UPDATE.md](docs/BACKEND_UPDATE.md)): three short movement tests measured in the browser with MediaPipe; results feed the Gravity hazard and a finding. Test page at `/demo/mobility/`.
-- **ECHO check-in chat, distance, RIDGE dashboard and alerts** (Ahmed's and the earlier RIDGE work): unchanged, running next to v2.
+- **ECHO** (Ahmed's scored isolation check-in chat), **distance**, a one-call **dashboard** and **alerts**: all on the same core, feeding the Isolation hazard and findings.
 - **Real NASA data**: DONKI storm events on mission day 97; JPL Horizons Earth-Mars distance for the trajectory.
 
 ## Getting started
@@ -49,29 +49,34 @@ NASA_API_KEY=your_key python -m scripts.check_donki_live   # verify live NASA ac
 
 ## Project structure
 
+One crew, one clock, one engine, one database. Pure logic is separate from HTTP and from storage.
+
 ```text
 app/
-├── main.py          # create_app(): one service, two APIs (v2 and RIDGE), CORS (GET/POST/PUT), error mapping
-├── container.py     # wires the v2 services
-├── ridge_container.py # wires the RIDGE services (A/B/C crew, ECHO, distance)
-├── models/ rules/   # RIDGE app: cards, rules engine (Ahmed's and the earlier work)
-├── domain/          # pure logic: generator, store, scoring engine, Nova rules
-├── schemas/         # pydantic models = the frontend's types (camelCase)
-├── services/        # clock, telemetry, analysis, crew mode, companion, actions, NASA feeds
-├── repositories/    # write-through persistence; external-feed cache
-├── db/              # Supabase (PostgREST) and in-memory backends
-├── routers/         # thin HTTP endpoints
-└── data/            # data exported from the frontend; real DONKI snapshot
-supabase/            # schema.sql (run once; RIDGE and v2 tables side by side, nothing is dropped)
-scripts/             # check_donki_live, build_snapshot, frontend-golden (regenerate parity fixtures)
-tests/               # pytest: parity with the frontend engine, every endpoint, persistence, NASA, Nova privacy
+├── main.py            # create_app(): routers, CORS (GET/POST/PUT), error mapping, startup
+├── container.py       # builds and wires everything (the one container)
+├── api/deps.py        # FastAPI dependency
+├── core/              # settings, domain errors, logging, middleware
+├── domain/            # pure logic, no I/O: seeded generator, data store, scoring engine (engine/hazards,
+│                      #   insights/, interpret), Nova rules, ECHO and mobility scoring
+├── schemas/           # pydantic models = the frontend's types (camelCase on the wire)
+├── services/          # clock, telemetry, analysis, crew mode, Nova, ECHO, mobility, actions, overview, Gemini wrapper
+├── repositories/      # write-through persistence (state, echo) and the external-feed cache
+├── nasa/              # DONKI and JPL Horizons clients, parsers, feed service, mapping onto the mission
+├── db/                # Supabase (PostgREST) and in-memory backends
+├── routers/           # thin HTTP endpoints
+├── static/mobility/   # MediaPipe test page for the Mobility & Balance Check
+└── data/              # data exported from the frontend, real DONKI snapshot
+supabase/              # schema.sql (the one schema), cleanup_old_tables.sql (optional)
+scripts/               # check_donki_live, build_snapshot, frontend-golden (regenerate the parity fixtures)
+tests/                 # pytest: parity with the frontend engine, every endpoint, ECHO, mobility, persistence, NASA
 ```
 
 ## Deployment
 
 `Dockerfile`: slim Python 3.12, non-root, pinned `requirements.lock`, health check on `/health`, honours `$PORT`.
 Set `NASA_API_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CORS_ORIGINS` (include the deployed frontend),
-and optionally `GEMINI_API_KEY`. Run [`supabase/schema.sql`](supabase/schema.sql) once. Row Level Security is **off**,
+and optionally `GEMINI_API_KEY`. Run [`supabase/schema.sql`](supabase/schema.sql) once (one schema for everything). Row Level Security is **off**,
 so never ship the project's anon key in a frontend. Without Supabase the app uses an in-memory store.
 
 ## Known limitations
