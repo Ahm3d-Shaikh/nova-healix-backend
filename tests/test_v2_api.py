@@ -293,10 +293,15 @@ def test_nova_open_ended_reply_uses_gemini_and_failures_are_503(settings, db):
         assert r["replies"][0]["text"] == "GEMINI heard 1 turns"
         assert nova(api, "ahmad", "I want to die").json()["safety"]  # safety never goes to the model
         assert replier.calls == ["the quarterly reactor audit went sideways"]
+        # Every other turn is written by the model, keeping the rule engine's card and using its draft as a hint.
+        checkin = nova(api, "ahmad", "check in: slept badly, feeling low, headache").json()
+        assert checkin["replies"][0]["text"].startswith("GEMINI") and checkin["replies"][0]["card"]["kind"] == "checkin"
+        assert "check-in" in replier.hints[-1]
+        assert nova(api, "ahmad", "thanks").json()["replies"][0]["text"].startswith("GEMINI")
+        assert len(replier.calls) == 3
         replier.fail = True
-        bad = nova(api, "ahmad", "something else entirely")
+        bad = nova(api, "ahmad", "thanks")
         assert bad.status_code == 503 and "Companion unavailable" in bad.json()["detail"]
-        assert nova(api, "ahmad", "thanks").status_code == 200  # rule-based answers do not need the model
 
 
 def test_shared_note_becomes_a_finding(api):

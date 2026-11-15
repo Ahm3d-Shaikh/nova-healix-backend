@@ -73,15 +73,17 @@ class FakeReplier:
     mode = "gemini"
 
     def __init__(self) -> None:
-        self.calls: list[str] = []
+        self.calls: list[str | None] = []
+        self.hints: list[str] = []
         self.fail = False
 
-    async def reply(self, name, history, text):
+    async def reply(self, name, history, text, hint):
         from app.core.errors import CompanionUnavailableError
 
         if self.fail:
             raise CompanionUnavailableError("rate limit reached, retry shortly")
         self.calls.append(text)
+        self.hints.append(hint)
         return f"GEMINI heard {len(history)} turns"
 
 
