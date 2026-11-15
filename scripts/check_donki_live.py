@@ -13,9 +13,9 @@ import sys
 import httpx
 
 from app.core.config import get_settings
-from app.models.enums import EventKind
-from app.services.donki_client import DonkiClient, DonkiError, DonkiRateLimited
-from app.services.space_weather_service import SpaceWeatherService
+from app.nasa.donki_client import DonkiClient, DonkiError, DonkiRateLimited
+from app.nasa.models import EventKind
+from app.nasa.space_weather_service import SpaceWeatherService
 
 
 async def main() -> int:

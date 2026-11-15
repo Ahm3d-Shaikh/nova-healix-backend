@@ -6,6 +6,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
@@ -15,38 +16,72 @@ from google.genai import types as genai_types
 
 from app.container import Container, build_container
 from app.core.config import Settings, get_settings
-from app.core.errors import (
-    CompanionUnavailableError,
-    DomainError,
-    InvalidDayError,
-    NotEnoughTurnsError,
-    SessionClosedError,
-    SessionNotFoundError,
-    SessionTurnLimitError,
-    UnknownAstronautError,
-)
+from app.core.errors import ConflictError, DomainError, InvalidInputError, NotFoundError, UnavailableError
 from app.core.logging import configure_logging
 from app.core.middleware import RequestContextMiddleware
 from app.core.reference import DISCLAIMER
 from app.db.base import Database, DatabaseError
 from app.db.memory import InMemoryDatabase
 from app.db.supabase import SupabaseDatabase
-from app.routers import crew, dashboard, distance, isolation, mobility
-from app.services.companion import GeminiCompanion
-from app.services.donki_client import DonkiClient
-from app.services.horizons_client import HorizonsClient
+from app.nasa.donki_client import DonkiClient
+from app.nasa.horizons_client import HorizonsClient
+from app.routers import (
+    actions,
+    assessment,
+    companion,
+    crew,
+    crew_mode,
+    isolation,
+    mission,
+    mobility,
+    overview,
+    telemetry,
+)
+from app.services.gemini import GeminiClient
 
-STATUS_BY_ERROR: dict[type[DomainError], int] = {
-    UnknownAstronautError: 404,
-    InvalidDayError: 422,
-    SessionNotFoundError: 404,
-    SessionClosedError: 409,
-    SessionTurnLimitError: 409,
-    NotEnoughTurnsError: 409,
-    CompanionUnavailableError: 503,
-}
 log = logging.getLogger(__name__)
 MOBILITY_PAGE_DIR = Path(__file__).parent / "static" / "mobility"
+
+ROUTERS = (
+    mission.router,
+    crew.router,
+    telemetry.router,
+    assessment.router,
+    crew_mode.router,
+    companion.router,  # Nova, the private companion
+    actions.router,
+    mobility.router,  # Mobility & Balance Check
+    isolation.router,  # ECHO, the scored isolation check-in
+    overview.router,  # distance, dashboard, alerts
+)
+
+# Domain errors map to HTTP in one place, by what kind of problem they are.
+STATUS_BY_ERROR: list[tuple[type[DomainError], int]] = [
+    (NotFoundError, 404),
+    (ConflictError, 409),
+    (UnavailableError, 503),
+    (InvalidInputError, 422),
+]
+
+
+def _database(settings: Settings, http: httpx.AsyncClient) -> Database:
+    if settings.use_supabase:
+        return SupabaseDatabase(
+            http, settings.supabase_url, settings.supabase_service_role_key, settings.supabase_timeout_seconds
+        )
+    log.warning("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set: using an in-memory store (lost on restart).")
+    return InMemoryDatabase()
+
+
+def _gemini(settings: Settings) -> tuple[genai.Client, GeminiClient] | None:
+    if not settings.gemini_api_key:
+        log.info("GEMINI_API_KEY not set: Nova answers from its rules only and ECHO returns 503.")
+        return None
+    client = genai.Client(
+        api_key=settings.gemini_api_key,
+        http_options=genai_types.HttpOptions(timeout=int(settings.gemini_timeout_seconds * 1000)),
+    )
+    return client, GeminiClient(client, settings.gemini_chat_timeout_seconds)
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -60,71 +95,45 @@ def create_app(settings: Settings | None = None, container: Container | None = N
             yield
             return
         async with httpx.AsyncClient() as http:
-            donki = DonkiClient(http, settings.donki_base_url, settings.nasa_api_key, settings.donki_timeout_seconds)
-            horizons = HorizonsClient(http, settings.horizons_base_url, settings.horizons_timeout_seconds)
-            db: Database
-            if settings.use_supabase:
-                db = SupabaseDatabase(
-                    http, settings.supabase_url, settings.supabase_service_role_key, settings.supabase_timeout_seconds
-                )
-            else:
-                log.warning("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY not set: using an in-memory store.")
-                db = InMemoryDatabase()
-            gemini = (
-                genai.Client(
-                    api_key=settings.gemini_api_key,
-                    http_options=genai_types.HttpOptions(timeout=int(settings.gemini_timeout_seconds * 1000)),
-                )
-                if settings.gemini_api_key
-                else None
+            gemini = _gemini(settings)
+            built = await build_container(
+                settings,
+                _database(settings, http),
+                donki=DonkiClient(http, settings.donki_base_url, settings.nasa_api_key, settings.donki_timeout_seconds),
+                horizons=HorizonsClient(http, settings.horizons_base_url, settings.horizons_timeout_seconds),
+                gemini=gemini[1] if gemini else None,
             )
-            companion = (
-                GeminiCompanion(
-                    gemini, settings.gemini_model, settings.gemini_chat_model, settings.gemini_chat_timeout_seconds
-                )
-                if gemini
-                else None
-            )
-            if companion is None:
-                log.warning("GEMINI_API_KEY not set: AI isolation check-ins are disabled.")
-            app.state.container = await build_container(settings, donki, horizons, db, companion)
+            app.state.container = built
             if settings.nasa_api_key == "DEMO_KEY":
                 log.warning("Using DEMO_KEY: heavily rate-limited. Set NASA_API_KEY for live DONKI data.")
-
-            # Warm the NASA caches so the first dashboard request does not wait on them.
-            async def warm() -> None:
-                await asyncio.gather(
-                    app.state.container.weather.get(),
-                    app.state.container.crew.distance_series(),
-                    return_exceptions=True,
-                )
-
-            warmup = asyncio.create_task(warm())
+            # Pull the NASA feeds in the background so no request waits on them; the API runs on defaults meanwhile.
+            refresh = asyncio.create_task(built.nasa.refresh()) if built.nasa else None
             try:
                 yield
             finally:
-                warmup.cancel()
-                if gemini is not None:
-                    await gemini.aio.aclose()
+                if refresh:
+                    refresh.cancel()
+                if gemini:
+                    await gemini[0].aio.aclose()
 
     app = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
-        description=f"RIDGE Monitor backend. **{DISCLAIMER}**",
+        description=f"Nova Healix backend. **{DISCLAIMER}**",
         lifespan=lifespan,
     )
     app.add_middleware(GZipMiddleware, minimum_size=1000)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "PUT", "OPTIONS"],
         allow_headers=["Content-Type"],
     )
     app.add_middleware(RequestContextMiddleware)
 
     @app.exception_handler(DomainError)
     async def handle_domain_error(_: Request, exc: DomainError) -> JSONResponse:
-        status = next((code for cls, code in STATUS_BY_ERROR.items() if isinstance(exc, cls)), 400)
+        status = next((code for cls, code in STATUS_BY_ERROR if isinstance(exc, cls)), 400)
         return JSONResponse(status_code=status, content={"detail": str(exc)})
 
     @app.exception_handler(DatabaseError)
@@ -132,25 +141,36 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         log.error("Database error: %s", exc)
         return JSONResponse(status_code=503, content={"detail": "Database temporarily unavailable; please retry"})
 
-    for router in (crew.router, dashboard.router, distance.router, isolation.router, mobility.router):
+    @app.exception_handler(RequestValidationError)
+    async def handle_validation_error(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # A readable message, and never an echo of the submitted values (Nova bodies are private).
+        parts = []
+        for err in exc.errors():
+            where = ".".join(str(p) for p in err["loc"] if p not in ("body", "query", "path"))
+            parts.append(f"{where}: {err['msg']}" if where else str(err["msg"]))
+        return JSONResponse(status_code=422, content={"detail": "; ".join(parts) or "Invalid request"})
+
+    for router in ROUTERS:
         app.include_router(router)
 
-    # Browser test page for the Mobility & Balance Check (MediaPipe runs in the browser, not here)
+    # Browser test page for the Mobility & Balance Check (MediaPipe runs in the browser, not on the server)
     if MOBILITY_PAGE_DIR.is_dir():
         app.mount("/demo/mobility", StaticFiles(directory=MOBILITY_PAGE_DIR, html=True), name="mobility-demo")
 
-    @app.get("/", tags=["meta"])
+    @app.get("/", tags=["ops"])
     async def root() -> dict[str, str]:
-        return {"message": "RIDGE Monitor backend is running!", "disclaimer": DISCLAIMER, "docs": "/docs"}
+        return {"message": "Nova Healix backend is running!", "disclaimer": DISCLAIMER, "docs": "/docs"}
 
-    @app.get("/health", tags=["meta"])
-    async def health_check(request: Request) -> dict[str, str | bool]:
+    @app.get("/health", tags=["ops"])
+    async def health_check(request: Request) -> dict[str, str | float | bool]:
         c: Container = request.app.state.container
         return {
-            "status": "healthy",
+            "status": "ok",
             "version": settings.app_version,
+            "companion": c.companion.mode,  # Nova: "gemini" | "rules" | "off"
+            "echo": c.echo.enabled,  # ECHO needs a Gemini key
             "database": c.database,
-            "ai_checkin": c.ai_checkin_enabled,
+            "missionHour": round(c.clock.now_hour(), 2),
         }
 
     return app
