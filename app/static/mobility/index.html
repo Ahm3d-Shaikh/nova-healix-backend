@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RIDGE Mobility &amp; Balance Check (test page)</title>
+<style>
+  :root { --bg:#0e1420; --card:#171f2f; --ink:#e8edf6; --mute:#93a0b8; --green:#3ecf8e; --amber:#f5b942; --red:#ef5b5b; --line:#26324a; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.45 system-ui,sans-serif; background:var(--bg); color:var(--ink); }
+  main { max-width:1100px; margin:0 auto; padding:16px; display:grid; gap:16px; grid-template-columns: 1fr 1fr; }
+  @media (max-width:820px) { main { grid-template-columns: 1fr; } }
+  h1 { font-size:20px; margin:0; } h2 { font-size:16px; margin:0 0 8px; }
+  header { grid-column:1/-1; } .note { color:var(--mute); font-size:13px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .stage { position:relative; background:#000; border-radius:12px; overflow:hidden; aspect-ratio:4/3; }
+  .stage video, .stage canvas { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; }
+  .mirror video, .mirror canvas { transform:scaleX(-1); }
+  #banner { position:absolute; left:0; right:0; bottom:0; padding:10px 12px; background:rgba(0,0,0,.65); font-weight:600; }
+  #count { position:absolute; top:8px; right:12px; font-size:42px; font-weight:800; text-shadow:0 2px 8px #000; }
+  button, select, input { font:inherit; color:var(--ink); background:#0f1626; border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  button { cursor:pointer; background:#22406f; border-color:#2f5a9c; } button:disabled { opacity:.45; cursor:not-allowed; }
+  button.go { background:#1d7a52; border-color:#25a06b; }
+  .row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:8px 0; }
+  .test { border-top:1px solid var(--line); padding:10px 0; } .test:first-of-type { border-top:0; }
+  .pill { display:inline-block; padding:2px 10px; border-radius:99px; font-weight:700; font-size:12px; color:#0b1020; background:var(--mute); }
+  .pill.green { background:var(--green); } .pill.amber { background:var(--amber); } .pill.red { background:var(--red); }
+  pre { background:#0b101c; padding:10px; border-radius:8px; overflow:auto; font-size:12px; max-height:240px; }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:2px 10px; font-size:13px; } .kv b { color:var(--mute); font-weight:500; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Mobility &amp; Balance Check <span class="note">(RIDGE · Gravity card · test page)</span></h1>
+    <p class="note">Decision-support prototype, not a medical device. Measures movement (balance, leg strength, knee bend), never bone health.
+      Video stays in this browser; only the final numbers are sent. Stand or sit <b>side-on</b> to the camera with your whole body in view.</p>
+  </header>
+
+  <section class="card">
+    <div class="stage" id="stage"><video id="video" muted playsinline></video><canvas id="overlay"></canvas>
+      <div id="count"></div><div id="banner">Loading pose model…</div></div>
+    <div class="row">
+      <button id="camBtn">Use camera</button>
+      <label>or video file <input id="file" type="file" accept="video/*"></label>
+    </div>
+    <div class="kv" id="live"></div>
+  </section>
+
+  <section class="card">
+    <div class="row">
+      <label>Astronaut <select id="astro"><option>A</option><option>B</option><option>C</option></select></label>
+      <label>Mission day <input id="day" type="number" min="1" value="10" style="width:5em"></label>
+      <label>API <input id="api" style="width:15em"></label>
+    </div>
+
+    <div class="test" id="t-balance">
+      <h2>1 · Single-leg balance <span class="note">(up to 30 s)</span></h2>
+      <p class="note">Stand on one leg, hands on hips, eyes open. Lift a foot when you see "Lift a foot".</p>
+      <button class="go" data-test="balance">Start</button> <span class="res" id="r-balance">not done</span>
+    </div>
+    <div class="test" id="t-sts">
+      <h2>2 · 5× sit-to-stand</h2>
+      <p class="note">Sit on a chair, side-on to the camera, arms crossed. Stand up and sit down 5 times, fast but safe.</p>
+      <button class="go" data-test="sts">Start</button> <span class="res" id="r-sts">not done</span>
+    </div>
+    <div class="test" id="t-squat">
+      <h2>3 · Squat knee bend <span class="note">(3 slow squats)</span></h2>
+      <p class="note">Side-on to the camera, feet shoulder-width. Squat as deep as is comfortable, 3 times.</p>
+      <button class="go" data-test="squat">Start</button> <span class="res" id="r-squat">not done</span>
+    </div>
+
+    <div class="row"><button id="send" disabled>Send to API</button> <button id="reset">Reset results</button></div>
+    <div id="out"></div>
+    <pre id="payload" hidden></pre>
+  </section>
+</main>
+
+<script type="module">
+import { PoseLandmarker, FilesetResolver, DrawingUtils }
+  from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/vision_bundle.mjs";
+
+// ---- Config (the Angular team can change these) -------------------------------------------
+const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@1.2.0/wasm";
+const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/latest/pose_landmarker_lite.task";
+const MAX_HUMAN_FLEXION = 150;     // deg: beyond this a 2D angle is a tracking error (the API rejects it too)
+const MIN_VIS = 0.5;               // a joint below this visibility is ignored for that frame
+const COUNTDOWN_S = 3;
+
+// MediaPipe landmark indices
+const LM = { nose:0, lSh:11, rSh:12, lHip:23, rHip:24, lKnee:25, rKnee:26, lAnk:27, rAnk:28 };
+const $ = (id) => document.getElementById(id);
+const video = $("video"), canvas = $("overlay"), ctx = canvas.getContext("2d");
+$("api").value = location.origin;
+const results = {};           // balance / sts / squat
+let landmarker, drawing, running = null, cameraMode = false;
+
+// ---- Geometry helpers ------------------------------------------------------------------------
+const px = (p) => ({ x: p.x * video.videoWidth, y: p.y * video.videoHeight, v: p.visibility ?? 0 });
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+function angle(a, b, c) {                               // degrees at b
+  const v1 = [a.x - b.x, a.y - b.y], v2 = [c.x - b.x, c.y - b.y];
+  const n = Math.hypot(...v1) * Math.hypot(...v2);
+  return n ? Math.acos(Math.max(-1, Math.min(1, (v1[0]*v2[0] + v1[1]*v2[1]) / n))) * 180 / Math.PI : 180;
+}
+const mean = (a) => a.reduce((s, x) => s + x, 0) / (a.length || 1);
+const median = (a) => { const s = [...a].sort((x, y) => x - y); return s.length ? s[Math.floor((s.length - 1) / 2)] : NaN; };
+
+function frameInfo(lms) {
+  const P = Object.fromEntries(Object.entries(LM).map(([k, i]) => [k, px(lms[i])]));
+  const sides = [["l", P.lHip, P.lKnee, P.lAnk], ["r", P.rHip, P.rKnee, P.rAnk]].map(([s, h, k, a]) => {
+    const v = Math.min(h.v, k.v, a.v);
+    return { s, v, flex: 180 - angle(h, k, a) };
+  });
+  const best = sides[0].v >= sides[1].v ? sides[0] : sides[1];
+  const bodyH = dist(P.nose, { x: (P.lAnk.x + P.rAnk.x) / 2, y: (P.lAnk.y + P.rAnk.y) / 2 });
+  return {
+    P, flex: best.v >= MIN_VIS && best.flex <= MAX_HUMAN_FLEXION ? best.flex : null,
+    conf: mean([P.lHip.v, P.rHip.v, P.lKnee.v, P.rKnee.v, P.lAnk.v, P.rAnk.v]),
+    bodyH, hip: { x: (P.lHip.x + P.rHip.x) / 2, y: (P.lHip.y + P.rHip.y) / 2 },
+    ankleGap: Math.abs(P.lAnk.y - P.rAnk.y),
+  };
+}
+
+// ---- Test state machines -----------------------------------------------------------------------
+// Each test is { start(), step(info, t) -> {banner, done?, result?} } where t is seconds since the test began.
+function balanceTest() {
+  let phase = "wait", liftT = null, holdStart = null, lostT = null, bodyHs = [], hips = [], confs = [], end = null;
+  return (info, t) => {
+    if (info.bodyH) bodyHs.push(info.bodyH);
+    const bodyH = median(bodyHs.slice(0, 30));
+    const lifted = info.ankleGap > 0.08 * bodyH;
+    confs.push(info.conf);
+    if (phase === "wait") {
+      if (t > 12) return finish("No foot lift detected. Try again.", null);
+      liftT = lifted ? (liftT ?? t) : null;
+      if (liftT !== null && t - liftT > 0.3) { phase = "hold"; holdStart = liftT; }
+      return { banner: "Lift a foot and balance on one leg" };
+    }
+    hips.push(info.hip);
+    lostT = lifted ? null : (lostT ?? t);
+    const stopped = lostT !== null && t - lostT > 0.5;
+    const hold = Math.min(30, (stopped ? lostT : t) - holdStart);
+    if (stopped || hold >= 30) {
+      const mx = mean(hips.map((h) => h.x)), my = mean(hips.map((h) => h.y));
+      const rms = Math.sqrt(mean(hips.map((h) => (h.x - mx) ** 2 + (h.y - my) ** 2)));
+      return finish(`Held ${hold.toFixed(1)} s`, { balance_hold_s: round(hold, 1), sway_pct_height: round(100 * rms / bodyH, 2) }, mean(confs));
+    }
+    return { banner: `Hold… ${hold.toFixed(1)} s` };
+  };
+}
+
+function stsTest() {
+  let phase = null, reps = 0, startT = null, confs = [];
+  return (info, t) => {
+    if (info.flex === null) return { banner: "Keep your whole body in view" };
+    confs.push(info.conf);
+    if (phase === null) {                               // need to start seated
+      if (info.flex < 55) return { banner: "Sit down on the chair first" };
+      phase = "seated";
+    }
+    if (t > 60) return finish("Timed out. Try again.", null);
+    if (phase === "seated") {
+      if (info.flex < 45 && startT === null) startT = t;   // started leaving the seat
+      if (info.flex < 25) { reps++; phase = "standing"; }
+    } else if (info.flex > 55) phase = "seated";
+    if (reps >= 5) return finish(`5 reps in ${(t - startT).toFixed(1)} s`, { sit_to_stand_5x_s: round(t - startT, 1) }, mean(confs));
+    return { banner: `Stand-ups: ${reps} / 5` };
+  };
+}
+
+function squatTest() {
+  let phase = "up", peak = 0, peaks = [], confs = [];
+  return (info, t) => {
+    if (info.flex === null) return { banner: "Keep your whole body in view" };
+    confs.push(info.conf);
+    if (t > 40) return finish("Timed out. Try again.", null);
+    if (phase === "up" && info.flex > 50) { phase = "down"; peak = info.flex; }
+    else if (phase === "down") {
+      peak = Math.max(peak, info.flex);
+      if (info.flex < 25) { peaks.push(peak); phase = "up"; }
+    }
+    if (peaks.length >= 3) {
+      const deg = median(peaks);
+      return finish(`Deepest knee bend ${deg.toFixed(0)}°`, { knee_flexion_deg: round(deg, 1) }, mean(confs));
+    }
+    return { banner: `Squats: ${peaks.length} / 3` };
+  };
+}
+
+const round = (x, d) => Math.round(x * 10 ** d) / 10 ** d;
+function finish(banner, values, conf = 0) { return { banner, done: true, values, conf }; }
+const TESTS = { balance: balanceTest, sts: stsTest, squat: squatTest };
+
+// ---- Frame loop ---------------------------------------------------------------------------------
+let lastTs = -1;
+function loop() {
+  if (landmarker && !video.paused && !video.ended && video.readyState >= 2 && video.videoWidth) {
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    const ts = Math.max(performance.now(), lastTs + 1); lastTs = ts;
+    const res = landmarker.detectForVideo(video, ts);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const lms = res.landmarks?.[0];
+    if (lms) {
+      drawing.drawConnectors(lms, PoseLandmarker.POSE_CONNECTIONS, { color: "#3ecf8e", lineWidth: 3 });
+      drawing.drawLandmarks(lms, { color: "#fff", radius: 2 });
+      const info = frameInfo(lms);
+      $("live").innerHTML = `<b>Knee bend</b><span>${info.flex === null ? "—" : info.flex.toFixed(0) + "°"}</span>` +
+        `<b>Tracking</b><span>${(info.conf * 100).toFixed(0)}%</span>`;
+      if (running && performance.now() / 1000 >= running.startAt) {
+        const out = running.step(info, performance.now() / 1000 - running.startAt);
+        $("banner").textContent = out.banner; $("count").textContent = "";
+        if (out.done) complete(out);
+      }
+    } else if (running) $("banner").textContent = "No person detected: step back so your whole body is in view";
+  }
+  (video.requestVideoFrameCallback ? video.requestVideoFrameCallback.bind(video) : requestAnimationFrame)(loop);
+}
+
+function complete(out) {
+  const name = running.name; running = null; setButtons(true);
+  if (!out.values) { $(`r-${name}`).textContent = out.banner; return; }
+  results[name] = { ...out.values, conf: out.conf };
+  $(`r-${name}`).innerHTML = `✅ ${out.banner} <span class="note">(tracking ${(out.conf * 100).toFixed(0)}%)</span>`;
+  refreshSend();
+}
+
+function setButtons(on) { document.querySelectorAll("button.go").forEach((b) => (b.disabled = !on)); }
+function refreshSend() { $("send").disabled = !(results.balance && results.sts && results.squat); }
+
+document.querySelectorAll("button.go").forEach((b) => b.addEventListener("click", async () => {
+  if (!video.srcObject && !video.src) { $("banner").textContent = "Choose the camera or a video file first"; return; }
+  if (video.paused) await video.play();
+  const name = b.dataset.test; setButtons(false); $(`r-${name}`).textContent = "running…";
+  const startAt = performance.now() / 1000 + COUNTDOWN_S;
+  running = { name, step: TESTS[name](), startAt };
+  const tick = setInterval(() => {
+    const left = Math.ceil(startAt - performance.now() / 1000);
+    if (left > 0) { $("count").textContent = left; $("banner").textContent = "Get ready…"; } else { $("count").textContent = ""; clearInterval(tick); }
+  }, 100);
+}));
+
+$("reset").onclick = () => { for (const k of Object.keys(results)) delete results[k]; document.querySelectorAll(".res").forEach((e) => (e.textContent = "not done")); $("out").innerHTML = ""; $("payload").hidden = true; refreshSend(); };
+
+$("send").onclick = async () => {
+  const body = {
+    balance_hold_s: results.balance.balance_hold_s, sway_pct_height: results.balance.sway_pct_height,
+    sit_to_stand_5x_s: results.sts.sit_to_stand_5x_s, knee_flexion_deg: results.squat.knee_flexion_deg,
+    pose_confidence: round(mean([results.balance.conf, results.sts.conf, results.squat.conf]), 3),
+  };
+  $("payload").hidden = false; $("payload").textContent = "POST " + `/api/mobility/${$("astro").value}?day=${$("day").value}\n` + JSON.stringify(body, null, 2);
+  try {
+    const r = await fetch(`${$("api").value}/api/mobility/${$("astro").value}?day=${$("day").value}`, {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const j = await r.json();
+    if (!r.ok) { $("out").innerHTML = `<p><span class="pill red">error ${r.status}</span> ${JSON.stringify(j.detail)}</p>`; return; }
+    const rows = (j.result?.tests ?? []).map((t) => `<div class="test"><b>${t.label}</b> <span class="pill ${t.level}">${t.level}</span> <span class="note">${t.note}</span></div>`).join("");
+    $("out").innerHTML = `<p>${j.message} <span class="pill ${j.result?.level ?? ""}">${j.result?.level ?? "not counted"}</span></p>${rows}`;
+  } catch (e) { $("out").innerHTML = `<p><span class="pill red">network</span> ${e}</p>`; }
+};
+
+// ---- Sources ---------------------------------------------------------------------------------------
+$("camBtn").onclick = async () => {
+  try {
+    video.srcObject = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: "user" }, audio: false });
+    video.removeAttribute("src"); video.loop = false; cameraMode = true; $("stage").classList.add("mirror");
+    await video.play(); $("banner").textContent = "Camera ready. Pick a test.";
+  } catch (e) { $("banner").textContent = "Camera unavailable: " + e.message; }
+};
+function useVideoUrl(url) {
+  video.srcObject = null; video.src = url; video.loop = true; cameraMode = false; $("stage").classList.remove("mirror");
+  video.play().then(() => ($("banner").textContent = "Video loaded. Pick a test.")).catch(() => ($("banner").textContent = "Press a test to start the video"));
+}
+$("file").onchange = (e) => e.target.files[0] && useVideoUrl(URL.createObjectURL(e.target.files[0]));
+const qv = new URLSearchParams(location.search).get("video"); // ?video=/some/clip.mp4 for demos
+
+// ---- Boot ----------------------------------------------------------------------------------------------
+try {
+  const fileset = await FilesetResolver.forVisionTasks(WASM_URL);
+  const make = (delegate) => PoseLandmarker.createFromOptions(fileset, {
+    baseOptions: { modelAssetPath: MODEL_URL, delegate }, runningMode: "VIDEO", numPoses: 1,
+  });
+  try { landmarker = await make("GPU"); } catch { landmarker = await make("CPU"); }   // GPU is faster; CPU always works
+  drawing = new DrawingUtils(ctx);
+  $("banner").textContent = "Ready. Use the camera or a video file.";
+  window.__ridge = { results, TESTS, frameInfo };   // handy for debugging
+  if (qv) useVideoUrl(qv);
+  loop();
+} catch (e) { $("banner").textContent = "Could not load the pose model: " + e.message; console.error(e); }
+</script>
+</body>
+</html>

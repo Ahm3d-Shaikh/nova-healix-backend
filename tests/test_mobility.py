@@ -81,6 +81,8 @@ def test_low_pose_confidence_is_stored_but_not_used(api):
 def test_validation_and_unknown_astronaut(api):
     assert post(api, {**GOOD, "balance_hold_s": 45}).status_code == 422
     assert post(api, {**GOOD, "sit_to_stand_5x_s": 0}).status_code == 422
+    assert post(api, {**GOOD, "knee_flexion_deg": 171.7}).status_code == 422  # impossible: tracking error
+    assert post(api, {**GOOD, "knee_flexion_deg": 150}).status_code == 201
     assert post(api, {k: v for k, v in GOOD.items() if k != "knee_flexion_deg"}).status_code == 422
     assert post(api, GOOD, aid="Z").status_code == 404
     assert post(api, GOOD, day=99).status_code == 422
@@ -98,3 +100,8 @@ def test_dashboard_includes_mobility(api):
     a = next(c for c in dash["crew"] if c["astronaut"]["id"] == "A")
     grav = next(c for c in a["cards"] if c["hazard"] == "G")
     assert grav["metrics"]["mobility"]["level"] == Level.GREEN.value
+
+
+def test_browser_test_page_is_served(api):
+    r = api.get("/demo/mobility/")
+    assert r.status_code == 200 and "Mobility" in r.text and "tasks-vision" in r.text
