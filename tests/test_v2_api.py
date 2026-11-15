@@ -332,7 +332,7 @@ def test_messages_carry_the_signal_delay_and_log_when_tied_to_a_finding(api, hou
     assert m["from"] == "Haleem" and 0.05 < delay_h < 0.15  # about 5.5 minutes at day 142
     assert api.get("/api/crew/ahmad/messages").json()[0]["id"] == m["id"]
     log = api.get("/api/actions").json()
-    assert log[-1]["kind"] == "message" and log[-1]["label"] == "Messaged Ahmad" and "arrives 5m" in log[-1]["detail"]
+    assert log[-1]["kind"] == "message" and log[-1]["label"] == "Messaged Ahmed" and "arrives 5m" in log[-1]["detail"]
     plain = api.post("/api/crew/ahmad/messages", json={"text": "hello"}).json()
     assert "insightId" not in plain and len(api.get("/api/actions").json()) == 1
 
