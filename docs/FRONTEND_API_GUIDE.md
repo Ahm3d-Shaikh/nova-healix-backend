@@ -1234,6 +1234,8 @@ draw the skeleton and compute the numbers; **no video is sent**, only the final 
 | `sit_to_stand` | 5 sit-to-stands, arms crossed, as fast as is safe | `sit_to_stand_5x_s` |
 | `squat_rom` | 3 slow bodyweight squats, side-on to the camera | `knee_flexion_deg` (deepest knee bend) |
 
+A working reference implementation is served at `/demo/mobility/`; see [MOBILITY_FRONTEND_HANDOFF.md](MOBILITY_FRONTEND_HANDOFF.md).
+
 Also send `pose_confidence` (mean keypoint visibility, 0 to 1). Below the `min_pose_confidence` from `/api/mobility/method`
 (0.6) the check is saved but not used (`counted: false`); ask the astronaut to retake in good light.
 
