@@ -401,3 +401,9 @@ def test_one_service_serves_the_guide_and_the_extra_endpoints(api):
 @pytest.mark.parametrize("path", ["/api/assessment/hazards", "/api/insights", "/api/mission", "/api/crew"])
 def test_every_get_is_camel_case(api, path):
     assert camel_only(api.get(path).json())
+
+
+def test_cors_allows_the_deployed_frontend(api):
+    r = api.get("/health", headers={"Origin": "https://nova-helix.vercel.app"})
+    assert r.headers["access-control-allow-origin"] == "https://nova-helix.vercel.app"
+    assert "access-control-allow-origin" not in api.get("/health", headers={"Origin": "https://evil.example"}).headers

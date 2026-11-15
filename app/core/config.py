@@ -15,7 +15,8 @@ class Settings(BaseSettings):
 
     app_name: str = "Nova Healix API"
     app_version: str = "3.0.0"
-    cors_origins: list[str] = ["http://localhost:4200"]
+    # Browser origins allowed to call the API: the Angular dev server and the deployed frontend.
+    cors_origins: list[str] = ["http://localhost:4200", "https://nova-helix.vercel.app"]
     log_level: str = "INFO"
 
     # --- Mission clock ------------------------------------------------------------------------
