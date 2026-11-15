@@ -87,7 +87,10 @@ class FakeReplier:
 
 @pytest.fixture
 def settings() -> Settings:
-    return Settings(supabase_url="", supabase_service_role_key="", gemini_api_key="", launch_epoch_ms=None)
+    # `_env_file=None`: tests use the code defaults, never one machine's .env
+    return Settings(
+        _env_file=None, supabase_url="", supabase_service_role_key="", gemini_api_key="", launch_epoch_ms=None
+    )
 
 
 @pytest.fixture
