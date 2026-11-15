@@ -779,7 +779,7 @@
      "title": "Sleep debt building ahead of EVA-3",
      "confidence": 0.8,
      "detectedAt": 3386.610509872404,
-     "summary": "Ahmad has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 4 days."
+     "summary": "Ahmed has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 4 days."
     },
     {
      "id": "exercise:hannan",
@@ -827,13 +827,13 @@
      "title": "Workload high during EVA-3 prep",
      "confidence": 0.74,
      "detectedAt": 3355,
-     "summary": "Ahmad rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
+     "summary": "Ahmed rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
     }
    ],
    "interp": [
     {
      "metric": "hr",
-     "summary": "Over the last 7 days heart rate averaged 66 bpm, within Ahmad's normal range (51–72 bpm). The trend is stable.",
+     "summary": "Over the last 7 days heart rate averaged 66 bpm, within Ahmed's normal range (51–72 bpm). The trend is stable.",
      "trend": "flat",
      "status": "nominal",
      "confidence": 0.92,
@@ -841,7 +841,7 @@
     },
     {
      "metric": "sleepDuration",
-     "summary": "Over the last 7 days sleep duration averaged 5.7 h, −18% versus Ahmad's normal (6.9 h), below the usual range. The trend is falling.",
+     "summary": "Over the last 7 days sleep duration averaged 5.7 h, −18% versus Ahmed's normal (6.9 h), below the usual range. The trend is falling.",
      "trend": "down",
      "status": "watch",
      "confidence": 0.8,
@@ -849,7 +849,7 @@
     },
     {
      "metric": "co2",
-     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.7 mmHg, within Ahmad's normal range (2.2–2.8 mmHg). The trend is rising.",
+     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.7 mmHg, within Ahmed's normal range (2.2–2.8 mmHg). The trend is rising.",
      "trend": "up",
      "status": "nominal",
      "confidence": 0.9,
@@ -857,7 +857,7 @@
     },
     {
      "metric": "mood",
-     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmad's normal range (3.1–4.6/5). The trend is falling.",
+     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmed's normal range (3.1–4.6/5). The trend is falling.",
      "trend": "down",
      "status": "nominal",
      "confidence": 0.67,
@@ -1754,7 +1754,7 @@
      "title": "Sleep debt building ahead of EVA-3",
      "confidence": 0.88,
      "detectedAt": 3386.610509872404,
-     "summary": "Ahmad has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 3 days."
+     "summary": "Ahmed has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 3 days."
     },
     {
      "id": "exercise:hannan",
@@ -1794,13 +1794,13 @@
      "title": "Workload high during EVA-3 prep",
      "confidence": 0.74,
      "detectedAt": 3355,
-     "summary": "Ahmad rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
+     "summary": "Ahmed rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
     }
    ],
    "interp": [
     {
      "metric": "hr",
-     "summary": "Over the last 7 days heart rate averaged 67 bpm, within Ahmad's normal range (51–72 bpm). The trend is stable.",
+     "summary": "Over the last 7 days heart rate averaged 67 bpm, within Ahmed's normal range (51–72 bpm). The trend is stable.",
      "trend": "flat",
      "status": "nominal",
      "confidence": 0.92,
@@ -1808,7 +1808,7 @@
     },
     {
      "metric": "sleepDuration",
-     "summary": "Over the last 7 days sleep duration averaged 5.5 h, −21% versus Ahmad's normal (6.9 h), below the usual range. The trend is falling.",
+     "summary": "Over the last 7 days sleep duration averaged 5.5 h, −21% versus Ahmed's normal (6.9 h), below the usual range. The trend is falling.",
      "trend": "down",
      "status": "watch",
      "confidence": 0.88,
@@ -1816,7 +1816,7 @@
     },
     {
      "metric": "co2",
-     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.9 mmHg, +16% versus Ahmad's normal (2.5 mmHg), above the usual range. The trend is rising.",
+     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.9 mmHg, +16% versus Ahmed's normal (2.5 mmHg), above the usual range. The trend is rising.",
      "trend": "up",
      "status": "watch",
      "confidence": 0.9,
@@ -1824,7 +1824,7 @@
     },
     {
      "metric": "mood",
-     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmad's normal range (3.1–4.6/5). The trend is falling.",
+     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmed's normal range (3.1–4.6/5). The trend is falling.",
      "trend": "down",
      "status": "nominal",
      "confidence": 0.67,
