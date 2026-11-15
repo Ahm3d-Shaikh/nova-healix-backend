@@ -1,0 +1,286 @@
+{
+ "can you do my check-in? slept badly, feeling low, bit of a headache": {
+  "replies": [
+   {
+    "text": "Here is your check-in from what you told me. Check-ins are shared with Mission Control, so review it before sending.",
+    "card": {
+     "kind": "checkin",
+     "draft": {
+      "mood": 2,
+      "sleepQuality": 2,
+      "energy": 2,
+      "symptoms": [
+       "headache"
+      ]
+     },
+     "status": "proposed"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "I want to die": {
+  "replies": [
+   {
+    "text": "Thank you for telling me. You don’t have to carry this alone. I have let Haleem, your flight surgeon, know that you need support right now. I did not share what you wrote, only that it is urgent. The message reaches Earth in about 5m 32s. If you can, find a crewmate now so you are not on your own. I’m here. Will you keep talking with me while you wait?",
+    "card": {
+     "kind": "safety",
+     "category": "self-harm"
+    }
+   }
+  ],
+  "safety": {
+   "category": "self-harm",
+   "signal": "wish-to-die"
+  },
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "what's the point": {
+  "replies": [
+   {
+    "text": "That sounds really hard, and I want to make sure I understand. Are you having any thoughts of hurting yourself or of not wanting to be alive?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": true,
+   "awaitingCheckIn": false
+  }
+ },
+ "I have chest pain": {
+  "replies": [
+   {
+    "text": "These symptoms need medical attention now. Please tell Sabaina (crew medical officer) straight away, or use the crew intercom. I have alerted Haleem, your flight surgeon, that you need urgent medical help. I only sent that, not what you wrote. The alert reaches Earth in about 5m 32s. Stay where you are and do not exercise.",
+    "card": {
+     "kind": "safety",
+     "category": "medical"
+    }
+   }
+  ],
+  "safety": {
+   "category": "medical",
+   "signal": "chest-pain"
+  },
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "tell Haleem I would like a private call this week": {
+  "replies": [
+   {
+    "text": "I can send a note to Haleem. Here is what would be shared. Nothing else from our conversation goes with it. Send it?",
+    "card": {
+     "kind": "share",
+     "text": "I would like a private call this week",
+     "status": "proposed"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "I feel anxious": {
+  "replies": [
+   {
+    "text": "Let’s slow things down together. Breathe in for 4, hold for 4, out for 6. Follow the circle for a minute; I’ll be here after.",
+    "card": {
+     "kind": "breathing"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "my back hurts and my vision is blurry": {
+  "replies": [
+   {
+    "text": "Changes in vision are worth checking early in microgravity. Please mention it to Sabaina (crew medical officer) today. I can also log it in your check-in so Haleem sees it.",
+    "card": {
+     "kind": "checkin",
+     "draft": {
+      "mood": 3,
+      "sleepQuality": 3,
+      "energy": 3,
+      "symptoms": [
+       "vision",
+       "back-pain"
+      ]
+     },
+     "status": "proposed"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "I miss my family a lot": {
+  "replies": [
+   {
+    "text": "Missing home is completely normal this far out, and it often gets harder around the middle of a mission. Some crews record a short video for family before each downlink window, so there is always something on its way. You could also ask Haleem for a private conference with the psychologist. Would talking about the people you miss help right now?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "I am nervous about the EVA": {
+  "replies": [
+   {
+    "text": "Feeling nervous before EVA-3 is a sign you take it seriously. It can help to walk through the timeline once more with your EVA partner and name the one step you are least sure about. Sleep is the biggest single thing that improves performance outside. What part is on your mind?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "I can't sleep": {
+  "replies": [
+   {
+    "text": "Poor sleep is one of the hardest parts of a long flight. Your wearable shows about 6.0 h a night lately, against your usual 6.9 h. With EVA-3 in 3 days, protecting the next few nights matters. A few things that tend to help: dim the module lights an hour before, keep the sleep station cool, and park work thoughts on a list. Want a short breathing routine to wind down?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "we had an argument with a crewmate": {
+  "replies": [
+   {
+    "text": "Friction is almost guaranteed with four people in a small space for months. If it helps, we can rehearse what you want to say: start with what you noticed, how it affected you, and one thing you would like to change. Want to try?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "thanks": {
+  "replies": [
+   {
+    "text": "Any time. I’m here whenever you want to talk, day or night."
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "hello": {
+  "replies": [
+   {
+    "text": "Hi Hannan. How are you feeling today?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "random words": {
+  "replies": [
+   {
+    "text": "Thank you for telling me. That sounds like a lot to carry. Would you like to say more, or would something practical help: a breathing exercise, a wind-down routine, or turning this into today’s check-in?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "__greeting": {
+  "replies": [
+   {
+    "text": "Hi Hannan. This is a private space: only you can see what we talk about. How are you doing today?"
+   },
+   {
+    "text": "I noticed your sleep has been shorter than usual this week (6.0 h a night, you normally get 6.9 h). We can talk about that if it helps."
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "__yes_after_ask": {
+  "replies": [
+   {
+    "text": "Thank you for telling me. You don’t have to carry this alone. I have let Haleem, your flight surgeon, know that you need support right now. I did not share what you wrote, only that it is urgent. The message reaches Earth in about 5m 32s. If you can, find a crewmate now so you are not on your own. I’m here. Will you keep talking with me while you wait?",
+    "card": {
+     "kind": "safety",
+     "category": "self-harm"
+    }
+   }
+  ],
+  "safety": {
+   "category": "self-harm",
+   "signal": "confirmed-when-asked"
+  },
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "__no_after_ask": {
+  "replies": [
+   {
+    "text": "Thank you for being honest with me. It still sounds really heavy. What has been weighing on you the most?"
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "__awaiting": {
+  "replies": [
+   {
+    "text": "Here is your check-in from what you told me. Check-ins are shared with Mission Control, so review it before sending.",
+    "card": {
+     "kind": "checkin",
+     "draft": {
+      "mood": 4,
+      "sleepQuality": 4,
+      "energy": 4,
+      "symptoms": []
+     },
+     "status": "proposed"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ },
+ "__share_prev": {
+  "replies": [
+   {
+    "text": "I can send a note to Haleem. Here is what would be shared. Nothing else from our conversation goes with it. Send it?",
+    "card": {
+     "kind": "share",
+     "text": "I need some time off",
+     "status": "proposed"
+    }
+   }
+  ],
+  "state": {
+   "pendingSafetyCheck": false,
+   "awaitingCheckIn": false
+  }
+ }
+}

@@ -49,6 +49,10 @@ class InMemoryTable:
                 r.update(copy.deepcopy(values))
             return [copy.deepcopy(r) for r in hits]
 
+    async def delete(self, eq: Mapping[str, object]) -> None:
+        async with self._lock:
+            self._rows = [r for r in self._rows if not _matches(r, eq)]
+
 
 class InMemoryDatabase:
     name = "memory"

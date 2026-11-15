@@ -1,0 +1,3224 @@
+{
+ "runs": {
+  "3": {
+   "hour": 3387,
+   "hazards": [
+    {
+     "crewId": "hashir",
+     "hazard": "radiation",
+     "score": 20,
+     "status": "nominal",
+     "headline": "270 mSv · 45% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "270 mSv · 45%",
+       28
+      ],
+      [
+       "Excess vs crew median",
+       "−5 mSv",
+       0
+      ],
+      [
+       "Dose rate, last 3 h",
+       "69 µSv/h",
+       0
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.17 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "isolation",
+     "score": 16,
+     "status": "nominal",
+     "headline": "Mood 4.1/5 · sleep 7.3 h",
+     "explanation": "Mood, sleep and stress are in the usual range.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "90%",
+       29
+      ],
+      [
+       "Reaction time, latest test",
+       "241 ms",
+       12
+      ],
+      [
+       "Mood, 7-day mean",
+       "4.1/5",
+       10
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "73 ms",
+       1
+      ],
+      [
+       "Stress index, latest",
+       "24/100",
+       0
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "distance",
+     "score": 16,
+     "status": "nominal",
+     "headline": "5m 31s delay · workload 45/100",
+     "explanation": "Workload and support from Earth are manageable.",
+     "drivers": [
+      [
+       "Medical supply readiness",
+       "80%",
+       26
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Workload index, latest",
+       "44/100",
+       0
+      ],
+      [
+       "Stress under autonomy",
+       "24/100",
+       0
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "gravity",
+     "score": 12,
+     "status": "nominal",
+     "headline": "Bone −1.2% since launch",
+     "explanation": "Bone, muscle and vision are holding up well with exercise.",
+     "drivers": [
+      [
+       "Leg strength change",
+       "−3.3%",
+       21
+      ],
+      [
+       "Near vision, latest check",
+       "0.97",
+       19
+      ],
+      [
+       "Lean mass change",
+       "−2.1% · −0.47%/mo",
+       15
+      ],
+      [
+       "Bone density change",
+       "−1.2% · −0.26%/mo",
+       0
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "0 headache · 0 vision · 0 congestion",
+       0
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "114 mmHg",
+       0
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "environment",
+     "score": 18,
+     "status": "nominal",
+     "headline": "CO₂ 3.4 mmHg (48 h)",
+     "explanation": "Air, noise and immune markers are in a healthy range.",
+     "drivers": [
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.1 mmHg",
+       26
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "90%",
+       16
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "50 dBA",
+       9
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       7
+      ],
+      [
+       "White blood cells, latest lab",
+       "6.2 ×10⁹/L",
+       3
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "radiation",
+     "score": 22,
+     "status": "nominal",
+     "headline": "279 mSv · 47% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "279 mSv · 47%",
+       29
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.08 ×10⁹/L",
+       6
+      ],
+      [
+       "Excess vs crew median",
+       "+4 mSv",
+       5
+      ],
+      [
+       "Dose rate, last 3 h",
+       "75 µSv/h",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "isolation",
+     "score": 57,
+     "status": "watch",
+     "headline": "Mood 3.6/5 · sleep 5.7 h",
+     "explanation": "Sleep has been more broken, and reaction time is slower. Protected rest time and a private call home can help.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "80%",
+       100
+      ],
+      [
+       "Reaction time, latest test",
+       "271 ms",
+       40
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "50 ms",
+       24
+      ],
+      [
+       "Mood, 7-day mean",
+       "3.6/5",
+       18
+      ],
+      [
+       "Stress index, latest",
+       "38/100",
+       8
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "distance",
+     "score": 54,
+     "status": "watch",
+     "headline": "5m 31s delay · workload 71/100",
+     "explanation": "Workload is heavy. Flag tasks that can wait and keep medical supplies under review.",
+     "drivers": [
+      [
+       "Workload index, latest",
+       "71/100",
+       82
+      ],
+      [
+       "Medical supply readiness",
+       "80%",
+       26
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Stress under autonomy",
+       "38/100",
+       4
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "gravity",
+     "score": 19,
+     "status": "nominal",
+     "headline": "Bone −2.9% since launch",
+     "explanation": "Bone, muscle and vision are holding up well with exercise.",
+     "drivers": [
+      [
+       "Bone density change",
+       "−2.9% · −0.63%/mo",
+       27
+      ],
+      [
+       "Leg strength change",
+       "−3.5%",
+       24
+      ],
+      [
+       "Back pain reports, 7 days",
+       "1",
+       15
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "1 headache · 0 vision · 0 congestion",
+       12
+      ],
+      [
+       "Lean mass change",
+       "−1.3% · −0.27%/mo",
+       2
+      ],
+      [
+       "Near vision, latest check",
+       "1.23",
+       0
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "122 mmHg",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "environment",
+     "score": 40,
+     "status": "watch",
+     "headline": "CO₂ 3.3 mmHg (48 h)",
+     "explanation": "Sleep has been more broken, and the sleep area has been noisy at night. Report headaches; the life-support team is checking air and ventilation.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "80%",
+       59
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "55 dBA",
+       56
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.0 mmHg",
+       22
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "1",
+       10
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       0
+      ],
+      [
+       "White blood cells, latest lab",
+       "7.2 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "radiation",
+     "score": 20,
+     "status": "nominal",
+     "headline": "272 mSv · 45% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "272 mSv · 45%",
+       28
+      ],
+      [
+       "Excess vs crew median",
+       "−4 mSv",
+       0
+      ],
+      [
+       "Dose rate, last 3 h",
+       "74 µSv/h",
+       0
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.06 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "isolation",
+     "score": 86,
+     "status": "alert",
+     "headline": "Mood 2.5/5 · sleep 6.0 h",
+     "explanation": "Mood has been lower than usual, and reported stress has risen. Protected rest time and a private call home can help.",
+     "drivers": [
+      [
+       "Mood, 7-day mean",
+       "2.5/5",
+       100
+      ],
+      [
+       "Stress index, latest",
+       "76/100",
+       100
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "82%",
+       89
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "3 of 7",
+       66
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "39 ms",
+       48
+      ],
+      [
+       "Reaction time, latest test",
+       "274 ms",
+       31
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "distance",
+     "score": 45,
+     "status": "watch",
+     "headline": "5m 31s delay · workload 59/100",
+     "explanation": "Stress is up while decisions rest with the crew, and workload is heavy. Flag tasks that can wait and keep medical supplies under review.",
+     "drivers": [
+      [
+       "Stress under autonomy",
+       "76/100",
+       60
+      ],
+      [
+       "Workload index, latest",
+       "61/100",
+       51
+      ],
+      [
+       "Medical supply readiness",
+       "80%",
+       26
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "gravity",
+     "score": 57,
+     "status": "watch",
+     "headline": "Bone −4.2% since launch",
+     "explanation": "Leg strength is declining, and bone is thinning faster than the target. Keep up daily exercise and report any change in vision or headaches.",
+     "drivers": [
+      [
+       "Leg strength change",
+       "−12.6%",
+       100
+      ],
+      [
+       "Bone density change",
+       "−4.2% · −0.92%/mo",
+       49
+      ],
+      [
+       "Lean mass change",
+       "−3.7% · −0.81%/mo",
+       39
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "114 mmHg",
+       16
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "0 headache · 0 vision · 0 congestion",
+       0
+      ],
+      [
+       "Near vision, latest check",
+       "1.00",
+       0
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "environment",
+     "score": 41,
+     "status": "watch",
+     "headline": "CO₂ 3.2 mmHg (48 h)",
+     "explanation": "The immune system looks suppressed, and sleep has been more broken. Report headaches; the life-support team is checking air and ventilation.",
+     "drivers": [
+      [
+       "White blood cells, latest lab",
+       "4.7 ×10⁹/L",
+       69
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "82%",
+       49
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "2.9 mmHg",
+       19
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "97%",
+       1
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "48 dBA",
+       0
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "radiation",
+     "score": 45,
+     "status": "watch",
+     "headline": "319 mSv · 53% of career limit",
+     "explanation": "Dose is higher than the rest of the crew. Keep storm-shelter procedures fresh and limit time in lightly shielded modules.",
+     "drivers": [
+      [
+       "Excess vs crew median",
+       "+43 mSv",
+       61
+      ],
+      [
+       "Cumulative dose vs career limit",
+       "319 mSv · 53%",
+       33
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.01 ×10⁹/L",
+       3
+      ],
+      [
+       "Dose rate, last 3 h",
+       "79 µSv/h",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "isolation",
+     "score": 6,
+     "status": "nominal",
+     "headline": "Mood 4.7/5 · sleep 6.7 h",
+     "explanation": "Mood, sleep and stress are in the usual range.",
+     "drivers": [
+      [
+       "Stress index, latest",
+       "28/100",
+       10
+      ],
+      [
+       "Reaction time, latest test",
+       "245 ms",
+       8
+      ],
+      [
+       "Mood, 7-day mean",
+       "4.7/5",
+       0
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "65 ms",
+       0
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "91%",
+       0
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "distance",
+     "score": 28,
+     "status": "nominal",
+     "headline": "5m 31s delay · workload 54/100",
+     "explanation": "Workload and support from Earth are manageable.",
+     "drivers": [
+      [
+       "Symptoms needing Earth consult",
+       "Vision change reported",
+       45
+      ],
+      [
+       "Medical supply readiness",
+       "80%",
+       26
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Stress under autonomy",
+       "28/100",
+       6
+      ],
+      [
+       "Workload index, latest",
+       "50/100",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "gravity",
+     "score": 67,
+     "status": "watch",
+     "headline": "Bone −2.0% since launch",
+     "explanation": "Headaches and vision changes suggest fluid shifting toward the head, and near vision has changed. Keep up daily exercise and report any change in vision or headaches.",
+     "drivers": [
+      [
+       "Fluid-shift symptoms, 7 days",
+       "4 headache · 1 vision · 2 congestion",
+       99
+      ],
+      [
+       "Near vision, latest check",
+       "0.82",
+       98
+      ],
+      [
+       "Lean mass change",
+       "−3.6% · −0.78%/mo",
+       37
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "121 mmHg",
+       18
+      ],
+      [
+       "Leg strength change",
+       "−3.0%",
+       17
+      ],
+      [
+       "Bone density change",
+       "−2.0% · −0.44%/mo",
+       11
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "environment",
+     "score": 38,
+     "status": "nominal",
+     "headline": "CO₂ 3.5 mmHg (48 h)",
+     "explanation": "Air, noise and immune markers are in a healthy range.",
+     "drivers": [
+      [
+       "Headache / congestion reports, 7 days",
+       "5",
+       60
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.2 mmHg",
+       34
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "50 dBA",
+       9
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       8
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "91%",
+       0
+      ],
+      [
+       "White blood cells, latest lab",
+       "6.7 ×10⁹/L",
+       0
+      ]
+     ]
+    }
+   ],
+   "insights": [
+    {
+     "id": "isolation-stress:hannan",
+     "severity": "alert",
+     "title": "Isolation stress rising",
+     "confidence": 0.9,
+     "detectedAt": 3355,
+     "summary": "5 independent signals for Hannan point the same way: lower mood, higher reported stress, suppressed HRV and fewer check-ins. The trend started around D112 and has not levelled off."
+    },
+    {
+     "id": "sleep-debt:ahmad",
+     "severity": "watch",
+     "title": "Sleep debt building ahead of EVA-3",
+     "confidence": 0.8,
+     "detectedAt": 3386.610509872404,
+     "summary": "Ahmad has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 4 days."
+    },
+    {
+     "id": "exercise:hannan",
+     "severity": "watch",
+     "title": "Exercise sessions missed",
+     "confidence": 0.83,
+     "detectedAt": 3374.5,
+     "summary": "Hannan completed 4 of 14 scheduled exercise sessions in the last 14 days. Weekly bone and lean-mass measurements are now declining faster than the countermeasure target."
+    },
+    {
+     "id": "fluid-shift:sabaina",
+     "severity": "watch",
+     "title": "Headaches with vision change. SANS screen advised",
+     "confidence": 0.95,
+     "detectedAt": 3365.263,
+     "summary": "Sabaina reported headaches on 4 of the last 7 check-ins and a change in near vision on D140. Resting systolic pressure has crept up over the same period."
+    },
+    {
+     "id": "co2:crew",
+     "severity": "watch",
+     "title": "Cabin CO₂ above 3 mmHg for 46 h",
+     "confidence": 0.9,
+     "detectedAt": 3347,
+     "summary": "Crew CO₂ exposure has averaged 3.4 mmHg over 48 h (CO₂ scrubber bed B degraded, D140). 3 headache reports across the crew in 3 days."
+    },
+    {
+     "id": "rad-outlier:sabaina",
+     "severity": "watch",
+     "title": "Highest cumulative radiation dose on crew",
+     "confidence": 0.92,
+     "detectedAt": 2339,
+     "summary": "Sabaina is at 319 mSv (53% of career limit), 43 mSv above the crew median. Most of the gap comes from late storm-shelter entry during the D97 solar particle event."
+    },
+    {
+     "id": "bone-on-track:hashir",
+     "severity": "info",
+     "title": "Bone loss within countermeasure target",
+     "confidence": 0.88,
+     "detectedAt": 3369,
+     "summary": "Hashir's femoral neck density is −1.2% since launch (−0.26%/month), inside the −0.5%/month target. Exercise compliance is consistent."
+    },
+    {
+     "id": "workload:ahmad",
+     "severity": "info",
+     "title": "Workload high during EVA-3 prep",
+     "confidence": 0.74,
+     "detectedAt": 3355,
+     "summary": "Ahmad rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
+    }
+   ],
+   "interp": [
+    {
+     "metric": "hr",
+     "summary": "Over the last 7 days heart rate averaged 66 bpm, within Ahmad's normal range (51–72 bpm). The trend is stable.",
+     "trend": "flat",
+     "status": "nominal",
+     "confidence": 0.92,
+     "why": "A resting heart rate that stays above normal can reflect stress, poor sleep, illness or deconditioning."
+    },
+    {
+     "metric": "sleepDuration",
+     "summary": "Over the last 7 days sleep duration averaged 5.7 h, −18% versus Ahmad's normal (6.9 h), below the usual range. The trend is falling.",
+     "trend": "down",
+     "status": "watch",
+     "confidence": 0.8,
+     "why": "Accumulated sleep loss degrades reaction time, procedural memory and error detection. During EVA suit operations these errors carry the highest consequence on the mission."
+    },
+    {
+     "metric": "co2",
+     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.7 mmHg, within Ahmad's normal range (2.2–2.8 mmHg). The trend is rising.",
+     "trend": "up",
+     "status": "nominal",
+     "confidence": 0.9,
+     "why": "Chronic CO₂ above 3 mmHg is linked to headache, reduced cognitive performance and poorer sleep. All four crew are exposed."
+    },
+    {
+     "metric": "mood",
+     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmad's normal range (3.1–4.6/5). The trend is falling.",
+     "trend": "down",
+     "status": "nominal",
+     "confidence": 0.67,
+     "why": "Mood is the earliest self-reported sign of isolation stress."
+    }
+   ],
+   "history": [
+    [
+     2876,
+     57
+    ],
+    [
+     2900,
+     59
+    ],
+    [
+     2924,
+     59
+    ],
+    [
+     2948,
+     61
+    ],
+    [
+     2972,
+     62
+    ],
+    [
+     2996,
+     63
+    ],
+    [
+     3020,
+     64
+    ],
+    [
+     3044,
+     66
+    ],
+    [
+     3068,
+     66
+    ],
+    [
+     3092,
+     66
+    ],
+    [
+     3116,
+     69
+    ],
+    [
+     3140,
+     72
+    ],
+    [
+     3164,
+     72
+    ],
+    [
+     3188,
+     75
+    ],
+    [
+     3212,
+     76
+    ],
+    [
+     3236,
+     77
+    ],
+    [
+     3260,
+     77
+    ],
+    [
+     3284,
+     78
+    ],
+    [
+     3308,
+     76
+    ],
+    [
+     3332,
+     81
+    ],
+    [
+     3356,
+     83
+    ],
+    [
+     3380,
+     84
+    ],
+    [
+     3387,
+     86
+    ]
+   ]
+  },
+  "14": {
+   "hour": 3398,
+   "hazards": [
+    {
+     "crewId": "hashir",
+     "hazard": "radiation",
+     "score": 20,
+     "status": "nominal",
+     "headline": "270 mSv · 45% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "270 mSv · 45%",
+       28
+      ],
+      [
+       "Excess vs crew median",
+       "−5 mSv",
+       0
+      ],
+      [
+       "Dose rate, last 3 h",
+       "66 µSv/h",
+       0
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.17 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "isolation",
+     "score": 18,
+     "status": "nominal",
+     "headline": "Mood 4.1/5 · sleep 7.3 h",
+     "explanation": "Mood, sleep and stress are in the usual range.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "89%",
+       32
+      ],
+      [
+       "Reaction time, latest test",
+       "241 ms",
+       12
+      ],
+      [
+       "Mood, 7-day mean",
+       "4.1/5",
+       10
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "73 ms",
+       1
+      ],
+      [
+       "Stress index, latest",
+       "24/100",
+       0
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "distance",
+     "score": 17,
+     "status": "nominal",
+     "headline": "5m 31s delay · workload 45/100",
+     "explanation": "Workload and support from Earth are manageable.",
+     "drivers": [
+      [
+       "Medical supply readiness",
+       "79%",
+       29
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Workload index, latest",
+       "44/100",
+       0
+      ],
+      [
+       "Stress under autonomy",
+       "24/100",
+       0
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "gravity",
+     "score": 19,
+     "status": "nominal",
+     "headline": "Bone −1.2% since launch",
+     "explanation": "Bone, muscle and vision are holding up well with exercise.",
+     "drivers": [
+      [
+       "Leg strength change",
+       "−4.6%",
+       36
+      ],
+      [
+       "Near vision, latest check",
+       "0.97",
+       19
+      ],
+      [
+       "Lean mass change",
+       "−2.1% · −0.47%/mo",
+       15
+      ],
+      [
+       "Bone density change",
+       "−1.2% · −0.26%/mo",
+       0
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "0 headache · 0 vision · 0 congestion",
+       0
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "114 mmHg",
+       0
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hashir",
+     "hazard": "environment",
+     "score": 30,
+     "status": "nominal",
+     "headline": "CO₂ 3.5 mmHg (48 h)",
+     "explanation": "Air, noise and immune markers are in a healthy range.",
+     "drivers": [
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.5 mmHg",
+       44
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "89%",
+       18
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "50 dBA",
+       13
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       6
+      ],
+      [
+       "White blood cells, latest lab",
+       "6.2 ×10⁹/L",
+       3
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "radiation",
+     "score": 22,
+     "status": "nominal",
+     "headline": "279 mSv · 47% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "279 mSv · 47%",
+       29
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.08 ×10⁹/L",
+       6
+      ],
+      [
+       "Excess vs crew median",
+       "+4 mSv",
+       5
+      ],
+      [
+       "Dose rate, last 3 h",
+       "71 µSv/h",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "isolation",
+     "score": 57,
+     "status": "watch",
+     "headline": "Mood 3.6/5 · sleep 5.5 h",
+     "explanation": "Sleep has been more broken, and reaction time is slower. Protected rest time and a private call home can help.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "80%",
+       100
+      ],
+      [
+       "Reaction time, latest test",
+       "271 ms",
+       40
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "49 ms",
+       28
+      ],
+      [
+       "Mood, 7-day mean",
+       "3.6/5",
+       18
+      ],
+      [
+       "Stress index, latest",
+       "38/100",
+       8
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "distance",
+     "score": 54,
+     "status": "watch",
+     "headline": "5m 31s delay · workload 71/100",
+     "explanation": "Workload is heavy. Flag tasks that can wait and keep medical supplies under review.",
+     "drivers": [
+      [
+       "Workload index, latest",
+       "71/100",
+       82
+      ],
+      [
+       "Medical supply readiness",
+       "79%",
+       29
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Stress under autonomy",
+       "38/100",
+       4
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "gravity",
+     "score": 19,
+     "status": "nominal",
+     "headline": "Bone −2.9% since launch",
+     "explanation": "Bone, muscle and vision are holding up well with exercise.",
+     "drivers": [
+      [
+       "Bone density change",
+       "−2.9% · −0.63%/mo",
+       27
+      ],
+      [
+       "Leg strength change",
+       "−3.5%",
+       24
+      ],
+      [
+       "Back pain reports, 7 days",
+       "1",
+       15
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "1 headache · 0 vision · 0 congestion",
+       12
+      ],
+      [
+       "Lean mass change",
+       "−1.3% · −0.27%/mo",
+       2
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "123 mmHg",
+       1
+      ],
+      [
+       "Near vision, latest check",
+       "1.23",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "ahmad",
+     "hazard": "environment",
+     "score": 43,
+     "status": "watch",
+     "headline": "CO₂ 3.3 mmHg (48 h)",
+     "explanation": "Sleep has been more broken, and the sleep area has been noisy at night. Report headaches; the life-support team is checking air and ventilation.",
+     "drivers": [
+      [
+       "Sleep efficiency, 7 nights",
+       "80%",
+       59
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "55 dBA",
+       56
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.3 mmHg",
+       37
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "1",
+       10
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       0
+      ],
+      [
+       "White blood cells, latest lab",
+       "7.2 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "radiation",
+     "score": 20,
+     "status": "nominal",
+     "headline": "272 mSv · 45% of career limit",
+     "explanation": "Dose is on the expected track for this point in the mission.",
+     "drivers": [
+      [
+       "Cumulative dose vs career limit",
+       "272 mSv · 45%",
+       28
+      ],
+      [
+       "Excess vs crew median",
+       "−4 mSv",
+       0
+      ],
+      [
+       "Dose rate, last 3 h",
+       "72 µSv/h",
+       0
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.06 ×10⁹/L",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "isolation",
+     "score": 87,
+     "status": "alert",
+     "headline": "Mood 2.3/5 · sleep 6.0 h",
+     "explanation": "Mood has been lower than usual, and reported stress has risen. Protected rest time and a private call home can help.",
+     "drivers": [
+      [
+       "Mood, 7-day mean",
+       "2.3/5",
+       100
+      ],
+      [
+       "Stress index, latest",
+       "76/100",
+       100
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "81%",
+       98
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "3 of 7",
+       66
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "39 ms",
+       49
+      ],
+      [
+       "Reaction time, latest test",
+       "274 ms",
+       31
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "distance",
+     "score": 45,
+     "status": "watch",
+     "headline": "5m 31s delay · workload 59/100",
+     "explanation": "Stress is up while decisions rest with the crew, and workload is heavy. Flag tasks that can wait and keep medical supplies under review.",
+     "drivers": [
+      [
+       "Stress under autonomy",
+       "76/100",
+       60
+      ],
+      [
+       "Workload index, latest",
+       "61/100",
+       51
+      ],
+      [
+       "Medical supply readiness",
+       "79%",
+       29
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Symptoms needing Earth consult",
+       "None open",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "gravity",
+     "score": 57,
+     "status": "watch",
+     "headline": "Bone −4.2% since launch",
+     "explanation": "Leg strength is declining, and bone is thinning faster than the target. Keep up daily exercise and report any change in vision or headaches.",
+     "drivers": [
+      [
+       "Leg strength change",
+       "−12.6%",
+       100
+      ],
+      [
+       "Bone density change",
+       "−4.2% · −0.92%/mo",
+       49
+      ],
+      [
+       "Lean mass change",
+       "−3.7% · −0.81%/mo",
+       39
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "114 mmHg",
+       16
+      ],
+      [
+       "Fluid-shift symptoms, 7 days",
+       "0 headache · 0 vision · 0 congestion",
+       0
+      ],
+      [
+       "Near vision, latest check",
+       "1.00",
+       0
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "hannan",
+     "hazard": "environment",
+     "score": 44,
+     "status": "watch",
+     "headline": "CO₂ 3.4 mmHg (48 h)",
+     "explanation": "The immune system looks suppressed, and sleep has been more broken. Report headaches; the life-support team is checking air and ventilation.",
+     "drivers": [
+      [
+       "White blood cells, latest lab",
+       "4.7 ×10⁹/L",
+       69
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "81%",
+       54
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.3 mmHg",
+       36
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "49 dBA",
+       0
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "97%",
+       0
+      ],
+      [
+       "Headache / congestion reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "radiation",
+     "score": 45,
+     "status": "watch",
+     "headline": "319 mSv · 53% of career limit",
+     "explanation": "Dose is higher than the rest of the crew. Keep storm-shelter procedures fresh and limit time in lightly shielded modules.",
+     "drivers": [
+      [
+       "Excess vs crew median",
+       "+43 mSv",
+       61
+      ],
+      [
+       "Cumulative dose vs career limit",
+       "319 mSv · 53%",
+       33
+      ],
+      [
+       "Lymphocytes, latest lab",
+       "2.01 ×10⁹/L",
+       3
+      ],
+      [
+       "Dose rate, last 3 h",
+       "78 µSv/h",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "isolation",
+     "score": 6,
+     "status": "nominal",
+     "headline": "Mood 4.7/5 · sleep 6.8 h",
+     "explanation": "Mood, sleep and stress are in the usual range.",
+     "drivers": [
+      [
+       "Stress index, latest",
+       "28/100",
+       10
+      ],
+      [
+       "Reaction time, latest test",
+       "245 ms",
+       8
+      ],
+      [
+       "Mood, 7-day mean",
+       "4.7/5",
+       0
+      ],
+      [
+       "HRV, 7-day resting mean",
+       "65 ms",
+       0
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "91%",
+       0
+      ],
+      [
+       "Missed check-ins, 7 days",
+       "0 of 7",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "distance",
+     "score": 28,
+     "status": "nominal",
+     "headline": "5m 31s delay · workload 54/100",
+     "explanation": "Workload and support from Earth are manageable.",
+     "drivers": [
+      [
+       "Symptoms needing Earth consult",
+       "Vision change reported",
+       45
+      ],
+      [
+       "Medical supply readiness",
+       "79%",
+       29
+      ],
+      [
+       "Signal delay to Earth",
+       "5m 31s",
+       22
+      ],
+      [
+       "Stress under autonomy",
+       "28/100",
+       6
+      ],
+      [
+       "Workload index, latest",
+       "50/100",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "gravity",
+     "score": 68,
+     "status": "watch",
+     "headline": "Bone −2.0% since launch",
+     "explanation": "Headaches and vision changes suggest fluid shifting toward the head, and near vision has changed. Keep up daily exercise and report any change in vision or headaches.",
+     "drivers": [
+      [
+       "Fluid-shift symptoms, 7 days",
+       "4 headache · 1 vision · 2 congestion",
+       99
+      ],
+      [
+       "Near vision, latest check",
+       "0.82",
+       98
+      ],
+      [
+       "Lean mass change",
+       "−3.6% · −0.78%/mo",
+       37
+      ],
+      [
+       "Systolic BP, 7-day resting mean",
+       "121 mmHg",
+       20
+      ],
+      [
+       "Leg strength change",
+       "−3.0%",
+       17
+      ],
+      [
+       "Bone density change",
+       "−2.0% · −0.44%/mo",
+       11
+      ],
+      [
+       "Back pain reports, 7 days",
+       "0",
+       0
+      ]
+     ]
+    },
+    {
+     "crewId": "sabaina",
+     "hazard": "environment",
+     "score": 41,
+     "status": "watch",
+     "headline": "CO₂ 3.6 mmHg (48 h)",
+     "explanation": "Headaches or congestion were reported, and CO₂ in the air has been high. Report headaches; the life-support team is checking air and ventilation.",
+     "drivers": [
+      [
+       "Headache / congestion reports, 7 days",
+       "5",
+       60
+      ],
+      [
+       "CO₂ exposure, 3-day mean",
+       "3.6 mmHg",
+       50
+      ],
+      [
+       "Night-time noise, 3 nights",
+       "51 dBA",
+       14
+      ],
+      [
+       "SpO₂, 3-day resting mean",
+       "98%",
+       11
+      ],
+      [
+       "Sleep efficiency, 7 nights",
+       "91%",
+       0
+      ],
+      [
+       "White blood cells, latest lab",
+       "6.7 ×10⁹/L",
+       0
+      ]
+     ]
+    }
+   ],
+   "insights": [
+    {
+     "id": "isolation-stress:hannan",
+     "severity": "alert",
+     "title": "Isolation stress rising",
+     "confidence": 0.9,
+     "detectedAt": 3389.148,
+     "summary": "5 independent signals for Hannan point the same way: lower mood, higher reported stress, suppressed HRV and fewer check-ins. The trend started around D112 and has not levelled off."
+    },
+    {
+     "id": "fluid-shift:sabaina",
+     "severity": "watch",
+     "title": "Headaches with vision change. SANS screen advised",
+     "confidence": 0.95,
+     "detectedAt": 3389.443,
+     "summary": "Sabaina reported headaches on 4 of the last 7 check-ins and a change in near vision on D140. Resting systolic pressure has crept up over the same period."
+    },
+    {
+     "id": "checkin:hannan:142",
+     "severity": "watch",
+     "title": "Check-in flag: mood 2/5",
+     "confidence": 0.7,
+     "detectedAt": 3389.148,
+     "summary": "Hannan's D142 check-in reports mood 2/5."
+    },
+    {
+     "id": "sleep-debt:ahmad",
+     "severity": "watch",
+     "title": "Sleep debt building ahead of EVA-3",
+     "confidence": 0.88,
+     "detectedAt": 3386.610509872404,
+     "summary": "Ahmad has averaged 5.4 h of sleep over the last 5 nights, 1.5 h below personal baseline. The decline started with the planned sleep shift. EVA-3 is in 3 days."
+    },
+    {
+     "id": "exercise:hannan",
+     "severity": "watch",
+     "title": "Exercise sessions missed",
+     "confidence": 0.83,
+     "detectedAt": 3374.5,
+     "summary": "Hannan completed 4 of 14 scheduled exercise sessions in the last 14 days. Weekly bone and lean-mass measurements are now declining faster than the countermeasure target."
+    },
+    {
+     "id": "co2:crew",
+     "severity": "watch",
+     "title": "Cabin CO₂ above 3 mmHg for 57 h",
+     "confidence": 0.9,
+     "detectedAt": 3347,
+     "summary": "Crew CO₂ exposure has averaged 3.5 mmHg over 48 h (CO₂ scrubber bed B degraded, D140). 2 headache reports across the crew in 3 days."
+    },
+    {
+     "id": "rad-outlier:sabaina",
+     "severity": "watch",
+     "title": "Highest cumulative radiation dose on crew",
+     "confidence": 0.92,
+     "detectedAt": 2339,
+     "summary": "Sabaina is at 319 mSv (53% of career limit), 43 mSv above the crew median. Most of the gap comes from late storm-shelter entry during the D97 solar particle event."
+    },
+    {
+     "id": "bone-on-track:hashir",
+     "severity": "info",
+     "title": "Bone loss within countermeasure target",
+     "confidence": 0.88,
+     "detectedAt": 3369,
+     "summary": "Hashir's femoral neck density is −1.2% since launch (−0.26%/month), inside the −0.5%/month target. Exercise compliance is consistent."
+    },
+    {
+     "id": "workload:ahmad",
+     "severity": "info",
+     "title": "Workload high during EVA-3 prep",
+     "confidence": 0.74,
+     "detectedAt": 3355,
+     "summary": "Ahmad rated workload 71/100 on the latest weekly questionnaire, above personal baseline (56)."
+    }
+   ],
+   "interp": [
+    {
+     "metric": "hr",
+     "summary": "Over the last 7 days heart rate averaged 67 bpm, within Ahmad's normal range (51–72 bpm). The trend is stable.",
+     "trend": "flat",
+     "status": "nominal",
+     "confidence": 0.92,
+     "why": "A resting heart rate that stays above normal can reflect stress, poor sleep, illness or deconditioning."
+    },
+    {
+     "metric": "sleepDuration",
+     "summary": "Over the last 7 days sleep duration averaged 5.5 h, −21% versus Ahmad's normal (6.9 h), below the usual range. The trend is falling.",
+     "trend": "down",
+     "status": "watch",
+     "confidence": 0.88,
+     "why": "Accumulated sleep loss degrades reaction time, procedural memory and error detection. During EVA suit operations these errors carry the highest consequence on the mission."
+    },
+    {
+     "metric": "co2",
+     "summary": "Over the last 7 days co₂ exposure, partial pressure averaged 2.9 mmHg, +16% versus Ahmad's normal (2.5 mmHg), above the usual range. The trend is rising.",
+     "trend": "up",
+     "status": "watch",
+     "confidence": 0.9,
+     "why": "Chronic CO₂ above 3 mmHg is linked to headache, reduced cognitive performance and poorer sleep. All four crew are exposed."
+    },
+    {
+     "metric": "mood",
+     "summary": "Over the last 7 days mood averaged 3.6/5, within Ahmad's normal range (3.1–4.6/5). The trend is falling.",
+     "trend": "down",
+     "status": "nominal",
+     "confidence": 0.67,
+     "why": "Mood is the earliest self-reported sign of isolation stress."
+    }
+   ],
+   "history": [
+    [
+     2876,
+     57
+    ],
+    [
+     2900,
+     59
+    ],
+    [
+     2924,
+     59
+    ],
+    [
+     2948,
+     61
+    ],
+    [
+     2972,
+     62
+    ],
+    [
+     2996,
+     63
+    ],
+    [
+     3020,
+     64
+    ],
+    [
+     3044,
+     66
+    ],
+    [
+     3068,
+     66
+    ],
+    [
+     3092,
+     66
+    ],
+    [
+     3116,
+     69
+    ],
+    [
+     3140,
+     72
+    ],
+    [
+     3164,
+     72
+    ],
+    [
+     3188,
+     75
+    ],
+    [
+     3212,
+     76
+    ],
+    [
+     3236,
+     77
+    ],
+    [
+     3260,
+     77
+    ],
+    [
+     3284,
+     78
+    ],
+    [
+     3308,
+     76
+    ],
+    [
+     3332,
+     81
+    ],
+    [
+     3356,
+     83
+    ],
+    [
+     3380,
+     84
+    ],
+    [
+     3398,
+     87
+    ]
+   ]
+  }
+ },
+ "baselines": {
+  "hashir:hr": {
+   "mean": 57.132871012482596,
+   "low": 45.5,
+   "high": 65.4,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hashir:hrv": {
+   "mean": 73.0864077669902,
+   "low": 60.6,
+   "high": 88.5,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hashir:sleepDuration": {
+   "mean": 7.200000000000001,
+   "low": 6.6042181607333115,
+   "high": 7.795781839266691,
+   "source": "In-flight D8–D40"
+  },
+  "hashir:mood": {
+   "mean": 4.333333333333333,
+   "low": 3.5001666833366674,
+   "high": 5.166499983329999,
+   "source": "In-flight D8–D40"
+  },
+  "hashir:stress": {
+   "mean": 26.666666666666668,
+   "low": 18.666666666666668,
+   "high": 34.66666666666667,
+   "source": "In-flight D7–D42"
+  },
+  "hashir:co2": {
+   "mean": 2.515757575757577,
+   "low": 2.215757575757577,
+   "high": 2.815757575757577,
+   "source": "In-flight D8–D40"
+  },
+  "hashir:boneDensity": {
+   "mean": 1.0371,
+   "low": 1.0215435,
+   "high": 1.0526564999999999,
+   "source": "Preflight / first measurement"
+  },
+  "hashir:lymphocytes": {
+   "mean": 1.9749999999999999,
+   "low": 1.6749999999999998,
+   "high": 2.275,
+   "source": "Early-mission labs D15–D45"
+  },
+  "hashir:doseRate": {
+   "mean": 71.48404993065188,
+   "low": 66,
+   "high": 77,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hashir:reactionTime": {
+   "mean": 233.5,
+   "low": 215.5,
+   "high": 251.5,
+   "source": "In-flight D7–D42"
+  },
+  "ahmad:hr": {
+   "mean": 63.32896551724128,
+   "low": 51.339999999999996,
+   "high": 71.9,
+   "source": "In-flight D8–D40, resting"
+  },
+  "ahmad:hrv": {
+   "mean": 55.635862068965515,
+   "low": 47.1,
+   "high": 67.17999999999999,
+   "source": "In-flight D8–D40, resting"
+  },
+  "ahmad:sleepDuration": {
+   "mean": 6.888787878787877,
+   "low": 6.382753265047838,
+   "high": 7.394822492527916,
+   "source": "In-flight D8–D40"
+  },
+  "ahmad:mood": {
+   "mean": 3.8484848484848486,
+   "low": 3.1379579419932755,
+   "high": 4.559011754976422,
+   "source": "In-flight D8–D40"
+  },
+  "ahmad:stress": {
+   "mean": 36.166666666666664,
+   "low": 28.166666666666664,
+   "high": 44.166666666666664,
+   "source": "In-flight D7–D42"
+  },
+  "ahmad:co2": {
+   "mean": 2.4766666666666666,
+   "low": 2.1766666666666667,
+   "high": 2.7766666666666664,
+   "source": "In-flight D8–D40"
+  },
+  "ahmad:boneDensity": {
+   "mean": 1.0879,
+   "low": 1.0715815,
+   "high": 1.1042185,
+   "source": "Preflight / first measurement"
+  },
+  "ahmad:lymphocytes": {
+   "mean": 2.125,
+   "low": 1.825,
+   "high": 2.425,
+   "source": "Early-mission labs D15–D45"
+  },
+  "ahmad:doseRate": {
+   "mean": 74.25655172413794,
+   "low": 68,
+   "high": 80,
+   "source": "In-flight D8–D40, resting"
+  },
+  "ahmad:reactionTime": {
+   "mean": 246.5,
+   "low": 228.5,
+   "high": 264.5,
+   "source": "In-flight D7–D42"
+  },
+  "hannan:hr": {
+   "mean": 67.25920329670333,
+   "low": 56,
+   "high": 75.565,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hannan:hrv": {
+   "mean": 48.73173076923077,
+   "low": 41.1,
+   "high": 59,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hannan:sleepDuration": {
+   "mean": 6.91060606060606,
+   "low": 6.3241503865984185,
+   "high": 7.497061734613702,
+   "source": "In-flight D8–D40"
+  },
+  "hannan:mood": {
+   "mean": 4.121212121212121,
+   "low": 3.4427557627755374,
+   "high": 4.799668479648704,
+   "source": "In-flight D8–D40"
+  },
+  "hannan:stress": {
+   "mean": 28.333333333333332,
+   "low": 20.333333333333332,
+   "high": 36.33333333333333,
+   "source": "In-flight D7–D42"
+  },
+  "hannan:co2": {
+   "mean": 2.4196969696969695,
+   "low": 2.1196969696969696,
+   "high": 2.7196969696969693,
+   "source": "In-flight D8–D40"
+  },
+  "hannan:boneDensity": {
+   "mean": 0.9845,
+   "low": 0.9697325,
+   "high": 0.9992675,
+   "source": "Preflight / first measurement"
+  },
+  "hannan:lymphocytes": {
+   "mean": 1.865,
+   "low": 1.565,
+   "high": 2.165,
+   "source": "Early-mission labs D15–D45"
+  },
+  "hannan:doseRate": {
+   "mean": 72.64423076923077,
+   "low": 67,
+   "high": 78,
+   "source": "In-flight D8–D40, resting"
+  },
+  "hannan:reactionTime": {
+   "mean": 255.33333333333334,
+   "low": 237.33333333333334,
+   "high": 273.33333333333337,
+   "source": "In-flight D7–D42"
+  },
+  "sabaina:hr": {
+   "mean": 60.81150684931507,
+   "low": 50,
+   "high": 68.955,
+   "source": "In-flight D8–D40, resting"
+  },
+  "sabaina:hrv": {
+   "mean": 64.03726027397255,
+   "low": 53.345,
+   "high": 80.36499999999998,
+   "source": "In-flight D8–D40, resting"
+  },
+  "sabaina:sleepDuration": {
+   "mean": 6.491818181818183,
+   "low": 5.90555559715,
+   "high": 7.078080766486366,
+   "source": "In-flight D8–D40"
+  },
+  "sabaina:mood": {
+   "mean": 4.212121212121212,
+   "low": 3.5336648536846282,
+   "high": 4.890577570557795,
+   "source": "In-flight D8–D40"
+  },
+  "sabaina:stress": {
+   "mean": 26.166666666666668,
+   "low": 18.166666666666668,
+   "high": 34.16666666666667,
+   "source": "In-flight D7–D42"
+  },
+  "sabaina:co2": {
+   "mean": 2.5069696969696964,
+   "low": 2.2069696969696966,
+   "high": 2.8069696969696962,
+   "source": "In-flight D8–D40"
+  },
+  "sabaina:boneDensity": {
+   "mean": 1.0115,
+   "low": 0.9963275,
+   "high": 1.0266724999999999,
+   "source": "Preflight / first measurement"
+  },
+  "sabaina:lymphocytes": {
+   "mean": 2.035,
+   "low": 1.735,
+   "high": 2.335,
+   "source": "Early-mission labs D15–D45"
+  },
+  "sabaina:doseRate": {
+   "mean": 76.46849315068494,
+   "low": 70,
+   "high": 83,
+   "source": "In-flight D8–D40, resting"
+  },
+  "sabaina:reactionTime": {
+   "mean": 240.5,
+   "low": 222.5,
+   "high": 258.5,
+   "source": "In-flight D7–D42"
+  }
+ },
+ "samples": {
+  "hashir:hr": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 54.1
+    },
+    {
+     "t": 1,
+     "v": 54.8
+    },
+    {
+     "t": 2,
+     "v": 52.8
+    },
+    {
+     "t": 3,
+     "v": 54.4
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 46.5
+   },
+   "last": {
+    "t": 3503,
+    "v": 57.7
+   }
+  },
+  "hashir:sleepDuration": {
+   "n": 145,
+   "first": [
+    {
+     "t": 28.735404608258026,
+     "v": 6.74
+    },
+    {
+     "t": 52.867545590173016,
+     "v": 6.87
+    },
+    {
+     "t": 77.24403556024916,
+     "v": 7.24
+    },
+    {
+     "t": 100.85729653844483,
+     "v": 6.86
+    }
+   ],
+   "mid": {
+    "t": 1757.7592594546952,
+    "v": 7.76
+   },
+   "last": {
+    "t": 3485.248082730477,
+    "v": 7.25
+   }
+  },
+  "hashir:radDose": {
+   "n": 146,
+   "first": [
+    {
+     "t": 0,
+     "v": 0
+    },
+    {
+     "t": 24,
+     "v": 1.71
+    },
+    {
+     "t": 48,
+     "v": 3.45
+    },
+    {
+     "t": 72,
+     "v": 5.17
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 126.47
+   },
+   "last": {
+    "t": 3480,
+    "v": 277.26
+   }
+  },
+  "hashir:co2": {
+   "n": 146,
+   "first": [
+    {
+     "t": 12,
+     "v": 2.56
+    },
+    {
+     "t": 36,
+     "v": 2.53
+    },
+    {
+     "t": 60,
+     "v": 2.7
+    },
+    {
+     "t": 84,
+     "v": 2.29
+    }
+   ],
+   "mid": {
+    "t": 1764,
+    "v": 2.45
+   },
+   "last": {
+    "t": 3492,
+    "v": 4.16
+   }
+  },
+  "hashir:boneDensity": {
+   "n": 21,
+   "first": [
+    {
+     "t": 9,
+     "v": 1.0371
+    },
+    {
+     "t": 177,
+     "v": 1.0445
+    },
+    {
+     "t": 345,
+     "v": 1.0376
+    },
+    {
+     "t": 513,
+     "v": 1.0375
+    }
+   ],
+   "mid": {
+    "t": 1689,
+    "v": 1.0357
+   },
+   "last": {
+    "t": 3369,
+    "v": 1.0245
+   }
+  },
+  "hashir:doseRate": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 72
+    },
+    {
+     "t": 1,
+     "v": 76
+    },
+    {
+     "t": 2,
+     "v": 74
+    },
+    {
+     "t": 3,
+     "v": 76
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 71
+   },
+   "last": {
+    "t": 3503,
+    "v": 70
+   }
+  },
+  "hashir:cabinNoise": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 46.2
+    },
+    {
+     "t": 1,
+     "v": 48.6
+    },
+    {
+     "t": 2,
+     "v": 47.9
+    },
+    {
+     "t": 3,
+     "v": 48.2
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 46.8
+   },
+   "last": {
+    "t": 3503,
+    "v": 58.6
+   }
+  },
+  "hashir:legStrength": {
+   "n": 139,
+   "first": [
+    {
+     "t": 55.5,
+     "v": 141.4
+    },
+    {
+     "t": 79.5,
+     "v": 143.5
+    },
+    {
+     "t": 103.5,
+     "v": 142.8
+    },
+    {
+     "t": 127.5,
+     "v": 140.3
+    }
+   ],
+   "mid": {
+    "t": 1759.5,
+    "v": 140.5
+   },
+   "last": {
+    "t": 3487.5,
+    "v": 140.8
+   }
+  },
+  "ahmad:hr": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 60.5
+    },
+    {
+     "t": 1,
+     "v": 59
+    },
+    {
+     "t": 2,
+     "v": 58.1
+    },
+    {
+     "t": 3,
+     "v": 56.5
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 53.8
+   },
+   "last": {
+    "t": 3503,
+    "v": 68.6
+   }
+  },
+  "ahmad:sleepDuration": {
+   "n": 145,
+   "first": [
+    {
+     "t": 28.55470773918036,
+     "v": 5.55
+    },
+    {
+     "t": 53.1016255998267,
+     "v": 6.1
+    },
+    {
+     "t": 77.78090264419032,
+     "v": 6.78
+    },
+    {
+     "t": 102.26742363615081,
+     "v": 7.27
+    }
+   ],
+   "mid": {
+    "t": 1757.9535274772943,
+    "v": 6.95
+   },
+   "last": {
+    "t": 3484.771254353586,
+    "v": 5.77
+   }
+  },
+  "ahmad:radDose": {
+   "n": 146,
+   "first": [
+    {
+     "t": 0,
+     "v": 0
+    },
+    {
+     "t": 24,
+     "v": 1.84
+    },
+    {
+     "t": 48,
+     "v": 3.57
+    },
+    {
+     "t": 72,
+     "v": 5.34
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 130.33
+   },
+   "last": {
+    "t": 3480,
+    "v": 286.52
+   }
+  },
+  "ahmad:co2": {
+   "n": 146,
+   "first": [
+    {
+     "t": 12,
+     "v": 2.19
+    },
+    {
+     "t": 36,
+     "v": 2.23
+    },
+    {
+     "t": 60,
+     "v": 2.42
+    },
+    {
+     "t": 84,
+     "v": 2.21
+    }
+   ],
+   "mid": {
+    "t": 1764,
+    "v": 2.68
+   },
+   "last": {
+    "t": 3492,
+    "v": 3.88
+   }
+  },
+  "ahmad:boneDensity": {
+   "n": 21,
+   "first": [
+    {
+     "t": 9,
+     "v": 1.0879
+    },
+    {
+     "t": 177,
+     "v": 1.0851
+    },
+    {
+     "t": 345,
+     "v": 1.0773
+    },
+    {
+     "t": 513,
+     "v": 1.0784
+    }
+   ],
+   "mid": {
+    "t": 1689,
+    "v": 1.0691
+   },
+   "last": {
+    "t": 3369,
+    "v": 1.0563
+   }
+  },
+  "ahmad:doseRate": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 74
+    },
+    {
+     "t": 1,
+     "v": 71
+    },
+    {
+     "t": 2,
+     "v": 70
+    },
+    {
+     "t": 3,
+     "v": 69
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 75
+   },
+   "last": {
+    "t": 3503,
+    "v": 75
+   }
+  },
+  "ahmad:cabinNoise": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 49.1
+    },
+    {
+     "t": 1,
+     "v": 47.8
+    },
+    {
+     "t": 2,
+     "v": 48.2
+    },
+    {
+     "t": 3,
+     "v": 45.3
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 46.9
+   },
+   "last": {
+    "t": 3503,
+    "v": 60
+   }
+  },
+  "ahmad:legStrength": {
+   "n": 125,
+   "first": [
+    {
+     "t": 65.5,
+     "v": 157.8
+    },
+    {
+     "t": 89.5,
+     "v": 157.4
+    },
+    {
+     "t": 113.5,
+     "v": 158.5
+    },
+    {
+     "t": 137.5,
+     "v": 158.2
+    }
+   ],
+   "mid": {
+    "t": 1721.5,
+    "v": 157.1
+   },
+   "last": {
+    "t": 3497.5,
+    "v": 154.2
+   }
+  },
+  "hannan:hr": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 64.3
+    },
+    {
+     "t": 1,
+     "v": 64.6
+    },
+    {
+     "t": 2,
+     "v": 61.9
+    },
+    {
+     "t": 3,
+     "v": 63.4
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 58.7
+   },
+   "last": {
+    "t": 3503,
+    "v": 73.7
+   }
+  },
+  "hannan:sleepDuration": {
+   "n": 145,
+   "first": [
+    {
+     "t": 29.79058586423255,
+     "v": 6.79
+    },
+    {
+     "t": 54.59860607764273,
+     "v": 7.6
+    },
+    {
+     "t": 77.54411528322824,
+     "v": 6.54
+    },
+    {
+     "t": 102.59914499484461,
+     "v": 7.6
+    }
+   ],
+   "mid": {
+    "t": 1757.7485343432575,
+    "v": 6.75
+   },
+   "last": {
+    "t": 3485.2529703052196,
+    "v": 6.25
+   }
+  },
+  "hannan:radDose": {
+   "n": 146,
+   "first": [
+    {
+     "t": 0,
+     "v": 0
+    },
+    {
+     "t": 24,
+     "v": 1.75
+    },
+    {
+     "t": 48,
+     "v": 3.43
+    },
+    {
+     "t": 72,
+     "v": 5.15
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 127.05
+   },
+   "last": {
+    "t": 3480,
+    "v": 279.33
+   }
+  },
+  "hannan:co2": {
+   "n": 146,
+   "first": [
+    {
+     "t": 12,
+     "v": 2.46
+    },
+    {
+     "t": 36,
+     "v": 2.34
+    },
+    {
+     "t": 60,
+     "v": 2.36
+    },
+    {
+     "t": 84,
+     "v": 2.52
+    }
+   ],
+   "mid": {
+    "t": 1764,
+    "v": 2.59
+   },
+   "last": {
+    "t": 3492,
+    "v": 3.92
+   }
+  },
+  "hannan:boneDensity": {
+   "n": 21,
+   "first": [
+    {
+     "t": 9,
+     "v": 0.9845
+    },
+    {
+     "t": 177,
+     "v": 0.9745
+    },
+    {
+     "t": 345,
+     "v": 0.9765
+    },
+    {
+     "t": 513,
+     "v": 0.9799
+    }
+   ],
+   "mid": {
+    "t": 1689,
+    "v": 0.9669
+   },
+   "last": {
+    "t": 3369,
+    "v": 0.943
+   }
+  },
+  "hannan:doseRate": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 71
+    },
+    {
+     "t": 1,
+     "v": 73
+    },
+    {
+     "t": 2,
+     "v": 70
+    },
+    {
+     "t": 3,
+     "v": 71
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 76
+   },
+   "last": {
+    "t": 3503,
+    "v": 72
+   }
+  },
+  "hannan:cabinNoise": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 46.4
+    },
+    {
+     "t": 1,
+     "v": 45.7
+    },
+    {
+     "t": 2,
+     "v": 46.8
+    },
+    {
+     "t": 3,
+     "v": 47
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 43.1
+   },
+   "last": {
+    "t": 3503,
+    "v": 59.5
+   }
+  },
+  "hannan:legStrength": {
+   "n": 121,
+   "first": [
+    {
+     "t": 62.5,
+     "v": 105.4
+    },
+    {
+     "t": 86.5,
+     "v": 103.3
+    },
+    {
+     "t": 110.5,
+     "v": 105.8
+    },
+    {
+     "t": 134.5,
+     "v": 105
+    }
+   ],
+   "mid": {
+    "t": 1526.5,
+    "v": 101.3
+   },
+   "last": {
+    "t": 3494.5,
+    "v": 92.5
+   }
+  },
+  "sabaina:hr": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 57
+    },
+    {
+     "t": 1,
+     "v": 56.9
+    },
+    {
+     "t": 2,
+     "v": 56.4
+    },
+    {
+     "t": 3,
+     "v": 59.3
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 50.3
+   },
+   "last": {
+    "t": 3503,
+    "v": 65.1
+   }
+  },
+  "sabaina:sleepDuration": {
+   "n": 145,
+   "first": [
+    {
+     "t": 27.99143272090946,
+     "v": 5.99
+    },
+    {
+     "t": 51.99705535297435,
+     "v": 6
+    },
+    {
+     "t": 76.25882491868319,
+     "v": 6.26
+    },
+    {
+     "t": 99.97276296377571,
+     "v": 5.97
+    }
+   ],
+   "mid": {
+    "t": 1756.1857001683989,
+    "v": 6.19
+   },
+   "last": {
+    "t": 3484.81129819939,
+    "v": 6.81
+   }
+  },
+  "sabaina:radDose": {
+   "n": 146,
+   "first": [
+    {
+     "t": 0,
+     "v": 0
+    },
+    {
+     "t": 24,
+     "v": 1.87
+    },
+    {
+     "t": 48,
+     "v": 3.71
+    },
+    {
+     "t": 72,
+     "v": 5.54
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 134.79
+   },
+   "last": {
+    "t": 3480,
+    "v": 326.02
+   }
+  },
+  "sabaina:co2": {
+   "n": 146,
+   "first": [
+    {
+     "t": 12,
+     "v": 2.55
+    },
+    {
+     "t": 36,
+     "v": 2.47
+    },
+    {
+     "t": 60,
+     "v": 2.49
+    },
+    {
+     "t": 84,
+     "v": 2.5
+    }
+   ],
+   "mid": {
+    "t": 1764,
+    "v": 2.54
+   },
+   "last": {
+    "t": 3492,
+    "v": 4.13
+   }
+  },
+  "sabaina:boneDensity": {
+   "n": 21,
+   "first": [
+    {
+     "t": 9,
+     "v": 1.0115
+    },
+    {
+     "t": 177,
+     "v": 1.0077
+    },
+    {
+     "t": 345,
+     "v": 1.0146
+    },
+    {
+     "t": 513,
+     "v": 1.0078
+    }
+   ],
+   "mid": {
+    "t": 1689,
+    "v": 1.0011
+   },
+   "last": {
+    "t": 3369,
+    "v": 0.9912
+   }
+  },
+  "sabaina:doseRate": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 79
+    },
+    {
+     "t": 1,
+     "v": 84
+    },
+    {
+     "t": 2,
+     "v": 83
+    },
+    {
+     "t": 3,
+     "v": 76
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 73
+   },
+   "last": {
+    "t": 3503,
+    "v": 82
+   }
+  },
+  "sabaina:cabinNoise": {
+   "n": 3504,
+   "first": [
+    {
+     "t": 0,
+     "v": 46.6
+    },
+    {
+     "t": 1,
+     "v": 46.8
+    },
+    {
+     "t": 2,
+     "v": 47.1
+    },
+    {
+     "t": 3,
+     "v": 51.6
+    }
+   ],
+   "mid": {
+    "t": 1752,
+    "v": 48.2
+   },
+   "last": {
+    "t": 3503,
+    "v": 57.7
+   }
+  },
+  "sabaina:legStrength": {
+   "n": 131,
+   "first": [
+    {
+     "t": 67.5,
+     "v": 113.8
+    },
+    {
+     "t": 91.5,
+     "v": 110.7
+    },
+    {
+     "t": 115.5,
+     "v": 113.1
+    },
+    {
+     "t": 139.5,
+     "v": 111.4
+    }
+   ],
+   "mid": {
+    "t": 1699.5,
+    "v": 112.4
+   },
+   "last": {
+    "t": 3499.5,
+    "v": 108.8
+   }
+  }
+ },
+ "checkIns": {
+  "hashir": {
+   "n": 145,
+   "first": {
+    "id": "ci-hashir-2",
+    "crewId": "hashir",
+    "day": 2,
+    "at": 29.504,
+    "mood": 4,
+    "sleepQuality": 5,
+    "energy": 4,
+    "symptoms": [
+     "nausea",
+     "congestion"
+    ]
+   },
+   "last": {
+    "id": "ci-hashir-146",
+    "crewId": "hashir",
+    "day": 146,
+    "at": 3486.47,
+    "mood": 4,
+    "sleepQuality": 3,
+    "energy": 4,
+    "symptoms": []
+   }
+  },
+  "ahmad": {
+   "n": 145,
+   "first": {
+    "id": "ci-ahmad-2",
+    "crewId": "ahmad",
+    "day": 2,
+    "at": 29.497,
+    "mood": 4,
+    "sleepQuality": 4,
+    "energy": 4,
+    "symptoms": [
+     "nausea"
+    ]
+   },
+   "last": {
+    "id": "ci-ahmad-146",
+    "crewId": "ahmad",
+    "day": 146,
+    "at": 3485.711,
+    "mood": 4,
+    "sleepQuality": 3,
+    "energy": 3,
+    "symptoms": []
+   }
+  },
+  "hannan": {
+   "n": 140,
+   "first": {
+    "id": "ci-hannan-2",
+    "crewId": "hannan",
+    "day": 2,
+    "at": 30.923,
+    "mood": 5,
+    "sleepQuality": 4,
+    "energy": 4,
+    "symptoms": [
+     "nausea",
+     "headache"
+    ]
+   },
+   "last": {
+    "id": "ci-hannan-146",
+    "crewId": "hannan",
+    "day": 146,
+    "at": 3486.248,
+    "mood": 3,
+    "sleepQuality": 3,
+    "energy": 2,
+    "symptoms": []
+   }
+  },
+  "sabaina": {
+   "n": 145,
+   "first": {
+    "id": "ci-sabaina-2",
+    "crewId": "sabaina",
+    "day": 2,
+    "at": 29.285,
+    "mood": 4,
+    "sleepQuality": 4,
+    "energy": 4,
+    "symptoms": [
+     "congestion"
+    ]
+   },
+   "last": {
+    "id": "ci-sabaina-146",
+    "crewId": "sabaina",
+    "day": 146,
+    "at": 3485.756,
+    "mood": 5,
+    "sleepQuality": 4,
+    "energy": 4,
+    "symptoms": []
+   }
+  }
+ },
+ "exercise": {
+  "hashir": {
+   "n": 144,
+   "done": 139
+  },
+  "ahmad": {
+   "n": 144,
+   "done": 125
+  },
+  "hannan": {
+   "n": 144,
+   "done": 121
+  },
+  "sabaina": {
+   "n": 144,
+   "done": 131
+  }
+ }
+}

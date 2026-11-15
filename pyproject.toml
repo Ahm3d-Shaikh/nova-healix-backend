@@ -19,7 +19,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**" = ["S101", "S105", "S106", "PLR", "PT011", "PT018", "PLC0415", "E731"]
+# The domain modules are a line-for-line port of the frontend engine: long user-facing strings stay verbatim.
+"app/domain/**" = ["E501", "PLR0911", "PLR0912", "PLR0915", "PLR0917"]
+"app/routers/**" = ["PLR0917"]  # FastAPI path/query/body parameters
+"tests/**" = ["E501", "S101", "S105", "S106", "PT011", "PT018", "PLC0415", "E731", "PLR"]
 "scripts/**" = ["S101", "T201"]
 
 [tool.ruff.lint.flake8-tidy-imports]

@@ -1,0 +1,123 @@
+[
+ {
+  "id": "tcm-1",
+  "kind": "burn",
+  "label": "TCM-1 trajectory correction",
+  "start": 278,
+  "end": 279,
+  "crewIds": [],
+  "hazards": [
+   "distance"
+  ]
+ },
+ {
+  "id": "eva-1",
+  "kind": "eva",
+  "label": "EVA-1 antenna inspection",
+  "start": 896,
+  "end": 903,
+  "crewIds": [
+   "hashir",
+   "ahmad"
+  ],
+  "hazards": [
+   "radiation",
+   "environment"
+  ]
+ },
+ {
+  "id": "tcm-2",
+  "kind": "burn",
+  "label": "TCM-2 trajectory correction",
+  "start": 1426,
+  "end": 1427,
+  "crewIds": [],
+  "hazards": [
+   "distance"
+  ]
+ },
+ {
+  "id": "eva-2",
+  "kind": "eva",
+  "label": "EVA-2 radiator repair",
+  "start": 2168,
+  "end": 2175,
+  "crewIds": [
+   "ahmad",
+   "sabaina"
+  ],
+  "hazards": [
+   "radiation",
+   "environment"
+  ]
+ },
+ {
+  "id": "spe-97",
+  "kind": "spe",
+  "label": "Solar particle event, storm shelter",
+  "start": 2307,
+  "end": 2339,
+  "crewIds": [],
+  "hazards": [
+   "radiation",
+   "isolation"
+  ]
+ },
+ {
+  "id": "oct-126",
+  "kind": "medical",
+  "label": "Ocular ultrasound, routine",
+  "start": 3010,
+  "end": 3011,
+  "crewIds": [
+   "sabaina",
+   "hashir",
+   "ahmad",
+   "hannan"
+  ],
+  "hazards": [
+   "gravity"
+  ]
+ },
+ {
+  "id": "shift-136",
+  "kind": "sleep-shift",
+  "label": "Sleep shift −2 h for EVA-3 prep",
+  "start": 3261,
+  "end": 3462,
+  "crewIds": [
+   "ahmad"
+  ],
+  "hazards": [
+   "isolation",
+   "environment"
+  ]
+ },
+ {
+  "id": "cdra-140",
+  "kind": "anomaly",
+  "label": "CO₂ scrubber bed B degraded",
+  "start": 3341,
+  "end": 3504,
+  "crewIds": [],
+  "hazards": [
+   "environment"
+  ]
+ },
+ {
+  "id": "eva-3",
+  "kind": "eva",
+  "label": "EVA-3 high-gain antenna gimbal",
+  "start": 3464,
+  "end": 3471,
+  "crewIds": [
+   "ahmad",
+   "hannan"
+  ],
+  "hazards": [
+   "radiation",
+   "environment"
+  ],
+  "planned": true
+ }
+]

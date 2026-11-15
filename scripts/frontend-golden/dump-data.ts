@@ -1,0 +1,12 @@
+import { writeFileSync } from 'node:fs';
+import { METRICS } from '../src/app/core/models/metric';
+import { PERSONAS } from '../src/app/core/mock/personas';
+import { MISSION_EVENTS } from '../src/app/core/mock/mission-plan';
+import { QUESTIONNAIRES, seedAssignments } from '../src/app/core/mock/questionnaires';
+const out = process.argv[2];
+const w = (n: string, v: unknown) => writeFileSync(`${out}/${n}.json`, JSON.stringify(v, null, 1));
+w('metrics', METRICS);
+w('personas', PERSONAS);
+w('mission_events', MISSION_EVENTS);
+w('questionnaires', QUESTIONNAIRES);
+w('seed_assignments', seedAssignments('Haleem'));
