@@ -10,57 +10,57 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 | # | Decision | Status |
 |---|---|---|
-| D1 | v2 **replaces** RIDGE: old `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`, `/api/mobility/*` are removed | [ ] |
-| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"). Code stays in git history (branches merged to `development`). If it returns, results go in as `legStrength` samples | [ ] |
-| D3 | ECHO Gemini chat (stored sessions, loneliness scoring) is replaced by stateless Nova; nothing from Nova is stored or logged | [ ] |
-| D4 | JSON is camelCase on the wire (pydantic `alias_generator=to_camel`) | [ ] |
-| D5 | Every time is a mission hour (float since launch); never evaluate past "now" | [ ] |
+| D1 | v2 **replaces** RIDGE: old `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`, `/api/mobility/*` are removed | [x] |
+| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"). Code stays in git history (branches merged to `development`). If it returns, results go in as `legStrength` samples | [x] removed with the RIDGE API |
+| D3 | ECHO Gemini chat (stored sessions, loneliness scoring) is replaced by stateless Nova; nothing from Nova is stored or logged | [x] |
+| D4 | JSON is camelCase on the wire (pydantic `alias_generator=to_camel`) | [x] |
+| D5 | Every time is a mission hour (float since launch); never evaluate past "now" | [x] |
 
 ## 1. Endpoints (29)
 
 | # | Method | Path | Frontend method | Status |
 |---|---|---|---|---|
-| 1 | GET | `/health` | ops | [ ] |
-| 2 | GET | `/api/mission` | `MissionApi.config` | [ ] |
-| 3 | GET | `/api/mission/events` | `MissionApi.events` | [ ] |
-| 4 | GET | `/api/crew/{id}/timeline?from&to` | `MissionApi.timeline` | [ ] |
-| 5 | GET | `/api/crew` | `CrewApi.list` | [ ] |
-| 6 | GET | `/api/crew/{id}` | convenience | [ ] |
-| 7 | GET | `/api/crew/{id}/metrics/{metric}?from&to&bucket` | `TelemetryApi.series` | [ ] |
-| 8 | GET | `/api/crew/{id}/metrics/{metric}/baseline` | `TelemetryApi.baseline` | [ ] |
-| 9 | GET | `/api/crew/{id}/vitals/live` | `TelemetryApi.live` | [ ] |
-| 10 | GET | `/api/crew/{id}/checkins?from&to` | `TelemetryApi.checkIns` | [ ] |
-| 11 | GET | `/api/assessment/hazards?at&autonomous` | `AssessmentApi.hazards` | [ ] |
-| 12 | GET | `/api/assessment/hazards/{hazard}/history?crew&fromDay&at&autonomous` | `AssessmentApi.hazardHistory` | [ ] |
-| 13 | GET | `/api/assessment/crew-summaries?at&autonomous` | `AssessmentApi.crewSummaries` | [ ] |
-| 14 | GET | `/api/insights?at&autonomous` | `AssessmentApi.insights` | [ ] |
-| 15 | GET | `/api/crew/{id}/metrics/{metric}/interpretation?at&autonomous` | `AssessmentApi.interpretMetric` | [ ] |
-| 16 | POST | `/api/crew/{id}/checkins` (201) | `CrewModeApi.submitCheckIn` | [ ] |
-| 17 | GET | `/api/questionnaires` | `CrewModeApi.questionnaires` | [ ] |
-| 18 | GET | `/api/crew/{id}/assignments` | `CrewModeApi.assignments` | [ ] |
-| 19 | GET | `/api/assignments/{assignmentId}` | `CrewModeApi.assignment` | [ ] |
-| 20 | PUT | `/api/assignments/{assignmentId}/progress` | `CrewModeApi.saveProgress` | [ ] |
-| 21 | POST | `/api/assignments/{assignmentId}/submit` | `CrewModeApi.submitQuestionnaire` | [ ] |
-| 22 | POST | `/api/crew/{id}/companion/reply` | `CompanionApi.start/send` | [ ] |
-| 23 | POST | `/api/crew/{id}/shared-notes` (201) | `CompanionApi.resolveCard` | [ ] |
-| 24 | GET | `/api/actions` | `ActionsApi.log` | [ ] |
-| 25 | POST | `/api/actions` (201) | `ActionsApi.record` | [ ] |
-| 26 | GET | `/api/crew/{id}/messages` | `ActionsApi.messages` | [ ] |
-| 27 | POST | `/api/crew/{id}/messages` (201) | `ActionsApi.sendMessage` | [ ] |
-| 28 | POST | `/api/insights/{insightId}/resolve` | `ActionsApi.resolve` | [ ] |
-| 29 | POST | `/api/insights/{insightId}/reopen` | `ActionsApi.reopen` | [ ] |
+| 1 | GET | `/health` | ops | [x] |
+| 2 | GET | `/api/mission` | `MissionApi.config` | [x] |
+| 3 | GET | `/api/mission/events` | `MissionApi.events` | [x] |
+| 4 | GET | `/api/crew/{id}/timeline?from&to` | `MissionApi.timeline` | [x] |
+| 5 | GET | `/api/crew` | `CrewApi.list` | [x] |
+| 6 | GET | `/api/crew/{id}` | convenience | [x] |
+| 7 | GET | `/api/crew/{id}/metrics/{metric}?from&to&bucket` | `TelemetryApi.series` | [x] |
+| 8 | GET | `/api/crew/{id}/metrics/{metric}/baseline` | `TelemetryApi.baseline` | [x] |
+| 9 | GET | `/api/crew/{id}/vitals/live` | `TelemetryApi.live` | [x] |
+| 10 | GET | `/api/crew/{id}/checkins?from&to` | `TelemetryApi.checkIns` | [x] |
+| 11 | GET | `/api/assessment/hazards?at&autonomous` | `AssessmentApi.hazards` | [x] |
+| 12 | GET | `/api/assessment/hazards/{hazard}/history?crew&fromDay&at&autonomous` | `AssessmentApi.hazardHistory` | [x] |
+| 13 | GET | `/api/assessment/crew-summaries?at&autonomous` | `AssessmentApi.crewSummaries` | [x] |
+| 14 | GET | `/api/insights?at&autonomous` | `AssessmentApi.insights` | [x] |
+| 15 | GET | `/api/crew/{id}/metrics/{metric}/interpretation?at&autonomous` | `AssessmentApi.interpretMetric` | [x] |
+| 16 | POST | `/api/crew/{id}/checkins` (201) | `CrewModeApi.submitCheckIn` | [x] |
+| 17 | GET | `/api/questionnaires` | `CrewModeApi.questionnaires` | [x] |
+| 18 | GET | `/api/crew/{id}/assignments` | `CrewModeApi.assignments` | [x] |
+| 19 | GET | `/api/assignments/{assignmentId}` | `CrewModeApi.assignment` | [x] |
+| 20 | PUT | `/api/assignments/{assignmentId}/progress` | `CrewModeApi.saveProgress` | [x] |
+| 21 | POST | `/api/assignments/{assignmentId}/submit` | `CrewModeApi.submitQuestionnaire` | [x] |
+| 22 | POST | `/api/crew/{id}/companion/reply` | `CompanionApi.start/send` | [x] |
+| 23 | POST | `/api/crew/{id}/shared-notes` (201) | `CompanionApi.resolveCard` | [x] |
+| 24 | GET | `/api/actions` | `ActionsApi.log` | [x] |
+| 25 | POST | `/api/actions` (201) | `ActionsApi.record` | [x] |
+| 26 | GET | `/api/crew/{id}/messages` | `ActionsApi.messages` | [x] |
+| 27 | POST | `/api/crew/{id}/messages` (201) | `ActionsApi.sendMessage` | [x] |
+| 28 | POST | `/api/insights/{insightId}/resolve` | `ActionsApi.resolve` | [x] |
+| 29 | POST | `/api/insights/{insightId}/reopen` | `ActionsApi.reopen` | [x] |
 
 ## 2. Foundation
 
 | Item | Status |
 |---|---|
 | CamelCase base model (`alias_generator`, `populate_by_name`, `by_alias` responses) | [x] |
-| CORS: `GET, POST, PUT, OPTIONS`; origins `http://localhost:4200` + Vercel URL | [ ] |
-| Mission clock: `missionHour`, `day = floor(h/24)+1`, `at` clamped to now | [ ] |
+| CORS: `GET, POST, PUT, OPTIONS`; origins `http://localhost:4200` + Vercel URL | [x] |
+| Mission clock: `missionHour`, `day = floor(h/24)+1`, `at` clamped to now | [x] |
 | 4 crew with slug ids (`hashir`, `ahmad`, `hannan`, `sabaina`) | [x] |
 | Metric catalogue (units, cadence, thresholds) ported from `core/models/metric.ts` | [x] |
-| Store abstraction (in-memory + Supabase) for samples, check-ins, assignments, notes, flags, log, messages, resolutions | [ ] |
-| Domain errors: 404 / 409 / 422 / 503 mapping with `{"detail": ...}` | [ ] |
+| Store abstraction (in-memory + Supabase) for samples, check-ins, assignments, notes, flags, log, messages, resolutions | [x] |
+| Domain errors: 404 / 409 / 422 / 503 mapping with `{"detail": ...}` | [x] |
 
 ## 3. Simulated data (ported from `generator.ts`, `personas.ts`, `mission-plan.ts`)
 
@@ -85,7 +85,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | Gravity hazard | [x] |
 | Environment hazard | [x] |
 | Hazard history (daily) | [x] |
-| Crew summaries | [ ] |
+| Crew summaries | [x] |
 | Insight rules: `sleep-debt`, `isolation-stress`, `rad-outlier`, `fluid-shift`, `exercise`, `bone-on-track`, `workload`, `co2`, `checkin`, `safety`, `note`, `q` | [x] |
 | Resolution rule (resolved / reopened) and sort order | [x] |
 | Metric interpretation | [x] |
@@ -94,44 +94,51 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 | Item | Status |
 |---|---|
-| Check-in (one per astronaut per day, replaces) + validation 1–5 | [ ] |
-| Questionnaires (4, verbatim from `questionnaires.ts`) + scoring + `feeds` metric | [~] data + scoring done; endpoints pending |
-| Assignments: progress, submit, 409 on resubmit | [ ] |
-| Nova: deterministic safety check before any model call | [ ] |
-| Nova: ambiguous hopelessness question + `pendingSafetyCheck` | [ ] |
-| Nova: check-in / share / breathing cards | [ ] |
-| Nova: Gemini fallback reply (503 on failure), `rules` fallback mode | [ ] |
-| Nova privacy: no storage, no logging of body/reply, bodies stripped from access logs and errors | [ ] |
-| Safety flag (no text) → `safety:<id>` alert insight | [ ] |
-| Shared notes → `note:<id>` insight | [ ] |
-| Action log, crew messages (signal delay from `trajectoryAu`), resolve / reopen | [ ] |
+| Check-in (one per astronaut per day, replaces) + validation 1–5 | [x] |
+| Questionnaires (4, verbatim from `questionnaires.ts`) + scoring + `feeds` metric | [x] |
+| Assignments: progress, submit, 409 on resubmit | [x] |
+| Nova: deterministic safety check before any model call | [x] |
+| Nova: ambiguous hopelessness question + `pendingSafetyCheck` | [x] |
+| Nova: check-in / share / breathing cards | [x] |
+| Nova: Gemini fallback reply (503 on failure), `rules` fallback mode | [x] tested with a scripted stand-in; not exercised against the live Gemini API |
+| Nova privacy: no storage, no logging of body/reply, bodies stripped from access logs and errors | [x] |
+| Safety flag (no text) → `safety:<id>` alert insight | [x] |
+| Shared notes → `note:<id>` insight | [x] |
+| Action log, crew messages (signal delay from `trajectoryAu`), resolve / reopen | [x] |
 
 ## 6. NASA data
 
 | Item | Status |
 |---|---|
-| DONKI events → `MissionEvent` (`spe`) + `doseRate` samples; live / cached / snapshot fallback kept | [ ] |
-| JPL Horizons → `MissionConfig.trajectoryAu` (≥ durationDays + 1 values) | [ ] |
+| DONKI events → `MissionEvent` (`spe`) + `doseRate` samples; live / cached / snapshot fallback kept | [~] events mapped onto D97 (18, `source: "NASA DONKI"`); `doseRate`/`radDose` deliberately NOT driven by them, to keep parity with the frontend demo data (see API_V2.md section 6) |
+| JPL Horizons → `MissionConfig.trajectoryAu` (≥ durationDays + 1 values) | [x] |
 
 ## 7. Database
 
 | Item | Status |
 |---|---|
-| New `supabase/schema.sql` (tables in guide section 9, no chat table) | [ ] |
-| Drop RIDGE tables (`isolation_chat_*`, `loneliness_assessments`, `mobility_checks`, `daily_records`) in a migration note | [ ] |
+| New `supabase/schema.sql` (tables in guide section 9, no chat table) | [~] written and cross-checked column-by-column against the repository; not yet run in a real Supabase project |
+| Drop RIDGE tables (`isolation_chat_*`, `loneliness_assessments`, `mobility_checks`, `daily_records`) in a migration note | [x] `supabase/drop_ridge_tables.sql`; run it deliberately (it deletes old chat transcripts) |
 
 ## 8. Quality and docs
 
 | Item | Status |
 |---|---|
-| Tests per endpoint group; checklist from guide section 10 automated | [ ] |
-| `make check` green (ruff, mypy strict, coverage ≥ 90%) | [ ] |
-| `docs/API_V2.md` (the guide) replaces `FRONTEND_API_GUIDE.md` | [ ] |
-| README / FEATURES updated | [ ] |
-| Compare with frontend `scripts/calibrate.ts` output at Day 142, 14:00 | [ ] |
-| Run frontend with `?data=api` against this server | [ ] |
+| Tests per endpoint group; checklist from guide section 10 automated | [x] |
+| `make check` green (ruff, mypy strict, coverage ≥ 90%) | [x] |
+| `docs/API_V2.md` replaces `FRONTEND_API_GUIDE.md` (it links to the contract in the frontend repo instead of copying it) | [x] |
+| README / FEATURES updated | [x] |
+| Compare with frontend `scripts/calibrate.ts` output at Day 142, 14:00 | [x] |
+| Run frontend with `?data=api` against this server | [x] Mission Control, profile, Nova (greeting, check-in, safety), insights, action log and resolve driven in the browser; the questionnaire form was only load-checked (covered by API tests) |
 
-## Verification so far (against the frontend's own engine, `npx tsx scripts/dump-golden.ts`)
+## Not verified / open
+
+- Docker image build (Docker daemon unavailable here; the container start command and health check were verified earlier).
+- Supabase schema and the Supabase code path against a real project (the PostgREST calls are tested with a mocked transport).
+- Live Gemini replies (rate limits, safety filters).
+- Railway needs the new variables (`CORS_ORIGINS` with the frontend origin) and `supabase/schema.sql` run.
+
+## Verification so far (against the frontend's own engine; see `scripts/frontend-golden/`)
 
 - Seeded PRNG: bit-identical to `prng.ts`.
 - Generated series: sample values, counts and last values identical for all metrics checked (`tests/fixtures/nova_golden.json`).
@@ -140,11 +147,15 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 ## 9. Guide checklist (section 10) → result
 
-- [ ] `GET /api/mission` returns `trajectoryAu` with at least `durationDays + 1` values
-- [ ] `GET /api/assessment/hazards` returns exactly 5 rows per astronaut
-- [ ] Unknown astronaut → 404; check-in with `mood: 9` → 422
-- [ ] Every GET returns the field names and types of guide section 4, camelCase
-- [ ] After resolve, `GET /api/insights` includes `resolution`; after reopen it is gone
-- [ ] Nova "I want to die" → `safety` card; `/api/insights` then starts with a `safety:…` alert with no chat text
-- [ ] Nothing from the Nova route is in the database, logs or error reports
-- [ ] Frontend `?data=api`: Mission Control, profile, metric sheet, check-in, questionnaire, Nova, resolve all work
+- [x] `GET /api/mission` returns `trajectoryAu` with at least `durationDays + 1` values
+- [x] `GET /api/assessment/hazards` returns exactly 5 rows per astronaut
+- [x] Unknown astronaut → 404; check-in with `mood: 9` → 422
+- [x] Every GET returns the field names and types of guide section 4, camelCase
+- [x] After resolve, `GET /api/insights` includes `resolution`; after reopen it is gone
+- [x] Nova "I want to die" → `safety` card; `/api/insights` then starts with a `safety:…` alert with no chat text
+- [x] Nothing from the Nova route is in the database, logs or error reports
+- [x] Frontend `?data=api`: Mission Control, profile, check-in, Nova, resolve all work in the browser with no console errors (metric sheet and the questionnaire form were not clicked through; their endpoints are covered by tests)
+
+## Result
+
+`make check`: ruff and `mypy --strict` clean, 166 tests passing, 93.5 % coverage.
