@@ -1,0 +1,616 @@
+{
+ "wellbeing": {
+  "id": "wellbeing",
+  "title": "Weekly wellbeing",
+  "purpose": "How the past week felt. Helps spot isolation stress early.",
+  "minutes": 2,
+  "hazards": [
+   "isolation",
+   "distance"
+  ],
+  "feeds": "stress",
+  "scoreMeaning": "more stress",
+  "questions": [
+   {
+    "id": "w1",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "This week, how often did you feel on edge or unable to relax?"
+   },
+   {
+    "id": "w2",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "After work, were you able to switch off?"
+   },
+   {
+    "id": "w3",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Did you feel connected to the rest of the crew?"
+   },
+   {
+    "id": "w4",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Did you feel connected to people at home?"
+   },
+   {
+    "id": "w5",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did small problems feel bigger than usual?"
+   },
+   {
+    "id": "w6",
+    "kind": "text",
+    "optional": true,
+    "text": "Anything you would like the flight surgeon to know?"
+   }
+  ]
+ },
+ "sleep": {
+  "id": "sleep",
+  "title": "Sleep",
+  "purpose": "What is getting in the way of good sleep on board.",
+  "minutes": 1,
+  "hazards": [
+   "isolation",
+   "environment"
+  ],
+  "scoreMeaning": "worse sleep",
+  "questions": [
+   {
+    "id": "s1",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did it take you more than 30 minutes to fall asleep?"
+   },
+   {
+    "id": "s2",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did you wake up during your sleep period?"
+   },
+   {
+    "id": "s3",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Did you feel rested when you woke up?"
+   },
+   {
+    "id": "s4",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did noise, light or temperature disturb your sleep?"
+   },
+   {
+    "id": "s5",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did you struggle to stay alert during the work day?"
+   }
+  ]
+ },
+ "workload": {
+  "id": "workload",
+  "title": "Workload",
+  "purpose": "How demanding the week was, with less help from Earth.",
+  "minutes": 1,
+  "hazards": [
+   "distance",
+   "isolation"
+  ],
+  "feeds": "workload",
+  "scoreMeaning": "heavier workload",
+  "questions": [
+   {
+    "id": "k1",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Very low"
+     },
+     {
+      "value": 2,
+      "label": "Low"
+     },
+     {
+      "value": 3,
+      "label": "Moderate"
+     },
+     {
+      "value": 4,
+      "label": "High"
+     },
+     {
+      "value": 5,
+      "label": "Very high"
+     }
+    ],
+    "text": "How mentally demanding was your work this week?"
+   },
+   {
+    "id": "k2",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Very low"
+     },
+     {
+      "value": 2,
+      "label": "Low"
+     },
+     {
+      "value": 3,
+      "label": "Moderate"
+     },
+     {
+      "value": 4,
+      "label": "High"
+     },
+     {
+      "value": 5,
+      "label": "Very high"
+     }
+    ],
+    "text": "How much time pressure did you feel?"
+   },
+   {
+    "id": "k3",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often did you have to make a decision you would normally check with Earth?"
+   },
+   {
+    "id": "k4",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Were you able to finish your planned tasks?"
+   },
+   {
+    "id": "k5",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Very low"
+     },
+     {
+      "value": 2,
+      "label": "Low"
+     },
+     {
+      "value": 3,
+      "label": "Moderate"
+     },
+     {
+      "value": 4,
+      "label": "High"
+     },
+     {
+      "value": 5,
+      "label": "Very high"
+     }
+    ],
+    "text": "How tired were you at the end of the work day?"
+   }
+  ]
+ },
+ "team": {
+  "id": "team",
+  "title": "Team dynamics",
+  "purpose": "How the crew is getting along in a small space.",
+  "minutes": 2,
+  "hazards": [
+   "isolation"
+  ],
+  "scoreMeaning": "more strain in the team",
+  "questions": [
+   {
+    "id": "t1",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Do you feel heard when you raise something with the crew?"
+   },
+   {
+    "id": "t2",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Never"
+     },
+     {
+      "value": 2,
+      "label": "Rarely"
+     },
+     {
+      "value": 3,
+      "label": "Sometimes"
+     },
+     {
+      "value": 4,
+      "label": "Often"
+     },
+     {
+      "value": 5,
+      "label": "Very often"
+     }
+    ],
+    "text": "How often were there tensions or disagreements this week?"
+   },
+   {
+    "id": "t3",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Do you get enough private time and space?"
+   },
+   {
+    "id": "t4",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "Do you feel tasks are shared fairly?"
+   },
+   {
+    "id": "t5",
+    "kind": "scale",
+    "options": [
+     {
+      "value": 1,
+      "label": "Not at all"
+     },
+     {
+      "value": 2,
+      "label": "A little"
+     },
+     {
+      "value": 3,
+      "label": "Somewhat"
+     },
+     {
+      "value": 4,
+      "label": "Mostly"
+     },
+     {
+      "value": 5,
+      "label": "Completely"
+     }
+    ],
+    "reverse": true,
+    "text": "If you had a problem, would you feel comfortable asking a crewmate for help?"
+   },
+   {
+    "id": "t6",
+    "kind": "text",
+    "optional": true,
+    "text": "Anything else about life on board you want to mention?"
+   }
+  ]
+ }
+}
