@@ -19,6 +19,7 @@ from app.schemas.assessment import Resolution
 from app.schemas.crew import Astronaut
 from app.schemas.crewmode import Assignment
 from app.schemas.mission import MissionEvent
+from app.schemas.mobility import MobilityCheck
 from app.schemas.nova import SharedNote
 from app.schemas.telemetry import Baseline, CheckIn
 
@@ -64,6 +65,7 @@ class MissionData:
     _notes: list[SharedNote] = field(default_factory=list)
     _log: list[ActionLogEntry] = field(default_factory=list)
     _outbox: list[CrewMessage] = field(default_factory=list)
+    _mobility: list[MobilityCheck] = field(default_factory=list)
     _resolutions: dict[str, Resolution] = field(default_factory=dict)
     version: int = 0
 
@@ -154,6 +156,14 @@ class MissionData:
 
     def add_shared_note(self, n: SharedNote) -> None:
         self._notes.append(n)
+        self._bump()
+
+    def mobility_checks(self, crew_id: str | None = None) -> list[MobilityCheck]:
+        """Mobility & Balance checks, oldest first."""
+        return [c for c in self._mobility if crew_id is None or c.crew_id == crew_id]
+
+    def add_mobility_check(self, c: MobilityCheck) -> None:
+        self._mobility = sorted([*self._mobility, c], key=lambda x: x.at)
         self._bump()
 
     # -- mission control -----------------------------------------------------------------

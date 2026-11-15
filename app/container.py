@@ -21,6 +21,7 @@ from app.services.analysis import AnalysisService
 from app.services.clock import MissionClock, Trajectory
 from app.services.companion import CompanionService, Replier
 from app.services.crew_mode import CrewModeService
+from app.services.mobility import MobilityService
 from app.services.telemetry import TelemetryService
 
 log = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ class Container:
     crew_mode: CrewModeService
     companion: CompanionService
     actions: ActionsService
+    mobility: MobilityService
     database: str  # "supabase" | "memory"
 
     def mission_config(self) -> MissionConfig:
@@ -106,6 +108,7 @@ async def build_container(
             data, clock, traj, repo, FLIGHT_SURGEON, replier=replier, enabled=settings.companion_enabled
         ),
         actions=ActionsService(data, clock, traj, repo, FLIGHT_SURGEON),
+        mobility=MobilityService(data, clock, repo),
         database=db.name,
     )
 

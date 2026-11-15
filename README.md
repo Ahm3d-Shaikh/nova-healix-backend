@@ -26,6 +26,7 @@ Built for NASA Space Apps 2026 — *Create Health Monitoring Software for Astron
 - **Nova**: the astronaut's private companion. Nothing from the chat is stored, logged or analysed; the only things
   that leave it are what the astronaut confirms, plus a content-free safety alert under the safety exception.
 - **Mission Control**: findings, action log, messages that carry the real signal delay, resolve / reopen.
+- **Mobility & Balance Check** (extra endpoints, [docs/MOBILITY.md](docs/MOBILITY.md)): three short movement tests measured in the browser with MediaPipe; results feed the Gravity hazard and a finding. Test page at `/demo/mobility/`.
 - **Real NASA data**: DONKI storm events on mission day 97; JPL Horizons Earth-Mars distance for the trajectory.
 
 ## Getting started

@@ -11,7 +11,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | # | Decision | Status |
 |---|---|---|
 | D1 | v2 **replaces** RIDGE: old `/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`, `/api/mobility/*` are removed | [x] |
-| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"). Code stays in git history (branches merged to `development`). If it returns, results go in as `legStrength` samples | [x] removed with the RIDGE API |
+| D2 | Mobility & Balance Check is not in the v2 guide ("Removed"); kept as **additive** endpoints (frontend unchanged): feeds a Gravity driver and a `mobility:<crew>` finding. See docs/MOBILITY.md | [x] |
 | D3 | ECHO Gemini chat (stored sessions, loneliness scoring) is replaced by stateless Nova; nothing from Nova is stored or logged | [x] |
 | D4 | JSON is camelCase on the wire (pydantic `alias_generator=to_camel`) | [x] |
 | D5 | Every time is a mission hour (float since launch); never evaluate past "now" | [x] |
@@ -49,6 +49,17 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 | 27 | POST | `/api/crew/{id}/messages` (201) | `ActionsApi.sendMessage` | [x] |
 | 28 | POST | `/api/insights/{insightId}/resolve` | `ActionsApi.resolve` | [x] |
 | 29 | POST | `/api/insights/{insightId}/reopen` | `ActionsApi.reopen` | [x] |
+
+## 1b. Additive endpoints (not in the guide)
+
+| # | Method | Path | Status |
+|---|---|---|---|
+| A1 | GET | `/api/mobility/method` | [x] |
+| A2 | POST | `/api/mobility/{crewId}` (201) | [x] |
+| A3 | GET | `/api/mobility/{crewId}` | [x] |
+| A4 | static | `/demo/mobility/` (MediaPipe test page) | [x] |
+| A5 | engine | Gravity driver "Mobility & balance check" + finding `mobility:<crew>` (no checks: scores unchanged, proven by parity tests) | [x] |
+| A6 | db | `mobility_sessions` table (distinct name: the old RIDGE `mobility_checks` is dropped by `drop_ridge_tables.sql`) | [x] |
 
 ## 2. Foundation
 
@@ -158,4 +169,4 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done and tested · `[-]`
 
 ## Result
 
-`make check`: ruff and `mypy --strict` clean, 166 tests passing, 93.5 % coverage.
+`make check`: ruff and `mypy --strict` clean, 180 tests passing, 93.7 % coverage.

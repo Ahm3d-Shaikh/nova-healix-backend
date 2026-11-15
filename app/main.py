@@ -2,6 +2,7 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request
@@ -9,6 +10,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from google import genai
 from google.genai import types as genai_types
 
@@ -22,7 +24,7 @@ from app.db.base import Database, DatabaseError
 from app.db.memory import InMemoryDatabase
 from app.db.supabase import SupabaseDatabase
 from app.repositories.cache import CacheRepository
-from app.routers import actions, assessment, companion, crew, crew_mode, mission, telemetry
+from app.routers import actions, assessment, companion, crew, crew_mode, mission, mobility, telemetry
 from app.services.companion import GeminiReplier
 from app.services.donki_client import DonkiClient
 from app.services.horizons_client import HorizonsClient
@@ -30,6 +32,7 @@ from app.services.nasa import NasaDataService
 from app.services.space_weather_service import SpaceWeatherService
 
 log = logging.getLogger(__name__)
+MOBILITY_PAGE_DIR = Path(__file__).parent / "static" / "mobility"
 
 STATUS_BY_ERROR: list[tuple[type[DomainError], int]] = [
     (NotFoundError, 404),
@@ -146,8 +149,13 @@ def create_app(settings: Settings | None = None, container: Container | None = N
         crew_mode.router,
         companion.router,
         actions.router,
+        mobility.router,
     ):
         app.include_router(router)
+
+    # Browser test page for the Mobility & Balance Check (MediaPipe runs in the browser, not on the server)
+    if MOBILITY_PAGE_DIR.is_dir():
+        app.mount("/demo/mobility", StaticFiles(directory=MOBILITY_PAGE_DIR, html=True), name="mobility-demo")
 
     @app.get("/", tags=["ops"])
     async def root() -> dict[str, str]:

@@ -25,7 +25,11 @@ All 29 endpoints of the guide, camelCase JSON, times in mission hours:
 | Nova | `POST /api/crew/{id}/companion/reply`, `POST /api/crew/{id}/shared-notes` |
 | Actions | `GET/POST /api/actions`, `GET/POST /api/crew/{id}/messages`, `POST /api/insights/{id}/resolve`, `POST /api/insights/{id}/reopen` |
 
-The RIDGE endpoints (`/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`, `/api/mobility/*`) are gone.
+**Additive (not in the guide, frontend unchanged):** the Mobility & Balance Check, `GET /api/mobility/method`,
+`POST|GET /api/mobility/{crewId}`, plus a test page at `/demo/mobility/`. Results feed the Gravity hazard score and a
+`mobility:<crewId>` finding automatically. See [MOBILITY.md](MOBILITY.md).
+
+The RIDGE endpoints (`/api/dashboard`, `/api/alerts`, `/api/distance`, `/api/isolation/*`) are gone.
 
 ## 2. Verified against the frontend
 
@@ -99,7 +103,7 @@ app/
 | Example check-in draft in 5.7 shows `energy: 3` | returns `energy: 2` for that text | the frontend's own engine returns 2; the example is illustrative |
 | 422 body | `{"detail": "<message>"}` string (field: message) | matches section 11 and never echoes input |
 | Questionnaire answers | scale answers must be 1-5 (else 422); unknown question id → 422 | not specified |
-| Mobility & Balance Check | removed with the RIDGE API | the guide marks it "Removed". It remains in git history; if it returns, write results as `legStrength` samples |
+| Mobility & Balance Check | kept, as extra endpoints | the guide marks it "Removed" (the frontend does not use it). It is additive: results appear as a Gravity driver and a finding, not as `legStrength` samples (a sit-to-stand time is not a leg-press load) |
 
 ## 7. Run, deploy
 

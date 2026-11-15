@@ -64,6 +64,21 @@ create table if not exists public.samples (
 );
 create index if not exists samples_crew_metric_t_idx on public.samples (crew_id, metric, t);
 
+-- Mobility & Balance Check (numbers measured in the browser with MediaPipe; no video is stored)
+create table if not exists public.mobility_sessions (
+    id                 text primary key,
+    crew_id            text not null,
+    day                integer not null check (day >= 1),
+    "at"               double precision not null,
+    balance_hold_s     double precision not null check (balance_hold_s between 0 and 30),
+    sway_pct_height    double precision not null check (sway_pct_height between 0 and 50),
+    sit_to_stand_s  double precision not null check (sit_to_stand_s > 1),
+    knee_flexion_deg   double precision not null check (knee_flexion_deg between 0 and 150),
+    pose_confidence    double precision not null check (pose_confidence between 0 and 1),
+    reliable           boolean not null
+);
+create index if not exists mobility_sessions_crew_idx on public.mobility_sessions (crew_id, "at");
+
 -- ---------------------------------------------------------------------------
 -- Nova safety exception: a flag carries a category and a signal, NEVER any chat text
 -- ---------------------------------------------------------------------------
@@ -134,6 +149,7 @@ alter table public.mission              disable row level security;
 alter table public.checkins             disable row level security;
 alter table public.assignments          disable row level security;
 alter table public.samples              disable row level security;
+alter table public.mobility_sessions      disable row level security;
 alter table public.safety_flags         disable row level security;
 alter table public.shared_notes         disable row level security;
 alter table public.action_log           disable row level security;

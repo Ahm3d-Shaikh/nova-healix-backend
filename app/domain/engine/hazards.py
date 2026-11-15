@@ -4,6 +4,7 @@ import math
 from collections.abc import Callable
 from dataclasses import dataclass
 
+from app.domain import mobility
 from app.domain.engine.context import (
     H_PER_DAY,
     EngineContext,
@@ -210,7 +211,7 @@ def _distance(ctx: EngineContext, crew_id: str) -> list[Part]:
     ]
 
 
-def _gravity(ctx: EngineContext, crew_id: str) -> list[Part]:
+def _gravity_core(ctx: EngineContext, crew_id: str) -> list[Part]:
     bone_pct, bone_pm = loss_rate_per_month(ctx, crew_id, "boneDensity")
     lean_pct, lean_pm = loss_rate_per_month(ctx, crew_id, "muscleMass")
     str_pct, str_pm = loss_rate_per_month(ctx, crew_id, "legStrength")
@@ -256,6 +257,26 @@ def _gravity(ctx: EngineContext, crew_id: str) -> list[Part]:
         _low_driver(ctx, crew_id, "visionAcuity", 10, "Near vision, latest check", 0.12, "near vision has changed", 45),
         _high_driver(ctx, crew_id, "bpSys", 7, "Systolic BP, 7-day resting mean", 0.08, "blood pressure has crept up"),
         _driver("Back pain reports, 7 days", f"{bp}", bp * 15, 0.08, None, "back pain has been reported"),
+    ]
+
+
+def _gravity(ctx: EngineContext, crew_id: str) -> list[Part]:
+    """The frontend engine's gravity drivers, plus the Mobility & Balance Check once one has been done."""
+    parts = _gravity_core(ctx, crew_id)
+    result = mobility.assess(mobility.checks_until(ctx.db.mobility_checks(crew_id), ctx.hour))
+    if result is None:
+        return parts
+    contribution = {"nominal": 0.0, "watch": 55.0, "alert": 85.0}[result.status]
+    return [
+        *parts,
+        _driver(
+            "Mobility & balance check",
+            mobility.value_text(result),
+            contribution,
+            0.12,
+            None,
+            "balance, leg strength or knee bend has worsened",
+        ),
     ]
 
 

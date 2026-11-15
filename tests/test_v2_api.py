@@ -394,7 +394,6 @@ def test_old_ridge_endpoints_are_gone(api):
         "/api/alerts",
         "/api/distance",
         "/api/isolation/method",
-        "/api/mobility/method",
         "/api/timeline",
     ):
         assert api.get(path).status_code == 404

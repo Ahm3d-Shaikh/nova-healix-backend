@@ -14,6 +14,7 @@ from app.domain.store import MissionData, SafetyFlag
 from app.schemas.actions import ActionLogEntry, CrewMessage
 from app.schemas.assessment import Resolution
 from app.schemas.crewmode import Assignment
+from app.schemas.mobility import MobilityCheck, MobilityMeasurements
 from app.schemas.nova import SharedNote
 from app.schemas.telemetry import CheckIn
 
@@ -28,6 +29,7 @@ SHARED_NOTES = "shared_notes"
 ACTION_LOG = "action_log"
 CREW_MESSAGES = "crew_messages"
 RESOLUTIONS = "resolutions"
+MOBILITY_CHECKS = "mobility_sessions"
 
 
 class StateRepository:
@@ -126,6 +128,23 @@ class StateRepository:
             [{"insight_id": insight_id, "at": r.at, "by": r.by, "note": r.note, "severity": r.severity}], "insight_id"
         )
 
+    async def save_mobility_check(self, c: MobilityCheck) -> None:
+        m = c.measurements
+        await self._db.table(MOBILITY_CHECKS).insert(
+            {
+                "id": c.id,
+                "crew_id": c.crew_id,
+                "day": c.day,
+                "at": c.at,
+                "balance_hold_s": m.balance_hold_s,
+                "sway_pct_height": m.sway_pct_height,
+                "sit_to_stand_s": m.sit_to_stand_s,
+                "knee_flexion_deg": m.knee_flexion_deg,
+                "pose_confidence": m.pose_confidence,
+                "reliable": c.reliable,
+            }
+        )
+
     async def delete_resolution(self, insight_id: str) -> None:
         await self._db.table(RESOLUTIONS).delete({"insight_id": insight_id})
 
@@ -189,6 +208,23 @@ class StateRepository:
                     sent_at=r["sent_at"],
                     deliver_at=r["deliver_at"],
                     insight_id=r.get("insight_id"),
+                )
+            )
+        for r in await db.table(MOBILITY_CHECKS).select(order="at"):
+            data.add_mobility_check(
+                MobilityCheck(
+                    id=r["id"],
+                    crew_id=r["crew_id"],
+                    day=r["day"],
+                    at=r["at"],
+                    measurements=MobilityMeasurements(
+                        balance_hold_s=r["balance_hold_s"],
+                        sway_pct_height=r["sway_pct_height"],
+                        sit_to_stand_s=r["sit_to_stand_s"],
+                        knee_flexion_deg=r["knee_flexion_deg"],
+                        pose_confidence=r["pose_confidence"],
+                    ),
+                    reliable=r["reliable"],
                 )
             )
         for r in await db.table(RESOLUTIONS).select():
