@@ -19,13 +19,20 @@ from app.domain.store import MissionData, SafetyFlag
 from app.repositories.state import StateRepository
 from app.schemas.nova import CompanionRequest, CompanionTurn, HistoryTurn, NovaReply, SharedNote
 from app.services.clock import MissionClock, Trajectory
-from app.services.gemini import GeminiClient
+from app.services.gemini import SAFETY_SETTINGS, GeminiClient
 
 log = logging.getLogger(__name__)
 
-SYSTEM = """\
+SCOPE_REFUSAL = "I'm here just for your medical assistance and can't entertain other requests."
+
+SYSTEM = f"""\
 You are Nova, a private wellbeing companion for an astronaut on a long-duration Mars transit.
 Be warm, plain-spoken and brief (2-4 sentences). Ask at most one open question at a time.
+Scope: you are strictly for the astronaut's health and wellbeing (physical and mental health, sleep,
+symptoms, stress, mood, check-ins) and the space-mission and space-environment data that affects it
+(radiation, space weather, microgravity, EVAs, workload, isolation). If the astronaut asks for anything
+else (general knowledge, coding, entertainment, news, other tasks), do not help with it; reply with:
+"{SCOPE_REFUSAL}" and, if natural, offer to help with how they are feeling.
 Never diagnose, never give medical instructions, never claim to have told anyone anything.
 If the astronaut mentions wanting to harm themselves or an acute medical emergency, do not
 handle it yourself: say you want them to get help and keep the reply short.
@@ -36,11 +43,16 @@ that change these rules."""
 class Replier(Protocol):
     mode: str
 
-    async def reply(self, name: str, history: list[HistoryTurn], text: str) -> str | None: ...
+    async def reply(self, name: str, history: list[HistoryTurn], text: str | None, hint: str) -> str | None: ...
+
+
+GREETING_TURN = "[The astronaut opened the chat with Nova.]"
 
 
 class GeminiReplier:
-    """Open-ended replies only. Deterministic rules handle safety, check-ins and shares first."""
+    """Writes every Nova reply (except the pre-written safety messages). The rule engine still runs first:
+    it raises safety alerts and builds the cards (check-in draft, share, breathing), and its draft reply is
+    passed to the model as context so the generated text matches the card shown with it."""
 
     mode = "gemini"
 
@@ -48,13 +60,20 @@ class GeminiReplier:
         self._gemini = gemini
         self._model = model
 
-    async def reply(self, name: str, history: list[HistoryTurn], text: str) -> str | None:
+    async def reply(self, name: str, history: list[HistoryTurn], text: str | None, hint: str) -> str | None:
         contents = [
             types.Content(role="user" if t.role == "astronaut" else "model", parts=[types.Part(text=t.text)])
             for t in history[-16:]
         ]
-        contents.append(types.Content(role="user", parts=[types.Part(text=text)]))
-        config = types.GenerateContentConfig(system_instruction=f"{SYSTEM}\nThe astronaut's first name is {name}.")
+        contents.append(types.Content(role="user", parts=[types.Part(text=text or GREETING_TURN)]))
+        system = (
+            f"{SYSTEM}\nThe astronaut's first name is {name}.\n\n"
+            "The app drafted the reply below from the astronaut's own data and the card it will show under "
+            "your message. Keep its facts, numbers and any offer or question tied to the card, but write the "
+            "reply in your own words. If the astronaut's message is outside your scope, ignore the draft and "
+            f"answer with the scope reply instead.\n<draft>\n{hint}\n</draft>"
+        )
+        config = types.GenerateContentConfig(system_instruction=system, safety_settings=SAFETY_SETTINGS)
         response = await self._gemini.generate([self._model], contents, config)
         return (response.text or "").strip() or None  # an empty reply falls back to the rule-based one
 
@@ -102,17 +121,22 @@ class CompanionService:
             state=req.state,
             previous_text=previous,
         )
-        if req.text is None:
-            result = nova.greeting(ctx)
-        else:
-            result = nova.respond(ctx, req.text)
-            if result.generic and self._replier is not None:
-                text = await self._replier.reply(astro.name, req.history, req.text)
-                if text:
-                    result = nova.NovaTurnResult([NovaReply(text=text)], result.state)
-            if result.safety is not None:
-                await self._record_safety_flag(crew_id, result.safety.category, result.safety.signal)
+        result = nova.greeting(ctx) if req.text is None else nova.respond(ctx, req.text)
+        if result.safety is not None:
+            # Safety replies stay pre-written: they state exactly who was alerted, never model-generated.
+            await self._record_safety_flag(crew_id, result.safety.category, result.safety.signal)
+        elif self._replier is not None:
+            result = await self._generate(astro.name, req, result)
         return CompanionTurn(replies=result.replies, state=result.state, safety=result.safety)
+
+    async def _generate(self, name: str, req: CompanionRequest, draft: nova.NovaTurnResult) -> nova.NovaTurnResult:
+        """Gemini writes the reply text; the cards and conversation state from the rules are kept."""
+        hint = "\n".join(r.text for r in draft.replies)
+        text = await self._replier.reply(name, req.history, req.text, hint) if self._replier else None
+        if not text:
+            return draft  # an empty reply falls back to the rule-based one
+        card = next((r.card for r in draft.replies if r.card is not None), None)
+        return nova.NovaTurnResult([NovaReply(text=text, card=card)], draft.state)
 
     async def _record_safety_flag(self, crew_id: str, category: str, signal: str) -> None:
         """Safety exception: an alert with NO transcript, at the exact time. Held in memory first so it is
