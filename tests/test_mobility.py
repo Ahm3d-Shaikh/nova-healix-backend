@@ -100,3 +100,8 @@ def test_dashboard_includes_mobility(api):
     a = next(c for c in dash["crew"] if c["astronaut"]["id"] == "A")
     grav = next(c for c in a["cards"] if c["hazard"] == "G")
     assert grav["metrics"]["mobility"]["level"] == Level.GREEN.value
+
+
+def test_browser_test_page_is_served(api):
+    r = api.get("/demo/mobility/")
+    assert r.status_code == 200 and "Mobility" in r.text and "tasks-vision" in r.text

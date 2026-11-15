@@ -2,12 +2,14 @@ import asyncio
 import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from google import genai
 from google.genai import types as genai_types
 
@@ -44,6 +46,7 @@ STATUS_BY_ERROR: dict[type[DomainError], int] = {
     CompanionUnavailableError: 503,
 }
 log = logging.getLogger(__name__)
+MOBILITY_PAGE_DIR = Path(__file__).parent / "static" / "mobility"
 
 
 def create_app(settings: Settings | None = None, container: Container | None = None) -> FastAPI:
@@ -131,6 +134,10 @@ def create_app(settings: Settings | None = None, container: Container | None = N
 
     for router in (crew.router, dashboard.router, distance.router, isolation.router, mobility.router):
         app.include_router(router)
+
+    # Browser test page for the Mobility & Balance Check (MediaPipe runs in the browser, not here)
+    if MOBILITY_PAGE_DIR.is_dir():
+        app.mount("/demo/mobility", StaticFiles(directory=MOBILITY_PAGE_DIR, html=True), name="mobility-demo")
 
     @app.get("/", tags=["meta"])
     async def root() -> dict[str, str]:
