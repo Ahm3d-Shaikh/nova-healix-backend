@@ -112,7 +112,7 @@ create table if not exists public.mobility_checks (
     balance_hold_s     double precision not null check (balance_hold_s between 0 and 30),
     sway_pct_height    double precision not null check (sway_pct_height between 0 and 50),
     sit_to_stand_5x_s  double precision not null check (sit_to_stand_5x_s > 1),
-    knee_flexion_deg   double precision not null check (knee_flexion_deg between 0 and 180),
+    knee_flexion_deg   double precision not null check (knee_flexion_deg between 0 and 150),
     pose_confidence    double precision not null check (pose_confidence between 0 and 1),
     reliable           boolean not null,
     created_at         timestamptz not null default now()

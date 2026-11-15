@@ -18,7 +18,9 @@ class MobilityMeasurements(BaseModel):
         ge=0, le=50, description="Single-leg stance: RMS sway of the hip centre, as % of body height"
     )
     sit_to_stand_5x_s: float = Field(gt=1, le=120, description="Seconds to complete 5 sit-to-stand repetitions")
-    knee_flexion_deg: float = Field(ge=0, le=180, description="Deepest knee bend in a bodyweight squat, degrees")
+    knee_flexion_deg: float = Field(
+        ge=0, le=150, description="Deepest knee bend in a bodyweight squat, degrees (above 150 is a tracking error)"
+    )
     pose_confidence: float = Field(ge=0, le=1, description="Mean MediaPipe keypoint visibility across the tests")
 
 
